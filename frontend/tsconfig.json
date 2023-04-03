@@ -1,0 +1,33 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.web.json",
+  "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "ignoreDeprecations": "5.0",
+    "noImplicitAny": false,
+    "lib": ["ESNext", "DOM"],
+    "baseUrl": "./",
+    "paths": {
+      "@middlewares/*": ["src/router/middlewares/*"],
+      "@composables/*": ["src/utils/composables/*"],
+      "@components/*": ["src/views/components/*"],
+      "@modules/*": ["src/views/modules/*"],
+      "@interfaces/*": ["src/interfaces/*"],
+      "@layouts/*": ["src/views/layouts/*"],
+      "@services/*": ["src/services/*"],
+      "@pages/*": ["src/views/pages/*"],
+      "@assets/*": ["src/assets/*"],
+      "@stores/*": ["src/stores/*"],
+      "@router/*": ["src/router/*"],
+      "@utils/*": ["src/utils/*"],
+      "@views/*": ["src/views/*"],
+      "@/*": ["src/*"]
+    }
+  },
+
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
+}

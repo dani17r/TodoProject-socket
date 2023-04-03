@@ -1,0 +1,89 @@
+@import "./base.css";
+
+body {
+  scrollbar-width: thin; /* "auto" or "thin" */
+  scrollbar-color: rgb(30, 58, 138) rgba(255, 255, 255, 0); /* scroll thumb and track */
+}
+body::-webkit-scrollbar {
+  width: 5px; /* width of the entire scrollbar */
+}
+
+body::-webkit-scrollbar-track {
+  background: rgb(30, 58, 138) rgba(255, 255, 255, 0); /* color of the tracking area */
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: rgb(30, 58, 138); /* color of the scroll thumb */
+  border-radius: 10px; /* roundness of the scroll thumb */
+  border: 2px solid rgba(255, 255, 255, 0); /* creates padding around scroll thumb */
+}
+
+.dark body {
+  @apply bg-zinc-800 text-zinc-300;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* .list-move, */
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.5s ease;
+}
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+.list-leave-active {
+  position: absolute;
+}
+
+.title {
+  @apply text-zinc-300 text-2xl;
+}
+.content-flex-simple {
+  @apply flex justify-center;
+}
+.col-flex-center {
+  @apply flex flex-col items-center justify-between;
+}
+.content-flex-between {
+  @apply flex items-center justify-between w-full;
+}
+.content-form {
+  @apply max-w-xs bg-white dark:bg-zinc-800 px-8 pt-6 pb-8 mb-4 rounded-lg;
+}
+.label {
+  @apply block text-gray-700 dark:text-white text-sm font-bold mb-1;
+}
+.input {
+  @apply appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none dark:text-white dark:bg-zinc-700 dark:border-zinc-700;
+}
+.input-error {
+  @apply text-red-500 text-xs mt-1;
+}
+.btn-main {
+  @apply bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none w-full;
+}
+
+.modal-enter-active,
+.modal-leave-active {
+  transition: all 0.5s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  transform: translateY(100%);
+}
+
+.modal-enter-to,
+.modal-leave-from {
+  transform: translateY(0%);
+}
