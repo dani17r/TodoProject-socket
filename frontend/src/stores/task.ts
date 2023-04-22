@@ -1,19 +1,20 @@
+import userLocalStorageComposable from "@composables/userLocalStorage";
+import type { CallbacksI } from "@interfaces/interfaces.generals";
+import { useSocketAction } from "@utils/main";
+import { socketBase } from "@services/main";
+import { findIndex, isEmpty } from "lodash";
+import eventBus from "@services/eventBus";
+import { defineStore } from "pinia";
+import query from "@utils/querys";
 import type {
-  CallbacksI,
+  TaskPositionI,
   FormsI,
   StateI,
   TaskI,
 } from "@interfaces/interfaces.task";
-import type { NotifyErrorI, NotifyI } from "@interfaces/interfaces.generals";
-import userLocalStorageComposable from "@composables/userLocalStorage";
-import { socketBase } from "@services/main";
-import { findIndex, isEmpty } from "lodash";
-import { defineStore } from "pinia";
-import query from "@utils/querys";
-
-type taskPosition = Pick<TaskI, "_id" | "position">[];
 
 const { getUserId } = userLocalStorageComposable();
+
 export default defineStore("task", {
   state: (): StateI => ({
     lifecicles: { mounted: false },
@@ -26,139 +27,116 @@ export default defineStore("task", {
   },
   actions: {
     clear() {
-      this.lifecicles.mounted = false;
       this.tasks = { data: [], trash: [] };
+      this.lifecicles.mounted = false;
       this.query = query.task;
     },
+
     onceMounted(callback: CallbacksI["actions"], verifyMounted = true) {
-      if (callback)
-        if (verifyMounted) {
-          if (!this.lifecicles.mounted) {
-            this.lifecicles.mounted = true;
-            callback();
-          }
-        } else callback();
+      if (verifyMounted) {
+        if (!this.lifecicles.mounted) {
+          this.lifecicles.mounted = true;
+          callback && callback();
+        }
+      } else callback && callback();
     },
+
     setProjectId(id: string) {
       if (this.project_id != id) this.project_id = id;
     },
-    insert(tasks: StateI["tasks"]) {
+
+    insert(tasks?: StateI["tasks"]) {
       if (!isEmpty(tasks)) this.tasks = tasks;
     },
+
     getAll(verifyMounted = false) {
-      const _project = this.project_id;
-      const query = this.query;
       this.countTask;
 
       this.onceMounted(() => {
         const socket = socketBase("/task", getUserId.value);
-        socket.emit("all", { query, _project });
-        socket.on("all", (tasks: StateI["tasks"]) => {
-          this.insert(tasks);
-          socket.close();
+        const init = useSocketAction("all", socket);
+        const run = init<StateI["tasks"]>({
+          actions: (tasks) => this.insert(tasks),
         });
+
+        run({ query: this.query, _project: this.project_id });
       }, verifyMounted);
     },
+
     create(form: FormsI["inter"], callbacks?: CallbacksI) {
+      eventBus.emit("task/create");
+
       const socket = socketBase("/task", getUserId.value);
-      socket.emit("create", { form, query: this.query });
 
-      socket.on("create/success", (tasks: StateI["tasks"]) => {
-        this.insert(tasks);
-        callbacks?.actions && callbacks.actions();
-        socket.close();
+      const init = useSocketAction("create", socket);
+      const run = init<StateI["tasks"]>(callbacks, {
+        actions: (tasks) => this.insert(tasks),
       });
 
-      socket.on("create/error", (err: NotifyErrorI) => {
-        callbacks?.error && callbacks.error(err);
-        socket.close();
-      });
+      run({ form, query: this.query });
     },
+
     update(form: FormsI["full"], callbacks?: CallbacksI) {
+      eventBus.emit("task/update");
+
       const socket = socketBase("/task", getUserId.value);
-      socket.emit("update", form);
 
-      socket.on("update/success", (newTask: TaskI) => {
-        const index = findIndex(this.tasks.data, { _id: form._id });
-        this.tasks.data[index] = newTask;
-        callbacks?.actions && callbacks.actions();
-        socket.close();
+      const init = useSocketAction("update", socket);
+      const run = init<TaskI>(callbacks, {
+        actions: (newTask) => {
+          const index = findIndex(this.tasks.data, { _id: form._id });
+          if (newTask) this.tasks.data[index] = newTask;
+        },
       });
 
-      socket.on("update/error", (err: NotifyErrorI) => {
-        callbacks?.error && callbacks.error(err);
-        socket.close();
-      });
+      run(form);
     },
-    changePosition(tasks: taskPosition, callbacks?: CallbacksI) {
+
+    changePosition(tasks: TaskPositionI, callbacks?: CallbacksI) {
+      eventBus.emit("task/move");
+
       const socket = socketBase("/task", getUserId.value);
-      socket.emit("change-position", tasks);
+      const init = useSocketAction("change-position", socket);
+      const run = init(callbacks);
 
-      socket.on("change-position/success", () => {
-        callbacks?.actions && callbacks.actions();
-        socket.close();
-      });
-
-      socket.on("change-position/error", (err: NotifyErrorI) => {
-        callbacks?.error && callbacks.error(err);
-        socket.close();
-      });
+      run(tasks);
     },
-    trash(_id: TaskI["_id"], callbacks?: CallbacksI) {
+
+    trash(_ids: TaskI["_id"][], callbacks?: CallbacksI) {
+      eventBus.emit("task/trash");
+
       const socket = socketBase("/task", getUserId.value);
-      socket.emit("trash", {
-        _project: this.project_id,
-        query: this.query,
-        _id,
+      const init = useSocketAction("trash", socket);
+      const run = init<StateI["tasks"]>(callbacks, {
+        actions: (tasks) => this.insert(tasks),
       });
 
-      socket.on("trash/success", (tasks: StateI["tasks"]) => {
-        this.insert(tasks);
-        callbacks?.actions && callbacks?.actions();
-        socket.close();
-      });
-
-      socket.on("trash/error", (err: NotifyI) => {
-        callbacks?.error && callbacks.error(err);
-        socket.close();
-      });
+      run({ _project: this.project_id, query: this.query, _ids });
     },
+
     remove(_id: TaskI["_id"], callbacks?: CallbacksI) {
+      eventBus.emit("task/delete");
+
       const socket = socketBase("/task", getUserId.value);
-      socket.emit("delete", {
-        _project: this.project_id,
-        query: this.query,
-        _id,
+      const init = useSocketAction("delete", socket);
+      const run = init<StateI["tasks"]>(callbacks, {
+        actions: (tasks) => this.insert(tasks),
       });
 
-      socket.on("delete/success", (tasks: StateI["tasks"]) => {
-        this.insert(tasks);
-        callbacks?.actions && callbacks.actions();
-        socket.close();
-      });
-
-      socket.on("delete/error", (err: NotifyI) => {
-        callbacks?.error && callbacks.error(err);
-        socket.close();
-      });
+      run({ _project: this.project_id, query: this.query, _id });
     },
+
     removeAll(callbacks?: CallbacksI) {
+      eventBus.emit("task/delete-all");
+
       const socket = socketBase("/task", getUserId.value);
-      socket.emit("delete-all", {
-        _project: this.project_id,
-        query: this.query,
+
+      const init = useSocketAction("delete-all", socket);
+      const run = init<StateI["tasks"]>(callbacks, {
+        actions: (tasks) => this.insert(tasks),
       });
 
-      socket.on("delete-all/success", (tasks: StateI["tasks"]) => {
-        callbacks?.actions && callbacks.actions();
-        this.insert(tasks);
-        socket.close();
-      });
-
-      socket.on("delete-all/error", (err: NotifyI) => {
-        callbacks?.error && callbacks.error(err);
-        socket.close();
-      });
+      run({ _project: this.project_id, query: this.query });
     },
   },
 });

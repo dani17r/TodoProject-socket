@@ -1,6 +1,6 @@
 import { superForm } from "@utils/inputs";
 import { storeToRefs } from "pinia";
-import { reactive, ref } from "vue";
+import { reactive } from "vue";
 import { pick } from "lodash";
 
 import type { SelectProjectT, ProjectI } from "@interfaces/interfaces.project";
@@ -10,98 +10,105 @@ import { superModals } from "@utils/inputs";
 import useProjectStore from "@stores/project";
 
 export default () => {
-  const projectStore = useProjectStore();
-  const { query } = storeToRefs(projectStore);
+  const store = useProjectStore();
+  const { query } = storeToRefs(store);
   const Notify = notifyComposable();
 
-  const dropdownMenu = reactive<ObjectI<boolean>>({});
-  const selectProject = ref<SelectProjectT>({});
-  const search = superForm({ input: "" });
-  const selectId = ref("");
-
-  const modals = superModals({
-    addEditProject: false,
-    confirmProject: false,
+  const select = reactive({
+    data: <SelectProjectT>{},
+    id: "",
   });
 
-  const openCreateProject = () => {
-    modals.toggle("addEditProject");
-    selectProject.value = {};
-  };
+  const dropdown = reactive({
+    values: <ObjectI<boolean>>{},
+    get: (index: number) => dropdown.values[index],
+    toggle: (index: number) => {
+      dropdown.values[index] = !dropdown.values[index];
+    },
+  });
 
-  const openUpdateProject = (project: ProjectI, index: number) => {
-    selectProject.value = pick(project, ["_id", "title", "description"]);
-    dropdownMenu[index] = false;
-    modals.toggle("addEditProject");
-  };
+  const search = superForm({
+    input: "",
+    find: () => {
+      if (query.value.search != search.input) {
+        query.value.search = search.input;
+        store.getAll();
+      }
+    },
+  });
 
-  const openDeleteProject = (_id: string, index: number) => {
-    selectId.value = _id;
-    dropdownMenu[index] = false;
-    modals.toggle("confirmProject");
-  };
+  const modals = superModals({
+    addEdit: false,
+    confirm: false,
+    open: {
+      create: () => {
+        modals.toggle("addEdit");
+        select.data = {};
+      },
+      update: (project: ProjectI, index: number) => {
+        select.data = pick(project, ["_id", "title", "description"]);
+        dropdown.toggle(index);
+        modals.toggle("addEdit");
+      },
+      delete: (_id: string, index: number) => {
+        select.id = _id;
+        dropdown.toggle(index);
+        modals.toggle("confirm");
+      },
+    },
+  });
 
-  const deleteProject = () => {
-    projectStore.remove(selectId.value, {
-      actions: () => modals.toggle("confirmProject"),
+  const remove = () => {
+    store.remove(select.id, {
+      actions: () => modals.toggle("confirm"),
       error: (notify) => {
-        modals.toggle("confirmProject");
+        modals.toggle("confirm");
         Notify.active({ msg: notify.message });
       },
     });
-    selectId.value = "";
+    select.id = "";
   };
 
-  const searchProject = () => {
-    if (query.value.search != search.input) {
-      query.value.search = search.input;
-      projectStore.getAll();
-    }
-  };
-
-  const ascDescProject = (value: "asc" | "desc") => {
+  const ascDesc = (value: "asc" | "desc") => {
     if (query.value.sort != `createdAt:${value}`) {
       query.value.sort = `createdAt:${value}`;
-      projectStore.getAll();
+      store.getAll();
     }
   };
 
-  const getAllByLimit = () => {
+  const getAll = () => {
     if (query.value.pag > 1) query.value.pag = 1;
-    projectStore.getAll();
+    store.getAll();
   };
 
   const pagination = {
     next(isNext: boolean) {
       if (isNext) {
         query.value.pag = Number(query.value.pag) + 1;
-        projectStore.getAll();
+        store.getAll();
       }
     },
     previe(isPrevie: boolean) {
       if (isPrevie) {
         query.value.pag = Number(query.value.pag) - 1;
-        projectStore.getAll();
+        store.getAll();
       }
     },
     selectPag(item: number) {
-      query.value.pag = item;
-      projectStore.getAll();
+      if (item != query.value.pag) {
+        query.value.pag = item;
+        store.getAll();
+      }
     },
   };
 
   return {
-    openDeleteProject,
-    openUpdateProject,
-    openCreateProject,
-    getAllByLimit,
-    dropdownMenu,
-    ascDescProject,
-    searchProject,
     pagination,
-    selectProject,
-    deleteProject,
-    selectId,
+    dropdown,
+    ascDesc,
+    getAll,
+    select,
+    remove,
     search,
     modals,
     query,

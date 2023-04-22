@@ -2,31 +2,27 @@
 import { validationForm } from "@utils/validations";
 import taskComposable from "@composables/task";
 import { superErrors } from "@utils/main";
+import useTaskStore from "@stores/task";
 import Icons from "@components/icons";
+import { computed } from "vue";
 
-const {
-  toggleMultiSelect,
-  multiSelectAll,
-  selectMultiple,
-  ascDescTask,
-  multiSelect,
-  createTask,
-  moveTrash,
-  newTask,
-  query,
-} = taskComposable();
+const taskStore = useTaskStore();
+
+const { moveSelectToRecycleBin, multiSelect, ascDesc, create, query, form } =
+  taskComposable();
 
 const { check, errors } = validationForm({ nameTask: ["empty"] });
 
 const addNewTask = () => {
-  const status = check({ nameTask: newTask.name });
-  if (status.value) createTask();
+  const status = check({ nameTask: form.name });
+  if (status.value) create();
 };
+const tasks = computed(() => taskStore.tasks.data);
 
 const sortActive = (val: string) =>
   query.value.sort.includes(val) && "bg-zinc-300 text-zinc-800";
 
-const inputError = superErrors(errors.value);
+const inputError = superErrors(errors);
 </script>
 
 <template>
@@ -34,9 +30,9 @@ const inputError = superErrors(errors.value);
     <h1 class="text-grey-darkest">Tasks</h1>
     <div class="flex mt-4">
       <input
-        v-model="newTask.name"
+        v-model="form.name"
         :class="['input py-2 px-3 mr-4', inputError('nameTask')]"
-        placeholder="Add Todo"
+        placeholder="New task"
       />
       <button
         class="p-2 rounded bg-blue-500 text-zinc-100 hover:text-zinc-300 hover:bg-blue-600"
@@ -45,55 +41,62 @@ const inputError = superErrors(errors.value);
         Add
       </button>
     </div>
-    <div class="flex mt-5 justify-between items-center">
-      <div v-show="!multiSelect" class="flex items-center h-6 pl-3">
+    <div v-if="tasks.length" class="flex mt-5 justify-between items-center">
+      <div
+        v-show="!multiSelect.button.value"
+        class="flex items-center h-6 pl-2"
+      >
         <button
           :class="['btn-sort rounded-l-md', sortActive('asc')]"
-          @click="ascDescTask('asc')"
+          @click="ascDesc('asc')"
         >
           Asc
         </button>
         <button
           :class="['btn-sort rounded-r-md', sortActive('desc')]"
-          @click="ascDescTask('desc')"
+          @click="ascDesc('desc')"
         >
           Desc
         </button>
       </div>
 
-      <div v-show="multiSelect" class="flex gap-3 pl-3">
+      <div v-show="multiSelect.button.value" class="flex gap-3 pl-2">
         <button
-          v-show="multiSelect"
+          v-show="multiSelect.button.value"
           class="px-2 border border-zinc-300 rounded text-zinc-200"
-          @click="toggleMultiSelect()"
+          @click="multiSelect.button.toggle()"
         >
           Cancel
         </button>
         <Icons.Delete
-          v-show="multiSelectAll?.length"
+          v-show="multiSelect.all.value.length"
           class="icon-task-delete"
-          @click="moveTrash()"
+          @click="moveSelectToRecycleBin()"
         />
       </div>
 
-      <div class="flex items-center gap-3 pr-3">
+      <div
+        :class="[
+          'flex items-center gap-3',
+          multiSelect.button.value ? 'pr-[18px]' : 'pr-1',
+        ]"
+      >
         <button
-          v-show="!multiSelect"
+          v-show="!multiSelect.button.value"
           class="px-2 border border-zinc-400 rounded"
-          @click="toggleMultiSelect()"
+          @click="multiSelect.button.toggle()"
         >
           MultiSelect
         </button>
 
         <input
-          v-show="multiSelect"
+          v-show="multiSelect.button.value"
           type="checkbox"
-          @change="selectMultiple()"
+          v-model="multiSelect.all.status"
+          @change="multiSelect.all.selectAll(tasks)"
         />
       </div>
     </div>
-
-    <div class="w-100 border border-zinc-300 mx-3 h-[1px] mt-5"></div>
   </div>
 </template>
 

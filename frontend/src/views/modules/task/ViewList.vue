@@ -10,26 +10,20 @@ import useTaskStore from "@stores/task";
 import Icons from "@components/icons";
 import Task from "@modules/task";
 
-const route = useRoute();
-const taskStore = useTaskStore();
 const {
   changePositionTask,
-  openUpdateTask,
-  selectOneTask,
+  moveToRecycleBin,
   multiSelect,
-  selectTask,
-  deleteTask,
-  doneTask,
+  select,
+  done,
   modals,
 } = taskComposable();
+const taskStore = useTaskStore();
+const route = useRoute();
 
-onMounted(() => {
-  taskStore.setProjectId(String(route.params.id));
-  taskStore.getAll();
-});
-onUnmounted(() => taskStore.clear());
-
-const updateTask = computed(() => selectTask.value as FormsI["full"]);
+const updateTask = computed(() => select.data as FormsI["full"]);
+const viewTask = computed(() => select.data as FormsI["full"]);
+const tasks = computed(() => taskStore.tasks.data);
 
 let optionsDragg = {
   componentData: {
@@ -44,10 +38,17 @@ let optionsDragg = {
   animation: 200,
   itemKey: "_id",
 };
+
+onUnmounted(() => taskStore.clear());
+
+onMounted(() => {
+  taskStore.setProjectId(String(route.params.id));
+  taskStore.getAll();
+});
 </script>
 
 <template>
-  <div v-if="taskStore.tasks.data" class="content-list">
+  <div v-if="tasks.length" class="content-list scrollable">
     <draggable
       v-model="taskStore.tasks.data"
       v-bind="optionsDragg"
@@ -55,7 +56,7 @@ let optionsDragg = {
     >
       <template #item="{ element: task }">
         <div class="list">
-          <div class="flex flex-col w-full">
+          <div class="flex flex-col w-full" @dblclick="modals.open.view(task)">
             <div class="w-full inline-flex justify-between">
               <div class="inline-flex gap-4">
                 <h2
@@ -67,28 +68,28 @@ let optionsDragg = {
                   {{ truncate(task.name, { length: 28 }) }}
                 </h2>
               </div>
-              <div v-show="!multiSelect" class="inline-flex gap-1">
+              <div v-show="!multiSelect.button.value" class="inline-flex gap-1">
                 <Icons.Edit
                   v-show="!task.done"
                   class="icon-task-edit"
-                  @click="openUpdateTask(task)"
+                  @click="modals.open.update(task)"
                 />
                 <Icons.Delete
                   class="icon-task-delete"
-                  @click="deleteTask(task._id)"
+                  @click="moveToRecycleBin(task._id)"
                 />
                 <Icons.CircleCheck
                   class="icon-task-check h-8 w-8 -mt-[3px] ml-3"
                   :class="task.done && 'stroke-green-600'"
-                  @click="doneTask(task)"
+                  @click="done(task)"
                 />
               </div>
               <input
-                v-show="multiSelect"
+                v-show="multiSelect.button.value"
                 :id="task._id"
                 v-model="task.select"
                 type="checkbox"
-                @change="selectOneTask()"
+                @change="multiSelect.all.selectOne(tasks)"
               />
             </div>
             <div
@@ -118,11 +119,18 @@ let optionsDragg = {
     :updated="updateTask"
     @close="modals.toggle('edite')"
   />
+  <Task.ModalView
+    :modal="modals.view"
+    :view="viewTask"
+    @close="modals.toggle('view')"
+  />
   <Task.ModalTrash :modal="modals.trash" @close="modals.toggle('trash')" />
 </template>
 
 <style>
 .content-list {
+  overflow-y: scroll;
+  max-height: 370px;
   @apply flex flex-col gap-4 mt-8;
 }
 .list {

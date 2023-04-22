@@ -7,7 +7,7 @@ import { superErrors } from "@utils/main";
 const { form, login, errors } = loginComposable();
 
 // Manejo de errores en las class de los elementos
-const inputError = superErrors(errors.value);
+const inputError = superErrors(errors);
 </script>
 
 <template>

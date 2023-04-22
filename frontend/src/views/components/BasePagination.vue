@@ -22,7 +22,7 @@ const isCurrentPag = (item: number) => {
 };
 
 const isNext = computed(() => {
-  return Number(props.query.pag) < Number(props.paginate?.totalPag);
+  return Number(props.query.pag) < Number(paginate.value?.totalPag);
 });
 </script>
 

@@ -1,22 +1,63 @@
 @import "./base.css";
 
 body {
-  scrollbar-width: thin; /* "auto" or "thin" */
-  scrollbar-color: rgb(30, 58, 138) rgba(255, 255, 255, 0); /* scroll thumb and track */
+  scrollbar-width: thin;
+  scrollbar-color: rgb(30, 58, 138) rgba(255, 255, 255, 0);
 }
 body::-webkit-scrollbar {
-  width: 5px; /* width of the entire scrollbar */
+  width: 5px;
 }
 
 body::-webkit-scrollbar-track {
-  background: rgb(30, 58, 138) rgba(255, 255, 255, 0); /* color of the tracking area */
+  background: rgb(30, 58, 138) rgba(255, 255, 255, 0); 
 }
 
 body::-webkit-scrollbar-thumb {
-  background-color: rgb(30, 58, 138); /* color of the scroll thumb */
-  border-radius: 10px; /* roundness of the scroll thumb */
-  border: 2px solid rgba(255, 255, 255, 0); /* creates padding around scroll thumb */
+  background-color: rgb(30, 58, 138);
+  border-radius: 10px; 
+  border: 2px solid rgba(255, 255, 255, 0);
 }
+
+.ql-editor {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(209, 209, 209) rgba(255, 255, 255, 0);
+}
+
+.ql-editor::-webkit-scrollbar {
+  width: 5px;
+}
+
+.ql-editor::-webkit-scrollbar-track {
+  background: rgb(209, 209, 209) rgba(255, 255, 255, 0);
+}
+
+.ql-editor::-webkit-scrollbar-thumb {
+  background-color: rgb(209, 209, 209);
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0);
+}
+
+/*  */
+
+.scrollable {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(209, 209, 209) rgba(255, 255, 255, 0);
+}
+
+.scrollable::-webkit-scrollbar {
+  width: 5px;
+}
+
+.scrollable::-webkit-scrollbar-track {
+  background: rgb(209, 209, 209) rgba(255, 255, 255, 0);
+}
+
+.scrollable::-webkit-scrollbar-thumb {
+  background-color: rgb(209, 209, 209);
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0);
+}
+
 
 .dark body {
   @apply bg-zinc-800 text-zinc-300;

@@ -7,6 +7,7 @@ import useUserStore from "@stores/user";
 import Modals from "@components/modals";
 import { isEmpty, omit } from "lodash";
 import { computed } from "vue";
+import { superErrors } from "@utils/main";
 
 const events = defineEmits(["close"]);
 
@@ -40,7 +41,7 @@ const stateModal = computed(() => {
   return props.modal;
 });
 
-const updateProject = () => {
+const update = () => {
   const status = check(omit(form, ["clear"]));
   if (status.value) {
     const newUpdate = omit(form, ["clear"]);
@@ -50,7 +51,7 @@ const updateProject = () => {
     });
   }
 };
-const createProject = () => {
+const create = () => {
   const status = check(omit(form, ["clear"]));
   if (status.value) {
     projectStore.create(
@@ -62,6 +63,8 @@ const createProject = () => {
     );
   }
 };
+
+const inputError = superErrors(errors);
 </script>
 
 <template>
@@ -76,28 +79,24 @@ const createProject = () => {
           <input
             id="title"
             v-model="form.title"
-            :class="['input', errors.title && '!border-red-500']"
+            :class="['input', inputError('title')]"
             placeholder="Title project"
           />
-          <p v-show="errors.title" class="input-error">
-            {{ errors.title }}
-          </p>
+          <p class="input-error">{{ errors.title }}</p>
         </div>
         <div class="mb-3">
           <label for="description">Description</label>
           <input
             id="description"
             v-model="form.description"
-            :class="['input', errors.description && '!border-red-500']"
+            :class="['input', inputError('description')]"
             placeholder="Description general project"
           />
-          <p v-show="errors.description" class="input-error">
-            {{ errors.description }}
-          </p>
+          <p class="input-error">{{ errors.description }}</p>
         </div>
         <button
           class="btn-main"
-          @click="isEmpty(props?.updated) ? createProject() : updateProject()"
+          @click="isEmpty(props?.updated) ? create() : update()"
         >
           {{ isEmpty(props?.updated) ? "Create" : "Update" }}
         </button>

@@ -6,9 +6,14 @@ import dayjs from "dayjs";
 import type { RouteParamsRaw } from "vue-router";
 
 // internal libraries
-import type { ObjectI } from "@interfaces/interfaces.generals";
+import type {
+  NotifyErrorI,
+  CallbacksI,
+  ObjectI,
+} from "@interfaces/interfaces.generals";
 import router from "@/router";
-import { ref } from "vue";
+import { ref, type Ref } from "vue";
+import type { Socket } from "socket.io-client";
 
 //Constantes
 const ONE_MINUTE = 1 * 60 * 1000;
@@ -75,7 +80,7 @@ export const TitleHeader = (title: string) => `ToDoProj - ${title}`;
 /** superErrors - Funcion para devolver una class(HTML) segun el
  *  valor y la condicion de errores */
 export const superErrors = (
-  errors: ObjectI<unknown>,
+  errors: Ref<ObjectI<unknown>>,
   style?: string,
   reverse = false
 ) => {
@@ -86,9 +91,31 @@ export const superErrors = (
   return (name: string): string => {
     /** Preguntamos si reverse esta true
      * e invertimos la condicion para mostrar la class(HTML) */
-    const condition = reverse ? !errors[name] : errors[name];
+    const condition = reverse ? !errors.value[name] : errors.value[name];
 
     //En base a la condicion regresamos la class
     return condition ? className : "";
   };
+};
+
+export const useSocketAction = (name: string, socket: Socket) => {
+  return <T>(callbackExt?: CallbacksI<T>, callbacks?: CallbacksI<T>) =>
+    (params?: unknown) => {
+      if (params) socket.emit(name, params);
+      else socket.emit(name);
+
+      socket.on(`${name}/success`, (body?: T) => {
+        if (body) {
+          callbackExt?.actions && callbackExt.actions(body);
+          callbacks?.actions && callbacks.actions(body);
+          socket.close();
+        }
+      });
+
+      socket.on(`${name}/error`, (err: NotifyErrorI) => {
+        callbackExt?.error && callbackExt.error(err);
+        callbacks?.error && callbacks.error(err);
+        socket.close();
+      });
+    };
 };

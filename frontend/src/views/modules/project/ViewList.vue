@@ -15,31 +15,23 @@ import useProjectStore from "@stores/project";
 
 const projectStore = useProjectStore();
 const { projects } = storeToRefs(projectStore);
-const {
-  openDeleteProject,
-  openCreateProject,
-  openUpdateProject,
-  dropdownMenu,
-  deleteProject,
-  selectProject,
-  selectId,
-  modals,
-  query,
-} = projectComposable();
+const { dropdown, remove, select, modals, query } = projectComposable();
 
-let selectOneProject = computed(() => selectProject.value as FormsI["full"]);
+let selectProject = computed(() => select.data as FormsI["full"]);
+let isEmptyProject = computed(() => projects.value.data.length);
+
 onMounted(() => projectStore.getAll(true));
 </script>
 
 <template>
   <div
     :class="[
-      !projects.data.length && 'flex justify-center items-center',
+      !isEmptyProject && 'flex justify-center items-center',
       'min-h-[48vh] w-full',
     ]"
   >
     <TransitionGroup
-      v-if="projects.data.length"
+      v-if="isEmptyProject"
       name="list"
       tag="div"
       class="list-project"
@@ -49,7 +41,7 @@ onMounted(() => projectStore.getAll(true));
         :key="index"
         class="relative"
       >
-        <div :class="['zoom', Boolean(dropdownMenu[index]) && 'cool-zoom']">
+        <div :class="['zoom', dropdown.get(index) && 'cool-zoom']">
           <div
             class="card-project"
             @click="pushLink('project-one', { id: project._id })"
@@ -62,31 +54,28 @@ onMounted(() => projectStore.getAll(true));
             </p>
             <span class="card-now-time">{{ nowTime(project.createdAt) }}</span>
           </div>
-          <button
-            class="btn-options btn-one"
-            @click="dropdownMenu[index] = true"
-          >
+          <button class="btn-options btn-one" @click="dropdown.toggle(index)">
             <Icons.MenuVertical />
           </button>
         </div>
         <Dropdown
           :id="project._id"
-          :state="Boolean(dropdownMenu[index])"
-          @close="dropdownMenu[index] = false"
+          :state="dropdown.get(index)"
+          @close="dropdown.toggle(index)"
         >
           <div
             class="flex flex-col gap-4 dark:bg-zinc-700 bg-zinc-200 dark:text-zinc-300 p-3 rounded-lg cursor-pointer"
           >
             <div
               class="flex justify-between items-center hover:text-white"
-              @click="openUpdateProject(project, index)"
+              @click="modals.open.update(project, index)"
             >
               <span>Edite</span>
               <Icons.Edit class="inline" />
             </div>
             <div
               class="flex justify-between items-center hover:text-white"
-              @click="openDeleteProject(project._id, index)"
+              @click="modals.open.delete(project._id, index)"
             >
               <span>Delete</span>
               <Icons.Delete class="inline" />
@@ -103,25 +92,26 @@ onMounted(() => projectStore.getAll(true));
       </template>
       <template v-else>
         <h1 class="mb-10 text-2xl">Welcome to To-Do-Projects</h1>
-        <div class="new-card-project zoom" @click="openCreateProject()">
+        <div class="new-card-project zoom" @click="modals.open.create()">
           <Icons.Plus />
         </div>
       </template>
     </div>
   </div>
+
   <Project.ModalAddOrEdit
-    :id="`modal_add_or_edit-${selectOneProject._id}`"
-    :modal="modals.addEditProject"
-    :updated="selectOneProject"
-    @close="modals.toggle('addEditProject')"
+    :id="`modal_add_or_edit-${selectProject._id}`"
+    :modal="modals.addEdit"
+    :updated="selectProject"
+    @close="modals.toggle('addEdit')"
   />
 
   <Modals.Confirm
-    :id="`modal_confirm-${selectId}`"
-    v-model="modals.confirmProject"
+    :id="`modal_confirm-${select.id}`"
+    v-model="modals.confirm"
     message="Do you want to delete this project?"
-    @close="modals.toggle('confirmProject')"
-    @confirm="deleteProject()"
+    @close="modals.toggle('confirm')"
+    @confirm="remove()"
   />
 </template>
 

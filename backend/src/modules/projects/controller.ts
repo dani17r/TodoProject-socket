@@ -1,16 +1,16 @@
-import { ProjectI } from '@modules/projects/Interfaces';
+import { ProjectI } from "@modules/projects/Interfaces";
 // import { rules } from "@modules/projects/validate";
-import Projects from '@modules/projects/model';
-import { io } from '@main/server';
+import Projects from "@modules/projects/model";
+import { io } from "@main/server";
 
 import {
   getPaginateQuery,
   getSearchQuery,
   getFieldQuery,
-  getFieldSort
-} from '@utils/querys';
-import { QueryI } from '@modules/interfaces';
-import { Types } from 'mongoose';
+  getFieldSort,
+} from "@utils/querys";
+import { QueryI } from "@modules/interfaces";
+import { Types } from "mongoose";
 
 interface AllDataI {
   query: QueryI;
@@ -35,34 +35,34 @@ const getAll = async (query: QueryI, _autor: string) => {
 };
 
 export default () => {
-  io.of('/project').on('connection', socket => {
-    let userId = socket.handshake.headers['user'];
+  io.of("/project").on("connection", (socket) => {
+    let userId = socket.handshake.headers["user"];
 
     socket.on(
-      'create',
+      "create",
       async ({ form, query }: { form: ProjectI; query: QueryI }) => {
         const isInsert = await Projects.findOneAndUpdate(
           { title: form.title },
           {
-            $setOnInsert: { ...form, _autor: new Types.ObjectId(form._autor) }
+            $setOnInsert: { ...form, _autor: new Types.ObjectId(form._autor) },
           },
           { upsert: true }
-        ).then(doc => doc == null);
+        ).then((doc) => doc == null);
 
         if (isInsert) {
-          const projects = await getAll(query, form._autor);
-
-          socket.broadcast.timeout(8000).emit(`broadcast:${userId}/create`);
-          socket.emit('create/success', projects);
+          getAll(query, form._autor).then((projects) => {
+            socket.broadcast.timeout(8000).emit(`broadcast:${userId}/create`);
+            socket.emit("create/success", projects);
+          });
         } else
-          socket.emit('create/error', {
+          socket.emit("create/error", {
             message: `A project with this name already exists`,
-            field: 'title'
+            field: "title",
           });
       }
     );
 
-    socket.on('update', async (form: ProjectI) => {
+    socket.on("update", async (form: ProjectI) => {
       const newProject = await Projects.findOneAndUpdate(
         { _id: form._id },
         { $set: form },
@@ -71,42 +71,43 @@ export default () => {
 
       if (newProject) {
         socket.broadcast.timeout(8000).emit(`broadcast:${userId}/update`);
-        socket.emit('update/success', newProject);
+        socket.emit("update/success", newProject);
       } else
-        socket.emit('update/error', {
+        socket.emit("update/error", {
           message: `Could not update project`,
-          field: 'title'
+          field: "title",
         });
     });
 
-    socket.on('delete', async ({ _id, _autor, query }: DeleteProject) => {
+    socket.on("delete", async ({ _id, _autor, query }: DeleteProject) => {
       await Projects.findByIdAndDelete(_id);
-      const isDelete = Projects.findById(_id).then(doc => doc == null);
+      const isDelete = Projects.findById(_id).then((doc) => doc == null);
 
       if (isDelete) {
-        const projects = await getAll(query, _autor);
-
-        socket.broadcast
-          .timeout(8000)
-          .emit(`broadcast:${userId}/delete`, { _id, projects });
-        socket.emit('delete/success', projects);
+        getAll(query, _autor).then((projects) => {
+          socket.emit("delete/success", projects);
+          socket.broadcast
+            .timeout(8000)
+            .emit(`broadcast:${userId}/delete`, { _id, projects });
+        });
       } else
-        socket.emit('delete/error', {
-          message: `Could not delete`
+        socket.emit("delete/error", {
+          message: `Could not delete`,
         });
     });
 
-    socket.on('all', async ({ query, _autor }: AllDataI) => {
-      const projects = await getAll(query, _autor);
-      socket.emit('all', projects);
+    socket.on("all", async ({ query, _autor }: AllDataI) => {
+      getAll(query, _autor).then((projects) => {
+        socket.emit("all/success", projects);
+      });
     });
 
     //Verify Id
-    socket.on('verify-id', async (_id: string) => {
+    socket.on("verify-id", async (_id: string) => {
       const user = await Projects.findById(_id).catch(() => false);
 
-      if (user) socket.emit('verify-id', true);
-      else socket.emit('verify-id', false);
+      if (user) socket.emit("verify-id", true);
+      else socket.emit("verify-id", false);
     });
   });
 };

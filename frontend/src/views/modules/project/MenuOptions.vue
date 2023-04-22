@@ -3,19 +3,10 @@ import projectComposable from "@composables/project";
 import Project from "@modules/project";
 import Icons from "@components/icons";
 
-const {
-  openCreateProject,
-  getAllByLimit,
-  ascDescProject,
-  selectProject,
-  searchProject,
-  modals,
-  search,
-  query,
-} = projectComposable();
+const { getAll, ascDesc, select, modals, search, query } = projectComposable();
 
 const sortActive = (val: string) =>
-  query.value.sort.includes(val) && "bg-zinc-300 text-zinc-80";
+  query.value.sort.includes(val) && "bg-zinc-300 text-zinc-800";
 </script>
 
 <template>
@@ -28,24 +19,24 @@ const sortActive = (val: string) =>
             v-model="search.input"
             placeholder="Search Projects"
             class="input-search"
-            @keydown.enter="searchProject()"
+            @keydown.enter="search.find()"
           />
-          <Icons.Search class="icon-search" @click="searchProject()" />
+          <Icons.Search class="icon-search" @click="search.find()" />
           <Icons.Close
             v-show="search.input.length > 0"
             class="icon-clear"
-            @click="[search.clear(), searchProject()]"
+            @click="[search.clear(), search.find()]"
           />
         </div>
         <button
           class="bg-zinc-200 rounded-r-lg px-3 text-zinc-900"
-          @click="searchProject()"
+          @click="search.find()"
         >
           Search
         </button>
       </div>
 
-      <button class="btn-create-project" @click="openCreateProject()">
+      <button class="btn-create-project" @click="modals.open.create()">
         <span> Create </span>
         <Icons.Plus />
       </button>
@@ -54,13 +45,13 @@ const sortActive = (val: string) =>
       <div class="actions">
         <button
           :class="['btn-sort rounded-l-md', sortActive('asc')]"
-          @click="ascDescProject('asc')"
+          @click="ascDesc('asc')"
         >
           Asc
         </button>
         <button
           :class="['btn-sort rounded-r-md', sortActive('desc')]"
-          @click="ascDescProject('desc')"
+          @click="ascDesc('desc')"
         >
           Desc
         </button>
@@ -72,7 +63,7 @@ const sortActive = (val: string) =>
           ref="selectLimit"
           v-model="query.limit"
           class="select-limit"
-          @change="getAllByLimit()"
+          @change="getAll()"
         >
           <option value="5">5</option>
           <option value="10">10</option>
@@ -84,9 +75,9 @@ const sortActive = (val: string) =>
   </div>
 
   <Project.ModalAddOrEdit
-    :id="`modal_add_or_edit-${selectProject._id}`"
-    :modal="modals.addEditProject"
-    @close="modals.toggle('addEditProject')"
+    :id="`modal_add_or_edit-${select.data._id}`"
+    :modal="modals.addEdit"
+    @close="modals.toggle('addEdit')"
   />
 </template>
 

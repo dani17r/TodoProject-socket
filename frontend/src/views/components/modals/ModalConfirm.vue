@@ -27,7 +27,7 @@ const status = computed(() => props.modelValue);
     :z-index="100"
     @close="emits('close')"
   >
-    <button class="float-right" @click="emits('close')">
+    <button class="float-right" @click.once="emits('close')">
       <Icons.Close />
     </button>
     <div class="content-confirm">
@@ -37,7 +37,7 @@ const status = computed(() => props.modelValue);
       <button class="btn-main" @click="emits('confirm')">Yes</button>
       <button
         class="btn-main !bg-red-500 hover:!bg-red-600"
-        @click="emits('close')"
+        @click.once="emits('close')"
       >
         No
       </button>

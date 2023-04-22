@@ -6,7 +6,7 @@ import { superErrors } from "@utils/main";
 /** Composables */
 const { form, errors, register } = signupComposable();
 
-const inputError = superErrors(errors.value);
+const inputError = superErrors(errors);
 </script>
 
 <template>

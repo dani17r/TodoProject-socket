@@ -1,11 +1,11 @@
-import type { NotifyErrorI, NotifyI } from "@interfaces/interfaces.generals";
+import type { CallbacksI, NotifyI } from "@interfaces/interfaces.generals";
 import userLocalStorageComposable from "@composables/userLocalStorage";
+import { useSocketAction } from "@utils/main";
 import useProjectStore from "@stores/project";
 import { socketBase } from "@services/main";
 import { defineStore } from "pinia";
 import { isEmpty } from "lodash";
 import type {
-  CallbacksI,
   FormsI,
   LoginI,
   StateI,
@@ -35,64 +35,63 @@ export default defineStore("user", {
         !isEmpty(newUser) && (this.current = newUser);
     },
 
-    login(form: FormsI["login"], callbacks: CallbacksI) {
+    login(form: FormsI["login"], callbacks?: CallbacksI<NotifyI>) {
       const socket = socketBase("/auth");
-      socket.emit("login", form);
 
-      socket.on("login/success", ({ user, token, notify }: LoginI) => {
-        localStorage.setItem("token", token);
-        setUserId(user._id);
-        this.addUser(user);
-
-        callbacks.actions && callbacks.actions(notify);
-        socket.close();
+      const init = useSocketAction("login", socket);
+      const run = init<LoginI>({
+        actions: (response) => {
+          const { user, token, notify } = response as LoginI;
+          callbacks?.actions && callbacks.actions(notify);
+          localStorage.setItem("token", token);
+          setUserId(user._id);
+          this.addUser(user);
+        },
+        error: (err) => callbacks?.error && callbacks.error(err),
       });
 
-      socket.on("login/error", (error: NotifyErrorI) => {
-        callbacks.error && callbacks.error(error);
-        socket.close();
-      });
+      run(form);
     },
 
-    logout(callbacks: CallbacksI) {
+    logout(callbacks?: CallbacksI<NotifyI>) {
       const token = localStorage.getItem("token");
       const socket = socketBase("/auth");
       const project = useProjectStore();
 
-      socket.emit("logout", token, localStorage.getItem("socketId"));
+      const init = useSocketAction("logout", socket);
+      const run = init<{ notify: NotifyI }>({
+        actions: (response) => {
+          const notify = response?.notify;
+          callbacks?.actions && callbacks.actions(notify);
 
-      socket.on("logout/success", (resp: { notify: NotifyI }) => {
-        callbacks.actions && callbacks.actions(resp.notify);
-
-        localStorage.removeItem("token");
-        setTimeout(() => {
-          project.clear();
-          removeUserId();
-          this.clear();
-        }, 400);
-
-        socket.close();
+          localStorage.removeItem("token");
+          setTimeout(() => {
+            project.clear();
+            removeUserId();
+            this.clear();
+          }, 400);
+        },
+        error: (err) => callbacks?.error && callbacks.error(err),
       });
 
-      socket.on("logout/error", (error: NotifyErrorI) => {
-        callbacks.error && callbacks.error(error);
-        socket.close();
-      });
+      run(token);
     },
 
-    register(form: FormsI["register"], callbacks: CallbacksI) {
+    register(form: FormsI["register"], callbacks?: CallbacksI<NotifyI>) {
       const socket = socketBase("/auth");
-      socket.emit("register", form);
 
-      socket.on("register/success", (resp: { notify: NotifyI }) => {
-        callbacks.actions && callbacks.actions(resp.notify);
-        socket.close();
+      const init = useSocketAction("register", socket);
+      const run = init<{ notify: NotifyI }>({
+        actions: (response) => {
+          if (response) {
+            const notify = response.notify;
+            callbacks?.actions && callbacks.actions(notify);
+          }
+        },
+        error: (err) => callbacks?.error && callbacks.error(err),
       });
 
-      socket.on("register/error", (error: NotifyErrorI) => {
-        callbacks.error && callbacks.error(error);
-        socket.close();
-      });
+      run(form);
     },
   },
 });

@@ -45,7 +45,7 @@ export const signupComposable = () => {
       useState.register(form, {
         actions: (notify) => {
           setTimeout(() => router.push({ name: "login" }), 300);
-          Notify.success(notify.message);
+          Notify.success(String(notify?.message));
         },
         error: (error) => setError(error),
       });
@@ -77,7 +77,7 @@ export const loginComposable = () => {
       useState.login(form, {
         actions: (notify) => {
           setTimeout(() => router.push({ name: "home" }), 300);
-          Notify.success(notify.message);
+          Notify.success(String(notify?.message));
         },
         error: (error) => setError(error),
       });

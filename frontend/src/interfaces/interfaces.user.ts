@@ -1,10 +1,4 @@
-import type { NotifyErrorI, NotifyI } from "@interfaces/interfaces.generals";
-
-/*eslint no-unused-vars: ["error", { "args": "none" }]*/
-export interface CallbacksI {
-  actions?: (value: NotifyI) => void;
-  error?: (err: NotifyErrorI) => void;
-}
+import type { NotifyI } from "@interfaces/interfaces.generals";
 
 /*eslint no-unused-vars: ["error", { "args": "none" }]*/
 export interface CallbacksMiddlI {

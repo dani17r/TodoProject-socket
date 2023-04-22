@@ -1,30 +1,49 @@
 import { superForm, superModals } from "@utils/inputs";
 import { storeToRefs } from "pinia";
-import { ref } from "vue";
+import { reactive } from "vue";
 
 import type {
-  FormsI,
   OnChangeDroggableI,
   SelectTaskT,
+  FormsI,
   TaskI,
 } from "@interfaces/interfaces.task";
 
-// import notifyComposable from "@composables/notify";
 import useTaskStore from "@stores/task";
 import useUserStore from "@stores/user";
 import { omit } from "lodash";
 
-const multiSelect = ref(false);
-const multiSelectAll = ref<TaskI[]>();
+const multiSelect = reactive({
+  button: {
+    value: false,
+    toggle: () => {
+      multiSelect.button.value = !multiSelect.button.value;
+    },
+  },
+  all: {
+    value: <TaskI[]>[],
+    status: false,
+    selectOne: (tasks: TaskI[]) => {
+      multiSelect.all.value = tasks.filter((task) => task.select);
+      multiSelect.all.status = false;
+    },
+    selectAll: (tasks: TaskI[]) => {
+      tasks.map((task) => (task.select = multiSelect.all.status));
+      multiSelect.all.value = tasks.filter((task) => task.select);
+    },
+  },
+});
 
 export default () => {
-  const taskStore = useTaskStore();
+  const store = useTaskStore();
   const userStore = useUserStore();
 
-  const { query, project_id, countTask } = storeToRefs(taskStore);
-  const selectTask = ref<SelectTaskT>({});
+  const { query, project_id, countTask } = storeToRefs(store);
+  const select = reactive({
+    data: <SelectTaskT>{},
+  });
 
-  const newTask = superForm({
+  const form = superForm({
     _autor: String(userStore.current?._id),
     _project: "",
     position: 0,
@@ -33,107 +52,88 @@ export default () => {
 
   const modals = superModals({
     edite: false,
+    view: false,
     trash: false,
+    open: {
+      update: (task: FormsI["full"]) => {
+        modals.toggle("edite");
+        select.data = task;
+      },
+      view: (task: FormsI["full"]) => {
+        modals.toggle("view");
+        select.data = task;
+      },
+    },
   });
 
-  const createTask = () => {
-    newTask._project = project_id.value;
-    newTask.position = countTask.value;
+  const create = () => {
+    form._project = project_id.value;
+    form.position = countTask.value + 1;
 
-    taskStore.create(omit(newTask, ["clear"]), {
-      actions: () => {
-        newTask.clear();
-      },
-      error: () => {
-        newTask.clear();
-      },
+    store.create(omit(form, ["clear"]), {
+      actions: () => form.clear(),
     });
   };
 
-  const deleteTask = (_id: string) => taskStore.trash(_id);
-
-  const openUpdateTask = (task: FormsI["full"]) => {
-    modals.toggle("edite");
-    selectTask.value = task;
-  };
+  const moveToRecycleBin = (_id: string) => store.trash([_id]);
 
   const changePositionTask = (evt: OnChangeDroggableI) => {
-    const position = evt.moved;
-    const start =
-      position.newIndex < position.oldIndex
-        ? position.newIndex
-        : position.oldIndex;
-    const end =
-      position.newIndex > position.oldIndex
-        ? position.newIndex
-        : position.oldIndex;
+    const newIndex = evt.moved.newIndex;
+    const oldIndex = evt.moved.oldIndex;
+    const start = newIndex < oldIndex ? newIndex : oldIndex;
+    const end = newIndex > oldIndex ? newIndex : oldIndex;
 
-    const updatePositionTasks: Pick<TaskI, "_id" | "position">[] = [];
+    const updatePositions: Pick<TaskI, "_id" | "position">[] = [];
 
     if (query.value.sort.includes("desc")) {
       const currentCount = countTask.value - 1;
       for (let i = currentCount - start; i >= currentCount - end; i--) {
-        taskStore.tasks.data[currentCount - i].position = i;
-        updatePositionTasks.push({
-          _id: taskStore.tasks.data[currentCount - i]._id,
+        store.tasks.data[currentCount - i].position = i;
+        updatePositions.push({
+          _id: store.tasks.data[currentCount - i]._id,
           position: i,
         });
       }
     } else
       for (let i = start; i <= end; i++) {
-        taskStore.tasks.data[i].position = i;
-        updatePositionTasks.push({
-          _id: taskStore.tasks.data[i]._id,
+        store.tasks.data[i].position = i;
+        updatePositions.push({
+          _id: store.tasks.data[i]._id,
           position: i,
         });
       }
 
-    taskStore.changePosition(updatePositionTasks);
+    store.changePosition(updatePositions);
   };
 
-  const doneTask = (task: TaskI) => {
+  const done = (task: TaskI) => {
     task.done = !task.done;
-    taskStore.update(task);
+    store.update(task);
   };
 
-  const selectMultiple = () => {
-    taskStore.tasks.data.map((task) => (task.select = !task.select));
-    multiSelectAll.value = taskStore.tasks.data.filter((task) => task.select);
+  const moveSelectToRecycleBin = () => {
+    const _ids = multiSelect.all.value.map((task) => task._id);
+    store.trash(_ids);
   };
 
-  const selectOneTask = () => {
-    multiSelectAll.value = taskStore.tasks.data.filter((task) => task.select);
-  };
-
-  const moveTrash = () => {
-    multiSelectAll.value?.map((task) => ({ _id: task._id }));
-  };
-
-  const toggleMultiSelect = () => (multiSelect.value = !multiSelect.value);
-
-  const ascDescTask = (value: "asc" | "desc") => {
+  const ascDesc = (value: "asc" | "desc") => {
     if (query.value.sort != `position:${value}`) {
       query.value.sort = `position:${value}`;
-      taskStore.getAll();
+      store.getAll();
     }
   };
 
   return {
+    moveSelectToRecycleBin,
     changePositionTask,
-    toggleMultiSelect,
-    openUpdateTask,
-    multiSelectAll,
-    selectMultiple,
-    selectOneTask,
+    moveToRecycleBin,
     multiSelect,
-    ascDescTask,
-    deleteTask,
-    selectTask,
-    createTask,
-    moveTrash,
-    doneTask,
-    newTask,
+    ascDesc,
+    select,
+    create,
     modals,
     query,
+    done,
+    form,
   };
 };

@@ -20,14 +20,14 @@ const router = createRouter({
           name: "home",
           component: Home,
           meta: {
-            title: TitleHeader("Start"),
+            title: "Start",
           },
         },
         {
           path: "project/:id",
           name: "project-one",
           meta: {
-            title: TitleHeader("One Task"),
+            title: "One Task",
             back: true,
           },
           beforeEnter: [isRealId],
@@ -45,7 +45,7 @@ const router = createRouter({
           name: "login",
           component: Login,
           meta: {
-            title: TitleHeader("Login"),
+            title: "Login",
           },
         },
         {
@@ -53,7 +53,7 @@ const router = createRouter({
           name: "register",
           component: () => import("@pages/RegisterPage.vue"),
           meta: {
-            title: TitleHeader("Signup"),
+            title: "Signup",
           },
         },
       ],
@@ -63,14 +63,14 @@ const router = createRouter({
       name: "not-found",
       component: () => import("@pages/NotFoundPage.vue"),
       meta: {
-        title: TitleHeader("Error"),
+        title: "Error",
       },
     },
   ],
 });
 
 router.beforeEach((to) => {
-  document.title = String(to.meta.title);
+  document.title = TitleHeader(String(to.meta?.title));
 });
 
 export default router;

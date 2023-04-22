@@ -18,7 +18,10 @@ const taskStore = useTaskStore();
 
 const deleteTask = (_id: string) => taskStore.remove(_id);
 
-const deleteAllTrash = () => taskStore.removeAll();
+const deleteAllTrash = () => {
+  modals.toggle("confirm");
+  taskStore.removeAll();
+};
 </script>
 
 <template>
@@ -45,7 +48,7 @@ const deleteAllTrash = () => taskStore.removeAll();
       </div>
     </div>
     <div class="content-trash px-6">
-      <div class="content-list">
+      <div class="content-list !min-h-[450px] scrollable">
         <div v-for="(task, i) in taskStore.tasks.trash" :key="i" class="list">
           <div class="flex flex-col w-full">
             <div class="w-full inline-flex justify-between">
@@ -86,27 +89,8 @@ const deleteAllTrash = () => taskStore.removeAll();
 .content-modal {
   @apply !w-[600px] h-[570px];
 }
-.content-trash {
-  @apply overflow-y-scroll w-full h-[570px];
-}
-.content-trash {
-  scrollbar-width: thin;
-  scrollbar-color: rgb(30, 58, 138) rgba(255, 255, 255, 0);
-}
-.content-trash::-webkit-scrollbar {
-  width: 5px;
-}
-
-.content-trash::-webkit-scrollbar-track {
-  background: rgb(30, 58, 138) rgba(255, 255, 255, 0);
-}
 .btn-remove-all {
   @apply border border-red-500 text-red-500 px-2 flex items-center rounded-md hover:border-red-400 hover:text-red-400;
-}
-.content-trash::-webkit-scrollbar-thumb {
-  background-color: rgb(30, 58, 138);
-  border-radius: 10px;
-  border: 2px solid rgba(255, 255, 255, 0);
 }
 .header-trash {
   @apply sticky bg-zinc-800 px-5 pb-4 border-b border-zinc-400 w-full;

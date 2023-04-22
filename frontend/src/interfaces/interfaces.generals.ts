@@ -1,6 +1,12 @@
 // internal libraries
 import type { NavigationGuardNext, RouteLocationNormalized } from "vue-router";
 
+/*eslint no-unused-vars: ["error", { "args": "none" }]*/
+export interface CallbacksI<T = unknown> {
+  actions?: (value?: T) => void;
+  error?: (err: NotifyErrorI) => void;
+}
+
 export interface QueryI {
   fields_search: string;
   without: boolean;

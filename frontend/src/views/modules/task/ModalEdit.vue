@@ -91,4 +91,8 @@ const updateTask = () => {
 .add_edit .content {
   @apply flex flex-col gap-5 mt-5;
 }
+.ql-editor {
+  overflow-y: overlay;
+  max-height: 180px;
+}
 </style>

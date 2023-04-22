@@ -1,14 +1,4 @@
-import type {
-  NotifyErrorI,
-  ObjectI,
-  QueryI,
-} from "@interfaces/interfaces.generals";
-
-/*eslint no-unused-vars: ["error", { "args": "none" }]*/
-export interface CallbacksI {
-  actions?: () => void;
-  error?: (err: NotifyErrorI) => void;
-}
+import type { ObjectI, QueryI } from "@interfaces/interfaces.generals";
 
 export interface TaskI {
   createdAt: string;
@@ -35,6 +25,8 @@ export interface FormsI {
   inter: Pick<TaskI, "name" | "position" | "_autor" | "_project">;
   full: TaskI;
 }
+
+export type TaskPositionI = Pick<TaskI, "_id" | "position">[];
 
 export interface StateI {
   lifecicles: {

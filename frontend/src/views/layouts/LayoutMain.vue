@@ -24,12 +24,13 @@ const logout = () => {
   useUserState.logout({
     actions: (notify) => {
       setTimeout(() => router.push({ name: "login" }), 300);
-      Notify.success(notify.message);
+      Notify.success(String(notify?.message));
     },
     error: (error) => Notify.error(error.message),
   });
 };
 </script>
+
 <template>
   <div class="base content-nav">
     <nav>

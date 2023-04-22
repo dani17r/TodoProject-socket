@@ -1,15 +1,8 @@
 import type {
-  NotifyErrorI,
-  ObjectI,
   PaginateI,
+  ObjectI,
   QueryI,
 } from "@interfaces/interfaces.generals";
-
-/*eslint no-unused-vars: ["error", { "args": "none" }]*/
-export interface CallbacksI {
-  actions: () => void;
-  error: (err: NotifyErrorI) => void;
-}
 
 export interface ProjectI {
   description: string;
