@@ -48,8 +48,6 @@ export default () => {
   });
 
   socket.value.timeout(8000).on(`${urlSocket}/delete`, (_id: string) => {
-    console.log(_id);
-
     setTimeout(() => (status.delete = true), 300);
     if (status.delete) taskStore.getAll();
   });

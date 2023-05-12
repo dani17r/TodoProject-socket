@@ -41,8 +41,6 @@ export default () => {
       ({ _id, projects }: { _id: string; projects: StateI["projects"] }) => {
         setTimeout(() => (status.delete = true), 300);
         if (status.delete) {
-          console.log(document.getElementById(`dropdown_blur-${_id}`));
-
           document.getElementById(`modal_add_or_edit-${_id}`)?.click();
           document.getElementById(`dropdown_blur-${_id}`)?.click();
           document.getElementById(`modal_confirm-${_id}`)?.click();
