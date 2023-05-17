@@ -26,8 +26,14 @@ export interface LoginI {
 }
 
 export interface FormsI {
-  login: Pick<UserI, "email" | "password">;
+  update: Pick<UserI, "email" | "fullname" | "_id" | "image"> & { file: Blob };
   register: Pick<UserI, "email" | "password" | "fullname">;
+  login: Pick<UserI, "email" | "password">;
+  changePassword: {
+    currentPassword: string;
+    newPassword: string;
+    _id: string;
+  };
 }
 
 export interface UserI {
@@ -36,6 +42,7 @@ export interface UserI {
   createdAt: Date;
   updateAt: Date;
   email: string;
+  image: string;
   _id: string;
 }
 
@@ -43,5 +50,5 @@ export interface StateI {
   lifecicles: {
     mounted: boolean;
   };
-  current: UserI | null;
+  user: UserI | null;
 }

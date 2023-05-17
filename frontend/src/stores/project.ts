@@ -1,17 +1,17 @@
 import type { FormsI, StateI, ProjectI } from "@interfaces/interfaces.project";
 import userLocalStorageComposable from "@composables/userLocalStorage";
 import type { CallbacksI } from "@interfaces/interfaces.generals";
+import { defineStore, storeToRefs } from "pinia";
 import { useSocketAction } from "@utils/main";
 import { socketBase } from "@services/main";
 import { findIndex, isEmpty } from "lodash";
 import eventBus from "@services/eventBus";
-import useUserStore from "@stores/user";
-import { defineStore } from "pinia";
+import { userStore } from "@stores/user";
 import query from "@utils/querys";
 
 const { getUserId } = userLocalStorageComposable();
 
-export default defineStore("project", {
+const store = defineStore("project", {
   state: (): StateI => ({
     lifecicles: {
       mounted: false,
@@ -42,7 +42,7 @@ export default defineStore("project", {
 
     getAll(verifyMounted = false) {
       this.onceMounted(() => {
-        const user = useUserStore();
+        const { user } = userStore();
 
         const socket = socketBase("/project", getUserId.value);
 
@@ -51,7 +51,7 @@ export default defineStore("project", {
           actions: (projects) => this.insert(projects),
         });
 
-        run({ _autor: user.current?._id, query: this.query });
+        run({ _autor: user.value?._id, query: this.query });
       }, verifyMounted);
     },
 
@@ -85,7 +85,7 @@ export default defineStore("project", {
 
     remove(_id: ProjectI["_id"], callbacks?: CallbacksI) {
       eventBus.emit("project/delete");
-      const user = useUserStore();
+      const { user } = userStore();
 
       const socket = socketBase("/project", getUserId.value);
       const init = useSocketAction("delete", socket);
@@ -93,7 +93,7 @@ export default defineStore("project", {
         actions: (projects) => this.removeAndPreviePaginate(projects),
       });
 
-      run({ _autor: user.current?._id, query: this.query, _id });
+      run({ _autor: user.value?._id, query: this.query, _id });
     },
 
     removeAndPreviePaginate(projects?: StateI["projects"]) {
@@ -112,3 +112,13 @@ export default defineStore("project", {
     },
   },
 });
+
+export const projectStore = () => {
+  const useStore = store();
+  return {
+    ...useStore,
+    ...storeToRefs(useStore),
+  };
+};
+
+export default store;

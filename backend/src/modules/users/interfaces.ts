@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import { Types } from "mongoose";
 export interface ValidateAuthI {
   LoginI: {
     password: string;
@@ -16,6 +16,7 @@ export interface JwtI {
 
 interface ActionsAuthI extends Document {
   passwordCompare: (password: string) => Promise<boolean>;
+  passwordUpdate: (password: string) => Promise<boolean>;
 }
 
 interface SessionsI {
@@ -31,6 +32,7 @@ export interface UserI extends ActionsAuthI {
   email: string;
   password: string;
   fullname: string;
+  image?: string;
 
   sessions: SessionsI[];
 }
@@ -47,11 +49,24 @@ export interface LoginI {
 }
 
 export interface CredentialI {
-  email: string
+  email: string;
 }
 export type CredentialT = CredentialI | boolean;
 
 export interface ResultLoginI {
   user: UserI;
   token: string;
+}
+
+export interface UpdateI {
+  file?: Array<Buffer>;
+  fullname: string;
+  email: string;
+  image: string;
+  _id: string;
+}
+export interface ChangePasswordI {
+  currentPassword: string;
+  newPassword: string;
+  _id: string;
 }

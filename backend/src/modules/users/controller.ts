@@ -1,12 +1,18 @@
 import { createSession, getEmailJwt, messages, removeSession } from "./options";
-import { LoginI, RegisterI } from "@modules/users/interfaces";
 import { rules } from "@modules/users/validate";
-import { removeProperty } from "@utils/actions";
+import { uploadImage } from "@utils/actions";
 import { io } from "@main/server";
 import { isEmpty } from "lodash";
+import {
+  LoginI,
+  UpdateI,
+  RegisterI,
+  ChangePasswordI,
+} from "@modules/users/interfaces";
 
 import User from "@modules/users/model";
 import validate from "@utils/validate";
+import { newPassword } from "@utils/auth";
 
 export default () => {
   io.of("/auth").on("connection", (socket) => {
@@ -77,6 +83,49 @@ export default () => {
         if (isUpdate) socket.emit("logout/success", msg.success);
         else socket.emit("logout/error", msg.error);
       } else socket.emit("logout/error", msg.error);
+    });
+
+    //Update
+    socket.on("update", async (form: UpdateI) => {
+      const msg = messages.update;
+
+      if (form.file.length) {
+        const oldImageName = form.image;
+        const name = await uploadImage(form.file, oldImageName);
+        form.image = name;
+      }
+
+      const user = await User.findOneAndUpdate(
+        { _id: form._id },
+        { $set: form },
+        { returnOriginal: false }
+      );
+
+      if (user) socket.emit("update/success", user);
+      else socket.emit("logout/error", msg.error);
+    });
+
+    //ChangePassword
+    socket.on("change-password", async (form: ChangePasswordI) => {
+      const action = async (values: ChangePasswordI) => {
+        const credential = { _id: values._id };
+        const msgPass = messages.changePassword;
+        const msg = messages.login;
+
+        const isUser = await User.findOne(credential).select("+password");
+
+        if (!isEmpty(isUser)) {
+          if (await isUser.passwordCompare(values.currentPassword)) {
+            await User.findByIdAndUpdate(credential, {
+              password: await newPassword(values.newPassword),
+            }).select("+password");
+
+            socket.emit("change-password/success", msgPass.success);
+          } else socket.emit("change-password/error", msg.password);
+        } else socket.emit("change-password/error", msg.userNotFount);
+      };
+
+      await validation(form, rules.changePassword, action);
     });
   });
 };

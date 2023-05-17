@@ -6,6 +6,7 @@ import type {
 } from "@interfaces/interfaces.generals";
 
 // internal libraries
+import { superErrors } from "@utils/main";
 import { computed, ref } from "vue";
 
 const validations = <ValidsT>{
@@ -119,7 +120,10 @@ export const validationForm = <T extends ObjectI<string[]>>(rules: T) => {
     }
   };
 
+  const inputError = superErrors(errors);
+
   return {
+    inputError,
     setError,
     status,
     errors,

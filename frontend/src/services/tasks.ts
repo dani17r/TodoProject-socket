@@ -47,7 +47,7 @@ export default () => {
     if (status.move) taskStore.getAll();
   });
 
-  socket.value.timeout(8000).on(`${urlSocket}/delete`, (_id: string) => {
+  socket.value.timeout(8000).on(`${urlSocket}/delete`, () => {
     setTimeout(() => (status.delete = true), 300);
     if (status.delete) taskStore.getAll();
   });

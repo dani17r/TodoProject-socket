@@ -34,7 +34,7 @@ const inputError = superErrors(errors);
           id="password"
           v-model="form.password"
           :class="['input', inputError('password')]"
-          placeholder="******************"
+          placeholder="••••••••"
           type="password"
         />
         <p class="input-error">

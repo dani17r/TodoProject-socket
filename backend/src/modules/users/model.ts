@@ -10,33 +10,38 @@ const UserSchema = new Schema(
       required: true,
       select: false,
       type: String,
-      trim: true
+      trim: true,
     },
     email: {
       lowercase: true,
       required: true,
       unique: true,
       type: String,
-      trim: true
+      trim: true,
     },
     fullname: {
       type: String,
-      trim: true
+      trim: true,
+    },
+    image: {
+      default: "placeholder.png",
+      type: String,
+      trim: true,
     },
     sessions: [
       {
         status: Boolean,
         token: String,
-      }
-    ]
+      },
+    ],
   },
   {
     timestamps: true,
     versionKey: false,
     strictQuery: false,
     query: {
-      paginate: paginate<UserI>
-    }
+      paginate: paginate<UserI>,
+    },
   }
 );
 

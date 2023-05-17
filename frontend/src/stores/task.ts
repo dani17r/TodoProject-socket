@@ -1,10 +1,10 @@
 import userLocalStorageComposable from "@composables/userLocalStorage";
 import type { CallbacksI } from "@interfaces/interfaces.generals";
+import { defineStore, storeToRefs } from "pinia";
 import { useSocketAction } from "@utils/main";
 import { socketBase } from "@services/main";
 import { findIndex, isEmpty } from "lodash";
 import eventBus from "@services/eventBus";
-import { defineStore } from "pinia";
 import query from "@utils/querys";
 import type {
   TaskPositionI,
@@ -15,7 +15,7 @@ import type {
 
 const { getUserId } = userLocalStorageComposable();
 
-export default defineStore("task", {
+const store = defineStore("task", {
   state: (): StateI => ({
     lifecicles: { mounted: false },
     tasks: { data: [], trash: [] },
@@ -140,3 +140,13 @@ export default defineStore("task", {
     },
   },
 });
+
+export const taskStore = () => {
+  const useStore = store();
+  return {
+    ...useStore,
+    ...storeToRefs(useStore),
+  };
+};
+
+export default store;

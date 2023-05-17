@@ -40,4 +40,7 @@ export default {
   Edit: defineAsyncComponent(() => import("@components/icons/IconEdit.vue")),
   Next: defineAsyncComponent(() => import("@components/icons/IconNext.vue")),
   Plus: defineAsyncComponent(() => import("@components/icons/IconPlus.vue")),
+  Profile: defineAsyncComponent(
+    () => import("@components/icons/IconProfile.vue")
+  ),
 };

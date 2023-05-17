@@ -18,6 +18,15 @@ const props = withDefaults(defineProps<PropsI>(), {
 });
 
 const status = computed(() => props.modelValue);
+
+let memory = true;
+const close = () => {
+  if (memory) {
+    memory = false;
+    emits("close");
+    setTimeout(() => (memory = true), 400);
+  }
+};
 </script>
 
 <template>
@@ -25,9 +34,9 @@ const status = computed(() => props.modelValue);
     v-model="status"
     :min-height="props.minHeight"
     :z-index="100"
-    @close="emits('close')"
+    @close="close()"
   >
-    <button class="float-right" @click.once="emits('close')">
+    <button class="float-right" @click="close()">
       <Icons.Close />
     </button>
     <div class="content-confirm">
@@ -35,10 +44,7 @@ const status = computed(() => props.modelValue);
     </div>
     <div class="flex gap-4">
       <button class="btn-main" @click="emits('confirm')">Yes</button>
-      <button
-        class="btn-main !bg-red-500 hover:!bg-red-600"
-        @click.once="emits('close')"
-      >
+      <button class="btn-main !bg-red-500 hover:!bg-red-600" @click="close()">
         No
       </button>
     </div>

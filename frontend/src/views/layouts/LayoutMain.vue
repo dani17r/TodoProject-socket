@@ -1,66 +1,39 @@
 <script setup lang="ts">
-import notifyComposable from "@composables/notify";
-import { superModals } from "@utils/inputs";
-import userStore from "@/stores/user";
+import { userStore } from "@/stores/user";
 
-import Confirm from "@components/modals/ModalConfirm.vue";
+import ViewImgProfile from "@modules/user/ViewImgProfile.vue";
+import MenuOptions from "@modules/user/MenuOptions.vue";
 import Icons from "@components/icons";
 
-import { useRouter } from "vue-router";
-import { storeToRefs } from "pinia";
 import { startCase } from "lodash";
+import { ref } from "vue";
 
-const Notify = notifyComposable();
-const useUserState = userStore();
-const router = useRouter();
+const menu = ref(false);
 
-const { current } = storeToRefs(useUserState);
-
-const modals = superModals({
-  confirm: false,
-});
-
-const logout = () => {
-  useUserState.logout({
-    actions: (notify) => {
-      setTimeout(() => router.push({ name: "login" }), 300);
-      Notify.success(String(notify?.message));
-    },
-    error: (error) => Notify.error(error.message),
-  });
-};
+const { user } = userStore();
 </script>
 
 <template>
   <div class="base content-nav">
-    <nav>
+    <nav class="flex items-center">
       <ul class="ul-left">
         <li v-show="$route.meta.back">
           <button class="btn-one" @click="$router.push({ name: 'home' })">
             <Icons.Back />
           </button>
         </li>
-        <li>
-          <h1 class="name">{{ startCase(current?.fullname) }}</h1>
+        <li class="cursor-pointer">
+          <h1 class="name">{{ startCase(user?.fullname) }}</h1>
         </li>
       </ul>
       <ul class="ul-right">
         <li>
-          <button class="btn-two" @click="modals.toggle('confirm')">
-            <Icons.Logout />
-            Logout
-          </button>
+          <ViewImgProfile @click="menu = true" />
+          <MenuOptions :status="menu" @close="menu = false" />
         </li>
       </ul>
     </nav>
   </div>
-
-  <Confirm
-    v-model="modals.confirm"
-    message="Are you sure to close the session ?"
-    @close="modals.toggle('confirm')"
-    @confirm="logout()"
-  />
 
   <div class="pt-20">
     <RouterView />
@@ -93,7 +66,7 @@ const logout = () => {
 }
 
 .base.content-nav .name {
-  @apply text-lg mt-[1px];
+  @apply text-lg;
 }
 
 .btn-one {

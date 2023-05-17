@@ -10,7 +10,7 @@ import type {
 } from "@interfaces/interfaces.task";
 
 import useTaskStore from "@stores/task";
-import useUserStore from "@stores/user";
+import { userStore } from "@stores/user";
 import { omit } from "lodash";
 
 const multiSelect = reactive({
@@ -36,7 +36,7 @@ const multiSelect = reactive({
 
 export default () => {
   const store = useTaskStore();
-  const userStore = useUserStore();
+  const { user } = userStore();
 
   const { query, project_id, countTask } = storeToRefs(store);
   const select = reactive({
@@ -44,7 +44,7 @@ export default () => {
   });
 
   const form = superForm({
-    _autor: String(userStore.current?._id),
+    _autor: String(user.value?._id),
     _project: "",
     position: 0,
     name: "",

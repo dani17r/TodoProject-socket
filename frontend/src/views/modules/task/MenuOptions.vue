@@ -91,8 +91,8 @@ const inputError = superErrors(errors);
 
         <input
           v-show="multiSelect.button.value"
-          type="checkbox"
           v-model="multiSelect.all.status"
+          type="checkbox"
           @change="multiSelect.all.selectAll(tasks)"
         />
       </div>

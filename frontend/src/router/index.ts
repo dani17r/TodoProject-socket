@@ -33,6 +33,16 @@ const router = createRouter({
           beforeEnter: [isRealId],
           component: () => import("@pages/TasksPage.vue"),
         },
+        {
+          name: "profile",
+          path: "profile/:id",
+          meta: {
+            title: "User Profile",
+            back: true,
+          },
+          beforeEnter: [isRealId],
+          component: () => import("@pages/ProfilePage.vue"),
+        },
       ],
     },
     {
