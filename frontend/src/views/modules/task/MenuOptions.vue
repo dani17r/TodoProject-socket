@@ -1,46 +1,78 @@
 <script setup lang="ts">
 import { validationForm } from "@utils/validations";
+import shareComposable from "@composables/share";
+import { projectStore } from "@stores/project";
 import taskComposable from "@composables/task";
 import { superErrors } from "@utils/main";
 import useTaskStore from "@stores/task";
 import Icons from "@components/icons";
 import { computed } from "vue";
 
-const taskStore = useTaskStore();
+import Popper from "vue3-popper";
 
-const { moveSelectToRecycleBin, multiSelect, ascDesc, create, query, form } =
-  taskComposable();
+const taskStore = useTaskStore();
+const { project } = projectStore();
+
+const {
+  allowIfPermission,
+
+  permissions,
+} = shareComposable();
+
+const {
+  moveSelectToRecycleBin,
+  ascDesc,
+  create,
+
+  multiSelect,
+  query,
+  form,
+} = taskComposable();
 
 const { check, errors } = validationForm({ nameTask: ["empty"] });
+const tasks = computed(() => taskStore.tasks.data);
 
 const addNewTask = () => {
   const status = check({ nameTask: form.name });
   if (status.value) create();
 };
-const tasks = computed(() => taskStore.tasks.data);
 
-const sortActive = (val: string) =>
-  query.value.sort.includes(val) && "bg-zinc-300 text-zinc-800";
+const sortActive = (val: string) => {
+  return query.value.sort.includes(val) && "bg-zinc-300 text-zinc-800";
+};
 
 const inputError = superErrors(errors);
 </script>
 
 <template>
   <div>
-    <h1 class="text-grey-darkest">Tasks</h1>
-    <div class="flex mt-4">
-      <input
-        v-model="form.name"
-        :class="['input py-2 px-3 mr-4', inputError('nameTask')]"
-        placeholder="New task"
-      />
-      <button
-        class="p-2 rounded bg-blue-500 text-zinc-100 hover:text-zinc-300 hover:bg-blue-600"
-        @click="addNewTask()"
-      >
-        Add
-      </button>
-    </div>
+    <h1 class="text-grey-darkest">
+      <i class="text-sm font-sans">Project: </i>
+      <br />
+      <span class="text-2xl font-bold">{{ project?.title }}</span>
+    </h1>
+
+    <Popper
+      class="w-full"
+      content="You don't have allow for created"
+      :disabled="permissions.c"
+    >
+      <div class="flex mt-4">
+        <input
+          v-model="form.name"
+          :class="['input py-2 px-3 mr-4', inputError('nameTask')]"
+          placeholder="New task"
+          @keyup.enter="allowIfPermission('u', () => addNewTask())"
+        />
+        <button
+          class="p-2 rounded bg-blue-500 text-zinc-100 hover:text-zinc-300 hover:bg-blue-600"
+          @click="allowIfPermission('c', () => addNewTask())"
+        >
+          Add
+        </button>
+      </div>
+    </Popper>
+
     <div v-if="tasks.length" class="flex mt-5 justify-between items-center">
       <div
         v-show="!multiSelect.button.value"
@@ -68,11 +100,18 @@ const inputError = superErrors(errors);
         >
           Cancel
         </button>
-        <Icons.Delete
-          v-show="multiSelect.all.value.length"
-          class="icon-task-delete"
-          @click="moveSelectToRecycleBin()"
-        />
+
+        <Popper
+          class="w-full"
+          content="You don't have allow for removed"
+          :disabled="permissions.r"
+        >
+          <Icons.Delete
+            v-show="multiSelect.all.value.length"
+            class="icon-task-delete"
+            @click="allowIfPermission('r', () => moveSelectToRecycleBin())"
+          />
+        </Popper>
       </div>
 
       <div

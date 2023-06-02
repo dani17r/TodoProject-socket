@@ -23,6 +23,7 @@
     "tiny-emitter": "^2.1.0",
     "vue": "^3.2.47",
     "vue-router": "^4.1.6",
+    "vue3-popper": "^1.5.0",
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {

@@ -1,27 +1,20 @@
-import { ProjectI } from "@modules/projects/Interfaces";
+import {
+  DeleteProject,
+  AllDataI,
+  OneDataI,
+  ProjectI,
+} from "@modules/projects/interfaces";
 // import { rules } from "@modules/projects/validate";
 import Projects from "@modules/projects/model";
+import { QueryI } from "@modules/interfaces";
 import { io } from "@main/server";
-
+import { Types } from "mongoose";
 import {
   getPaginateQuery,
   getSearchQuery,
   getFieldQuery,
   getFieldSort,
 } from "@utils/querys";
-import { QueryI } from "@modules/interfaces";
-import { Types } from "mongoose";
-
-interface AllDataI {
-  query: QueryI;
-  _autor: string;
-}
-
-interface DeleteProject {
-  _id: string;
-  _autor: string;
-  query: QueryI;
-}
 
 const getAll = async (query: QueryI, _autor: string) => {
   const search = getSearchQuery(query);
@@ -41,10 +34,12 @@ export default () => {
     socket.on(
       "create",
       async ({ form, query }: { form: ProjectI; query: QueryI }) => {
+        const _autor = new Types.ObjectId(form._autor);
+
         const isInsert = await Projects.findOneAndUpdate(
           { title: form.title },
           {
-            $setOnInsert: { ...form, _autor: new Types.ObjectId(form._autor) },
+            $setOnInsert: { ...form, _autor },
           },
           { upsert: true }
         ).then((doc) => doc == null);
@@ -97,17 +92,27 @@ export default () => {
     });
 
     socket.on("all", async ({ query, _autor }: AllDataI) => {
-      getAll(query, _autor).then((projects) => {
-        socket.emit("all/success", projects);
-      });
+      getAll(query, _autor)
+        .then((projects) => {
+          socket.emit("all/success", projects);
+        })
+        .catch(() => socket.emit("all/error"));
+    });
+
+    socket.on("one", async ({ _id }: OneDataI) => {
+      await Projects.findById(_id)
+        .then((project) => {
+          socket.emit("one/success", project);
+        })
+        .catch(() => socket.emit("one/error"));
     });
 
     //Verify Id
     socket.on("verify-id", async (_id: string) => {
-      const user = await Projects.findById(_id).catch(() => false);
+      const project = await Projects.findById(_id).catch(() => false);
 
-      if (user) socket.emit("verify-id", true);
-      else socket.emit("verify-id", false);
+      if (project) socket.emit("verify-id", { project, status: true });
+      else socket.emit("verify-id", { project: null, status: false });
     });
   });
 };

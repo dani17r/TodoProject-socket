@@ -19,6 +19,7 @@ const store = defineStore("project", {
     },
     projects: { data: [] },
     query: query.project,
+    project: null,
   }),
   actions: {
     clear() {
@@ -38,6 +39,10 @@ const store = defineStore("project", {
 
     insert(projects?: StateI["projects"]) {
       if (!isEmpty(projects)) this.projects = projects;
+    },
+
+    insertOne(project?: StateI["project"]) {
+      if (!isEmpty(project)) this.project = project;
     },
 
     getAll(verifyMounted = false) {
@@ -67,7 +72,7 @@ const store = defineStore("project", {
       run({ form, query: this.query });
     },
 
-    update(form: FormsI["full"], callbacks?: CallbacksI) {
+    update(form: Partial<FormsI["full"]>, callbacks?: CallbacksI) {
       eventBus.emit("project/update");
 
       const socket = socketBase("/project", getUserId.value);

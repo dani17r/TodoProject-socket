@@ -44,7 +44,7 @@ const getAll = async (query: QueryI, _project: string) => {
 
 export default () => {
   io.of("/task").on("connection", (socket) => {
-    let userId = socket.handshake.headers["user"];
+    let projectId = socket.handshake.headers["project_id"];
 
     socket.on("create", async ({ form, query }: CreateResI) => {
       const isInsert = await Tasks.create({
@@ -55,7 +55,7 @@ export default () => {
 
       if (isInsert) {
         getAll(query, form._project).then((tasks) => {
-          socket.broadcast.timeout(8000).emit(`broadcast:${userId}/create`);
+          socket.broadcast.timeout(8000).emit(`broadcast:${projectId}/create`);
           socket.emit("create/success", tasks);
         });
       } else
@@ -73,7 +73,7 @@ export default () => {
       );
 
       if (newTask) {
-        socket.broadcast.timeout(8000).emit(`broadcast:${userId}/update`);
+        socket.broadcast.timeout(8000).emit(`broadcast:${projectId}/update`);
         socket.emit("update/success", newTask);
       } else
         socket.emit("update/error", {
@@ -95,7 +95,8 @@ export default () => {
       if (successTasks.length) {
         socket.broadcast
           .timeout(8000)
-          .emit(`broadcast:${userId}/change-position`);
+          .emit(`broadcast:${projectId}/change-position`);
+
         socket.emit("change-position/success", "success");
       } else
         socket.emit("change-position/error", {
@@ -111,7 +112,7 @@ export default () => {
 
       if (Number(update?.modifiedCount) > 0) {
         getAll(query, _project).then((tasks) => {
-          socket.broadcast.timeout(8000).emit(`broadcast:${userId}/update`);
+          socket.broadcast.timeout(8000).emit(`broadcast:${projectId}/update`);
           socket.emit("trash/success", tasks);
         });
       } else
@@ -128,9 +129,10 @@ export default () => {
       if (isDelete) {
         getAll(query, _project).then((tasks) => {
           socket.emit("delete/success", tasks);
+
           socket.broadcast
             .timeout(8000)
-            .emit(`broadcast:${userId}/delete`, { _id, tasks });
+            .emit(`broadcast:${projectId}/delete`, { _id, tasks });
         });
       } else
         socket.emit("delete/error", {
@@ -143,7 +145,9 @@ export default () => {
 
       if (isDelete) {
         getAll(query, _project).then((tasks) => {
-          socket.broadcast.timeout(8000).emit(`broadcast:${userId}/delete-all`);
+          socket.broadcast
+            .timeout(8000)
+            .emit(`broadcast:${projectId}/delete-all`);
           socket.emit("delete-all/success", tasks);
         });
       } else

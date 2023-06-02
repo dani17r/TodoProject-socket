@@ -31,6 +31,8 @@ export default (projectId: string) => {
   });
 
   socket.value.timeout(8000).on(`${urlSocket}/update`, () => {
+    console.log("funciona");
+
     setTimeout(() => (status.update = true), 300);
     if (status.update) taskStore.getAll();
   });

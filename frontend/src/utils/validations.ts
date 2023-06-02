@@ -48,7 +48,7 @@ const validations = <ValidsT>{
  *   seran validadas en el orden dado */
 export const validationForm = <T extends ObjectI<string[]>>(rules: T) => {
   // Variable reactiva para agregar los errores, inicia vacia
-  const errors = ref<T | ObjectI<unknown>>({});
+  const errors = ref<ObjectI<T>>({});
 
   // Funcion para limpiar los errores
   const clear = () => (errors.value = {});

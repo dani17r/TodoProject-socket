@@ -1,5 +1,4 @@
 import { superForm, superModals } from "@utils/inputs";
-import { storeToRefs } from "pinia";
 import { reactive } from "vue";
 
 import type {
@@ -9,9 +8,23 @@ import type {
   TaskI,
 } from "@interfaces/interfaces.task";
 
-import useTaskStore from "@stores/task";
-import { userStore } from "@stores/user";
+import { taskStore } from "@stores/task";
+import { projectStore } from "@stores/project";
 import { omit } from "lodash";
+
+const optionsDragg = {
+  componentData: {
+    type: "transition-group",
+    name: "list",
+  },
+  preventOnFilter: false,
+  group: "description",
+  ghostClass: "ghost",
+  dragClass: "drag",
+  disabled: false,
+  animation: 200,
+  itemKey: "_id",
+};
 
 const multiSelect = reactive({
   button: {
@@ -35,16 +48,24 @@ const multiSelect = reactive({
 });
 
 export default () => {
-  const store = useTaskStore();
-  const { user } = userStore();
+  const {
+    create: createTask,
+    update: updateTask,
+    trash: trashTask,
+    changePosition,
+    getAll,
 
-  const { query, project_id, countTask } = storeToRefs(store);
+    countTask,
+    query,
+    tasks,
+  } = taskStore();
+  const { project } = projectStore();
   const select = reactive({
     data: <SelectTaskT>{},
   });
 
   const form = superForm({
-    _autor: String(user.value?._id),
+    _autor: "",
     _project: "",
     position: 0,
     name: "",
@@ -67,15 +88,16 @@ export default () => {
   });
 
   const create = () => {
-    form._project = project_id.value;
+    form._project = String(project.value?._id);
+    form._autor = String(project.value?._autor);
     form.position = countTask.value + 1;
 
-    store.create(omit(form, ["clear"]), {
+    createTask(omit(form, ["clear"]), {
       actions: () => form.clear(),
     });
   };
 
-  const moveToRecycleBin = (_id: string) => store.trash([_id]);
+  const moveToRecycleBin = (_id: string) => trashTask([_id]);
 
   const changePositionTask = (evt: OnChangeDroggableI) => {
     const newIndex = evt.moved.newIndex;
@@ -88,38 +110,38 @@ export default () => {
     if (query.value.sort.includes("desc")) {
       const currentCount = countTask.value - 1;
       for (let i = currentCount - start; i >= currentCount - end; i--) {
-        store.tasks.data[currentCount - i].position = i;
+        tasks.value.data[currentCount - i].position = i;
         updatePositions.push({
-          _id: store.tasks.data[currentCount - i]._id,
+          _id: tasks.value.data[currentCount - i]._id,
           position: i,
         });
       }
     } else
       for (let i = start; i <= end; i++) {
-        store.tasks.data[i].position = i;
+        tasks.value.data[i].position = i;
         updatePositions.push({
-          _id: store.tasks.data[i]._id,
+          _id: tasks.value.data[i]._id,
           position: i,
         });
       }
 
-    store.changePosition(updatePositions);
+    changePosition(updatePositions);
   };
 
   const done = (task: TaskI) => {
     task.done = !task.done;
-    store.update(task);
+    updateTask(task);
   };
 
   const moveSelectToRecycleBin = () => {
     const _ids = multiSelect.all.value.map((task) => task._id);
-    store.trash(_ids);
+    trashTask(_ids);
   };
 
   const ascDesc = (value: "asc" | "desc") => {
     if (query.value.sort != `position:${value}`) {
       query.value.sort = `position:${value}`;
-      store.getAll();
+      getAll();
     }
   };
 
@@ -127,13 +149,15 @@ export default () => {
     moveSelectToRecycleBin,
     changePositionTask,
     moveToRecycleBin,
-    multiSelect,
     ascDesc,
-    select,
     create,
+    done,
+
+    optionsDragg,
+    multiSelect,
+    select,
     modals,
     query,
-    done,
     form,
   };
 };

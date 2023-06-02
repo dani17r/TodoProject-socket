@@ -14,8 +14,8 @@ export default defineConfig({
 
       //Custom
       "@middlewares": path.resolve(__dirname, "src/router/middlewares"),
-      "@composables": path.resolve(__dirname, "src/utils/composables"),
       "@components": path.resolve(__dirname, "src/views/components"),
+      "@composables": path.resolve(__dirname, "src/composables"),
       "@modules": path.resolve(__dirname, "src/views/modules"),
       "@layouts": path.resolve(__dirname, "src/views/layouts"),
       "@interfaces": path.resolve(__dirname, "src/interfaces"),

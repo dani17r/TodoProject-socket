@@ -5,39 +5,32 @@ import draggable from "vuedraggable";
 import { truncate } from "lodash";
 
 import type { FormsI } from "@interfaces/interfaces.task";
+import shareComposable from "@composables/share";
 import taskComposable from "@composables/task";
 import useTaskStore from "@stores/task";
 import Icons from "@components/icons";
 import Task from "@modules/task";
 
+import Popper from "vue3-popper";
+
 const {
   changePositionTask,
   moveToRecycleBin,
+  done,
+
+  optionsDragg,
   multiSelect,
   select,
-  done,
   modals,
 } = taskComposable();
+
+const { permissions, allowIfPermission } = shareComposable();
 const taskStore = useTaskStore();
 const route = useRoute();
 
 const updateTask = computed(() => select.data as FormsI["full"]);
 const viewTask = computed(() => select.data as FormsI["full"]);
 const tasks = computed(() => taskStore.tasks.data);
-
-let optionsDragg = {
-  componentData: {
-    type: "transition-group",
-    name: "list",
-  },
-  preventOnFilter: false,
-  group: "description",
-  ghostClass: "ghost",
-  dragClass: "drag",
-  disabled: false,
-  animation: 200,
-  itemKey: "_id",
-};
 
 onUnmounted(() => taskStore.clear());
 
@@ -52,6 +45,7 @@ onMounted(() => {
     <draggable
       v-model="taskStore.tasks.data"
       v-bind="optionsDragg"
+      :disabled="!permissions.m"
       @change="changePositionTask"
     >
       <template #item="{ element: task }">
@@ -69,20 +63,40 @@ onMounted(() => {
                 </h2>
               </div>
               <div v-show="!multiSelect.button.value" class="inline-flex gap-1">
-                <Icons.Edit
-                  v-show="!task.done"
-                  class="icon-task-edit"
-                  @click="modals.open.update(task)"
-                />
-                <Icons.Delete
-                  class="icon-task-delete"
-                  @click="moveToRecycleBin(task._id)"
-                />
-                <Icons.CircleCheck
-                  class="icon-task-check h-8 w-8 -mt-[3px] ml-3"
-                  :class="task.done && 'stroke-green-600'"
-                  @click="done(task)"
-                />
+                <Popper
+                  content="You don't have allow for edited"
+                  :disabled="permissions.u"
+                >
+                  <Icons.Edit
+                    v-show="!task.done"
+                    class="icon-task-edit"
+                    @click="
+                      allowIfPermission('u', () => modals.open.update(task))
+                    "
+                  />
+                </Popper>
+                <Popper
+                  content="You don't have allow for removed"
+                  :disabled="permissions.r"
+                >
+                  <Icons.Delete
+                    class="icon-task-delete"
+                    @click="
+                      allowIfPermission('r', () => moveToRecycleBin(task._id))
+                    "
+                  />
+                </Popper>
+
+                <Popper
+                  content="You don't have allow for verify or unverify a task"
+                  :disabled="permissions.u"
+                >
+                  <Icons.CircleCheck
+                    class="icon-task-check h-8 w-8 -mt-[3px] ml-3"
+                    :class="task.done && 'stroke-green-600'"
+                    @click="allowIfPermission('u', () => done(task))"
+                  />
+                </Popper>
               </div>
               <input
                 v-show="multiSelect.button.value"
@@ -107,24 +121,31 @@ onMounted(() => {
     </draggable>
   </div>
 
-  <button
-    class="fixed bottom-3 left-3 z-50 bg-blue-600 p-2 rounded-full"
-    @click="modals.toggle('trash')"
-  >
-    <Icons.Delete />
-  </button>
+  <template v-if="permissions.st">
+    <button
+      class="fixed bottom-3 left-3 z-50 bg-blue-600 p-2 rounded-full"
+      @click="modals.toggle('trash')"
+    >
+      <Icons.Delete />
+    </button>
+  </template>
 
-  <Task.ModalEdit
-    :modal="modals.edite"
-    :updated="updateTask"
-    @close="modals.toggle('edite')"
-  />
+  <template v-if="permissions.u">
+    <Task.ModalEdit
+      :modal="modals.edite"
+      :updated="updateTask"
+      @close="modals.toggle('edite')"
+    />
+  </template>
+
   <Task.ModalView
     :modal="modals.view"
     :view="viewTask"
     @close="modals.toggle('view')"
   />
-  <Task.ModalTrash :modal="modals.trash" @close="modals.toggle('trash')" />
+  <template v-if="permissions.st">
+    <Task.ModalTrash :modal="modals.trash" @close="modals.toggle('trash')" />
+  </template>
 </template>
 
 <style>
@@ -150,5 +171,8 @@ onMounted(() => {
 }
 .drag {
   opacity: 0;
+}
+.popper {
+  @apply !bg-red-600 !px-3 !py-2 !rounded-lg;
 }
 </style>

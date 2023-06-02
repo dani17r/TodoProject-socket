@@ -2,12 +2,13 @@
 // project libraries
 import shareComposable from "@composables/share";
 import { onUnmounted, onMounted } from "vue";
-import broadcastTask from "@services/tasks";
+import broadcastTask from "@services/share";
 import Project from "@modules/project";
 import { useRoute } from "vue-router";
 import Task from "@modules/task";
+
 // internal libraries
-const { initPermissions } = shareComposable();
+const { initPermissions, isOwner } = shareComposable();
 const route = useRoute();
 
 // Instancias
@@ -23,7 +24,7 @@ onMounted(() => {
 
 <template>
   <Task.Content>
-    <Project.MenuShare />
+    <Project.MenuShare v-if="isOwner" />
     <Task.Options />
     <Task.List />
   </Task.Content>

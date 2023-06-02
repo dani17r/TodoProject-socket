@@ -1,7 +1,7 @@
 // project libraries
 import { validationForm } from "@utils/validations";
 import notifyComposable from "@composables/notify";
-import userStore from "@/stores/user";
+import { userStore } from "@/stores/user";
 
 // internal libraries
 import { useRouter } from "vue-router";

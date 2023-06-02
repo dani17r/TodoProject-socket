@@ -21,7 +21,7 @@ const props = withDefaults(defineProps<PropsI>(), {
   <div
     v-show="props.state"
     :id="`dropdown_menu-${$attrs.id}`"
-    class="dropdown-menu"
+    :class="`dropdown-menu ${$attrs.class}`"
   >
     <slot />
   </div>

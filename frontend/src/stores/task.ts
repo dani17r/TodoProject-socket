@@ -1,8 +1,7 @@
-import userLocalStorageComposable from "@composables/userLocalStorage";
 import type { CallbacksI } from "@interfaces/interfaces.generals";
 import { defineStore, storeToRefs } from "pinia";
 import { useSocketAction } from "@utils/main";
-import { socketBase } from "@services/main";
+import { socketTask } from "@services/main";
 import { findIndex, isEmpty } from "lodash";
 import eventBus from "@services/eventBus";
 import query from "@utils/querys";
@@ -12,8 +11,6 @@ import type {
   StateI,
   TaskI,
 } from "@interfaces/interfaces.task";
-
-const { getUserId } = userLocalStorageComposable();
 
 const store = defineStore("task", {
   state: (): StateI => ({
@@ -53,7 +50,7 @@ const store = defineStore("task", {
       this.countTask;
 
       this.onceMounted(() => {
-        const socket = socketBase("/task", getUserId.value);
+        const socket = socketTask("/task", this.project_id);
         const init = useSocketAction("all", socket);
         const run = init<StateI["tasks"]>({
           actions: (tasks) => this.insert(tasks),
@@ -66,7 +63,7 @@ const store = defineStore("task", {
     create(form: FormsI["inter"], callbacks?: CallbacksI) {
       eventBus.emit("task/create");
 
-      const socket = socketBase("/task", getUserId.value);
+      const socket = socketTask("/task", this.project_id);
 
       const init = useSocketAction("create", socket);
       const run = init<StateI["tasks"]>(callbacks, {
@@ -79,7 +76,7 @@ const store = defineStore("task", {
     update(form: FormsI["full"], callbacks?: CallbacksI) {
       eventBus.emit("task/update");
 
-      const socket = socketBase("/task", getUserId.value);
+      const socket = socketTask("/task", this.project_id);
 
       const init = useSocketAction("update", socket);
       const run = init<TaskI>(callbacks, {
@@ -95,7 +92,7 @@ const store = defineStore("task", {
     changePosition(tasks: TaskPositionI, callbacks?: CallbacksI) {
       eventBus.emit("task/move");
 
-      const socket = socketBase("/task", getUserId.value);
+      const socket = socketTask("/task", this.project_id);
       const init = useSocketAction("change-position", socket);
       const run = init(callbacks);
 
@@ -105,7 +102,7 @@ const store = defineStore("task", {
     trash(_ids: TaskI["_id"][], callbacks?: CallbacksI) {
       eventBus.emit("task/trash");
 
-      const socket = socketBase("/task", getUserId.value);
+      const socket = socketTask("/task", this.project_id);
       const init = useSocketAction("trash", socket);
       const run = init<StateI["tasks"]>(callbacks, {
         actions: (tasks) => this.insert(tasks),
@@ -117,7 +114,7 @@ const store = defineStore("task", {
     remove(_id: TaskI["_id"], callbacks?: CallbacksI) {
       eventBus.emit("task/delete");
 
-      const socket = socketBase("/task", getUserId.value);
+      const socket = socketTask("/task", this.project_id);
       const init = useSocketAction("delete", socket);
       const run = init<StateI["tasks"]>(callbacks, {
         actions: (tasks) => this.insert(tasks),
@@ -129,7 +126,7 @@ const store = defineStore("task", {
     removeAll(callbacks?: CallbacksI) {
       eventBus.emit("task/delete-all");
 
-      const socket = socketBase("/task", getUserId.value);
+      const socket = socketTask("/task", this.project_id);
 
       const init = useSocketAction("delete-all", socket);
       const run = init<StateI["tasks"]>(callbacks, {

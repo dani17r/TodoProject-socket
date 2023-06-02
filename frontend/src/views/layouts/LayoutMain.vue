@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import broadcastUser from "@services/user";
 import { userStore } from "@/stores/user";
 
 import ViewImgProfile from "@modules/user/ViewImgProfile.vue";
 import MenuOptions from "@modules/user/MenuOptions.vue";
 import Icons from "@components/icons";
+
+import { onUnmounted, onMounted } from "vue";
 
 import { startCase } from "lodash";
 import { ref } from "vue";
@@ -11,6 +14,11 @@ import { ref } from "vue";
 const menu = ref(false);
 
 const { user } = userStore();
+const socket = broadcastUser();
+
+/** Ciclo de vida --------------------*/
+onUnmounted(() => socket.close());
+onMounted(() => socket.open());
 </script>
 
 <template>

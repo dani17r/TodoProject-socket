@@ -4,8 +4,14 @@ export default {
   MenuVertical: defineAsyncComponent(
     () => import("@components/icons/IconMenuVertical.vue")
   ),
+  SharePrivate: defineAsyncComponent(
+    () => import("@components/icons/IconSharePrivate.vue")
+  ),
   CircleCheck: defineAsyncComponent(
     () => import("@components/icons/IconCircleCheck.vue")
+  ),
+  SharePublic: defineAsyncComponent(
+    () => import("@components/icons/IconSharePublic.vue")
   ),
   Descending: defineAsyncComponent(
     () => import("@components/icons/IconDescending.vue")
@@ -15,6 +21,9 @@ export default {
   ),
   Register: defineAsyncComponent(
     () => import("@components/icons/IconRegister.vue")
+  ),
+  Profile: defineAsyncComponent(
+    () => import("@components/icons/IconProfile.vue")
   ),
   Delete: defineAsyncComponent(
     () => import("@components/icons/IconDelete.vue")
@@ -34,13 +43,11 @@ export default {
   Danger: defineAsyncComponent(
     () => import("@components/icons/IconDanger.vue")
   ),
+  Share: defineAsyncComponent(() => import("@components/icons/IconShare.vue")),
   Close: defineAsyncComponent(() => import("@components/icons/IconClose.vue")),
   Login: defineAsyncComponent(() => import("@components/icons/IconLogin.vue")),
   Back: defineAsyncComponent(() => import("@components/icons/IconBack.vue")),
   Edit: defineAsyncComponent(() => import("@components/icons/IconEdit.vue")),
   Next: defineAsyncComponent(() => import("@components/icons/IconNext.vue")),
   Plus: defineAsyncComponent(() => import("@components/icons/IconPlus.vue")),
-  Profile: defineAsyncComponent(
-    () => import("@components/icons/IconProfile.vue")
-  ),
 };

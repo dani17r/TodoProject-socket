@@ -4,6 +4,7 @@ import { defineStore, storeToRefs } from "pinia";
 import { useSocketAction } from "@utils/main";
 import useProjectStore from "@stores/project";
 import { socketBase } from "@services/main";
+import eventBus from "@services/eventBus";
 import { isEmpty } from "lodash";
 import type {
   FormsI,
@@ -12,7 +13,7 @@ import type {
   UserI,
 } from "@interfaces/interfaces.user";
 
-const { removeUserId, setUserId } = userLocalStorageComposable();
+const { removeUserId, setUserId, getUserId } = userLocalStorageComposable();
 
 const store = defineStore("user", {
   state: (): StateI => ({
@@ -32,6 +33,18 @@ const store = defineStore("user", {
 
     addUser(newUser: UserI) {
       if (!this.lifecicles.mounted) !isEmpty(newUser) && (this.user = newUser);
+    },
+
+    refresh() {
+      const socket = socketBase("/auth");
+
+      const token = localStorage.getItem("token") ?? null;
+      socket.emit("status", token);
+      socket.on("status/response", ({ user }) => {
+        if (!isEmpty(user)) this.addUser(user);
+        socket.close();
+      });
+      socket.io.on("error", () => socket.close());
     },
 
     login(form: FormsI["login"], callbacks?: CallbacksI<NotifyI>) {
@@ -94,7 +107,8 @@ const store = defineStore("user", {
     },
 
     update(form: FormsI["update"], callbacks?: CallbacksI<NotifyI>) {
-      const socket = socketBase("/auth");
+      eventBus.emit("user/update");
+      const socket = socketBase("/auth", getUserId.value);
 
       const init = useSocketAction("update", socket);
       const run = init<UserI>({

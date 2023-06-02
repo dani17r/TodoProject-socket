@@ -3,7 +3,7 @@ import type { NotifyI } from "@interfaces/interfaces.generals";
 /*eslint no-unused-vars: ["error", { "args": "none" }]*/
 export interface CallbacksMiddlI {
   actions: (value: StatusMiddlI) => void;
-  error: () => void;
+  error?: () => void;
 }
 
 interface StatusMiddlI {

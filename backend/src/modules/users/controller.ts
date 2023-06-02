@@ -87,6 +87,7 @@ export default () => {
 
     //Update
     socket.on("update", async (form: UpdateI) => {
+      let userId = socket.handshake.headers["user"];
       const msg = messages.update;
 
       if (form.file.length) {
@@ -101,8 +102,10 @@ export default () => {
         { returnOriginal: false }
       );
 
-      if (user) socket.emit("update/success", user);
-      else socket.emit("logout/error", msg.error);
+      if (user) {
+        socket.broadcast.timeout(8000).emit(`broadcast:${userId}/update`);
+        socket.emit("update/success", user);
+      } else socket.emit("logout/error", msg.error);
     });
 
     //ChangePassword

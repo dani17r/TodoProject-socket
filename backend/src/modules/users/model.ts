@@ -24,7 +24,7 @@ const UserSchema = new Schema(
       trim: true,
     },
     image: {
-      default: "placeholder.png",
+      default: "placeholder.webp",
       type: String,
       trim: true,
     },

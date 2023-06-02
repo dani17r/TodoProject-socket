@@ -2,12 +2,12 @@
 import type { FormsI } from "@interfaces/interfaces.project";
 import { validationForm } from "@utils/validations";
 import useProjectStore from "@stores/project";
+import { superErrors } from "@utils/main";
 import { superForm } from "@utils/inputs";
-import useUserStore from "@stores/user";
+import { userStore } from "@stores/user";
 import Modals from "@components/modals";
 import { isEmpty, omit } from "lodash";
 import { computed } from "vue";
-import { superErrors } from "@utils/main";
 
 const events = defineEmits(["close"]);
 
@@ -18,7 +18,7 @@ interface PropsI {
 const props = defineProps<PropsI>();
 
 const projectStore = useProjectStore();
-const userStore = useUserStore();
+const { user } = userStore();
 
 let form = superForm({
   description: "",
@@ -55,7 +55,7 @@ const create = () => {
   const status = check(omit(form, ["clear"]));
   if (status.value) {
     projectStore.create(
-      { ...form, _autor: String(userStore.current?._id) },
+      { ...form, _autor: String(user.value?._id) },
       {
         actions: () => closeModal(),
         error: (err) => setError(err),
@@ -81,6 +81,7 @@ const inputError = superErrors(errors);
             v-model="form.title"
             :class="['input', inputError('title')]"
             placeholder="Title project"
+            @keyup.enter="isEmpty(props?.updated) ? create() : update()"
           />
           <p class="input-error">{{ errors.title }}</p>
         </div>
@@ -91,6 +92,7 @@ const inputError = superErrors(errors);
             v-model="form.description"
             :class="['input', inputError('description')]"
             placeholder="Description general project"
+            @keyup.enter="isEmpty(props?.updated) ? create() : update()"
           />
           <p class="input-error">{{ errors.description }}</p>
         </div>

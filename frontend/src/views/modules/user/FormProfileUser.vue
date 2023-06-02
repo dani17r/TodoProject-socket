@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import { reactive, computed, ref, watchEffect } from "vue";
 import { validationForm } from "@utils/validations";
 import notifyComposable from "@composables/notify";
 import { userStore } from "@stores/user";
-import { reactive, computed } from "vue";
 
 import UploadImgProfile from "@modules/user/UploadImgProfile.vue";
 import type { FormsI } from "@interfaces/interfaces.user";
@@ -10,10 +10,13 @@ import type { FormsI } from "@interfaces/interfaces.user";
 const Notify = notifyComposable();
 const { user, update } = userStore();
 
+const url = import.meta.env.VITE_URL_UPLOAD;
 const form = reactive({
   ...user.value,
   file: new Blob(),
 });
+
+const cleanFile = ref(false);
 
 const ifNotEmptyFields = computed(() =>
   Boolean(checkUpdate() && form.fullname?.length && form.email?.length)
@@ -43,11 +46,18 @@ const updateUser = () => {
     update(form as FormsI["update"], {
       actions: () => {
         Notify.success("updated success");
-        form.file = new Blob();
+        cleanFile.value = true;
+        setTimeout(() => (cleanFile.value = false), 300);
       },
       error: (msg) => Notify.error(msg.message),
     });
 };
+
+watchEffect(() => {
+  form.email = user.value?.email;
+  form.fullname = user.value?.fullname;
+  form.image = user.value?.image;
+});
 </script>
 
 <template>
@@ -55,7 +65,11 @@ const updateUser = () => {
     <h1 class="font-bold text-xl mb-2">Change data user</h1>
     <div class="box-field">
       <label>Imagen</label>
-      <UploadImgProfile @update="(file) => (form.file = file)" />
+      <UploadImgProfile
+        :clean="cleanFile"
+        :preview="`${url}/${form.image}`"
+        @update="(file) => (form.file = file)"
+      />
     </div>
 
     <div class="box-field">

@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import Confirm from "@components/modals/ModalConfirm.vue";
+import shareComposable from "@composables/share";
 import { superModals } from "@utils/inputs";
 import Modals from "@components/modals";
 import useTaskStore from "@stores/task";
 import Icons from "@components/icons";
 import { truncate } from "lodash";
+import Popper from "vue3-popper";
 import { computed } from "vue";
 
 const events = defineEmits(["close"]);
 const props = defineProps<{ modal: boolean }>();
+
+const { permissions, allowIfPermission } = shareComposable();
 
 const stateModal = computed(() => props.modal);
 
@@ -37,14 +41,20 @@ const deleteAllTrash = () => {
         <h1 class="flex items-center gap-3">
           <Icons.Delete class="inline" /> <span class="text-xl">Trash</span>
         </h1>
-        <button
-          v-show="taskStore.tasks.trash.length"
-          class="btn-remove-all"
-          @click="modals.toggle('confirm')"
+
+        <Popper
+          content="You don't have allow for removed all"
+          :disabled="permissions.d"
         >
-          <span class="mr-2">Remove all</span>
-          <Icons.Close class="icon-task-delete" />
-        </button>
+          <button
+            v-show="taskStore.tasks.trash.length"
+            class="btn-remove-all"
+            @click="allowIfPermission('d', () => modals.toggle('confirm'))"
+          >
+            <span class="mr-2">Remove all</span>
+            <Icons.Close class="icon-task-delete" />
+          </button>
+        </Popper>
       </div>
     </div>
     <div class="content-trash px-6">
@@ -58,10 +68,15 @@ const deleteAllTrash = () => {
                 </h2>
               </div>
               <div class="inline-flex">
-                <Icons.Close
-                  class="icon-task-delete"
-                  @click="deleteTask(task._id)"
-                />
+                <Popper
+                  content="You don't have allow for removed all"
+                  :disabled="permissions.d"
+                >
+                  <Icons.Close
+                    class="icon-task-delete"
+                    @click="allowIfPermission('d', () => deleteTask(task._id))"
+                  />
+                </Popper>
               </div>
             </div>
             <div v-show="task.content != ''" class="ql-container ql-disabled">

@@ -4,6 +4,21 @@ import type {
   QueryI,
 } from "@interfaces/interfaces.generals";
 
+export interface PermissionsI {
+  st: boolean;
+  d: boolean;
+  m: boolean;
+  u: boolean;
+  r: boolean;
+  c: boolean;
+  s: boolean;
+}
+
+export interface GroupI {
+  permissions: PermissionsI;
+  _user: string;
+}
+
 export interface ProjectI {
   description: string;
   createdAt: string;
@@ -11,6 +26,18 @@ export interface ProjectI {
   _autor: string;
   title: string;
   _id: string;
+  share: {
+    public: {
+      password: string | null;
+      permissions: PermissionsI;
+      status: boolean;
+    };
+    private: {
+      password: string | null;
+      status: boolean;
+      group: GroupI[];
+    };
+  };
 }
 
 export type SelectProjectT =
@@ -34,5 +61,6 @@ export interface StateI {
     paginate?: PaginateI;
     data: ProjectI[];
   };
+  project: ProjectI | null;
   query: QueryI;
 }

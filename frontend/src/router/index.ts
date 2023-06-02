@@ -1,8 +1,8 @@
 import { isAuthLoginUser, isNotAuthLoginUser } from "@middlewares/auth";
 import { createRouter, createWebHistory } from "vue-router";
+import { isRealId, isShareProject } from "@middlewares/one";
 import templateAuth from "@layouts/LayoutAuth.vue";
 import templateBase from "@layouts/LayoutMain.vue";
-import { isRealId } from "@middlewares/one";
 import { TitleHeader } from "@utils/main";
 import Home from "@pages/ProjectsPage.vue";
 import Login from "@pages/LoginPage.vue";
@@ -44,6 +44,16 @@ const router = createRouter({
           component: () => import("@pages/ProfilePage.vue"),
         },
       ],
+    },
+    {
+      path: "/share/project/:id",
+      name: "share-project-one",
+      meta: {
+        title: "Share One Task",
+        type: "private",
+      },
+      beforeEnter: [isShareProject],
+      component: () => import("@pages/ShareProjectPage.vue"),
     },
     {
       path: "/",
