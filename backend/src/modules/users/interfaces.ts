@@ -1,3 +1,4 @@
+import { QueryI } from "@modules/interfaces";
 import { Types } from "mongoose";
 export interface ValidateAuthI {
   LoginI: {
@@ -65,6 +66,12 @@ export interface UpdateI {
   image: string;
   _id: string;
 }
+
+export interface AllDataI {
+  query: QueryI;
+  _ids: string[];
+}
+
 export interface ChangePasswordI {
   currentPassword: string;
   newPassword: string;

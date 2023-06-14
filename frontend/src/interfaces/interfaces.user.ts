@@ -1,4 +1,8 @@
-import type { NotifyI } from "@interfaces/interfaces.generals";
+import type {
+  NotifyI,
+  PaginateI,
+  QueryI,
+} from "@interfaces/interfaces.generals";
 
 /*eslint no-unused-vars: ["error", { "args": "none" }]*/
 export interface CallbacksMiddlI {
@@ -50,5 +54,10 @@ export interface StateI {
   lifecicles: {
     mounted: boolean;
   };
+  users: {
+    paginate?: PaginateI;
+    data: UserI[];
+  };
   user: UserI | null;
+  query: QueryI;
 }

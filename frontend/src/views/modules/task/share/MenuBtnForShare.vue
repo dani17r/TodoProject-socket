@@ -1,15 +1,26 @@
 <script setup lang="ts">
-// project libraries
-import ModalPublicShare from "@modules/project/ModalPublicShare.vue";
 import Dropdown from "@components/MenuDropdown.vue";
-import Icons from "@components/icons";
-
+import shareComposable from "@composables/share";
+import { userStore } from "@stores/user";
 import { superModals } from "@utils/inputs";
+import Icons from "@components/icons";
+import Tasks from "@modules/task";
+
+// project libraries
+const { restarOrInitSharePrivate } = shareComposable();
+const { restartUsers } = userStore();
 
 const model = superModals({
-  dropdown: false,
+  sharePrivate: false,
   sharePublic: false,
+  dropdown: false,
 });
+
+const closeModalPrivateShare = () => {
+  model.toggle("sharePrivate");
+  restarOrInitSharePrivate();
+  restartUsers();
+};
 </script>
 
 <template>
@@ -18,6 +29,7 @@ const model = superModals({
       <Icons.Share class="inline ml-1" />
     </button>
   </div>
+
   <Dropdown
     :state="model.dropdown"
     class="!min-w-[170px] !top-28 !right-8 shadow-xl"
@@ -34,15 +46,23 @@ const model = superModals({
         <span>Everyone</span>
         <Icons.SharePublic class="inline" />
       </button>
-      <button class="flex justify-between items-center hover:text-white">
+      <button
+        class="flex justify-between items-center hover:text-white"
+        @click="[model.toggle('sharePrivate'), model.toggle('dropdown')]"
+      >
         <span>Some only</span>
         <Icons.SharePrivate class="inline" />
       </button>
     </div>
   </Dropdown>
 
-  <ModalPublicShare
+  <Tasks.ModalPublicShare
     :status="model.sharePublic"
     @close="model.toggle('sharePublic')"
+  />
+
+  <Tasks.ModalPrivateShare
+    :status="model.sharePrivate"
+    @close="closeModalPrivateShare()"
   />
 </template>

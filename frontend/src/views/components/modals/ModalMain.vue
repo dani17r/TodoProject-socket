@@ -66,11 +66,11 @@ export default {
 
 <style>
 .bg-modal {
-  @apply bg-[#0c0c0c7d] fixed w-full h-[100vh] top-0;
+  @apply bg-[#121212ed] fixed w-full h-[100vh] top-0;
 }
 
 .content-modal-main {
-  @apply fixed w-full h-[100vh] top-0;
+  @apply fixed w-full h-[100vh] top-0 rounded-md;
 }
 
 .bg-click {

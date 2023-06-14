@@ -58,15 +58,15 @@ export default () => {
     );
 
     socket.on("update", async (form: ProjectI) => {
-      const newProject = await Projects.findOneAndUpdate(
+      const updateProject = await Projects.findOneAndUpdate(
         { _id: form._id },
         { $set: form },
         { returnOriginal: false }
       );
 
-      if (newProject) {
+      if (updateProject) {
         socket.broadcast.timeout(8000).emit(`broadcast:${userId}/update`);
-        socket.emit("update/success", newProject);
+        socket.emit("update/success", updateProject);
       } else
         socket.emit("update/error", {
           message: `Could not update project`,

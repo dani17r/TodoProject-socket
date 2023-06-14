@@ -76,12 +76,4 @@ onMounted(() => socket.open());
 .base.content-nav .name {
   @apply text-lg;
 }
-
-.btn-one {
-  @apply inline-block rounded-full hover:border-gray-200 hover:text-blue-600 text-white hover:bg-gray-200 py-1 px-1;
-}
-
-.btn-two {
-  @apply inline-block rounded hover:border-gray-200 hover:text-blue-600 text-white hover:bg-gray-200 py-1 px-2;
-}
 </style>

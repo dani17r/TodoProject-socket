@@ -30,7 +30,8 @@ const PermissionsShema = new Schema(
 const GroupShema = new Schema(
   {
     permissions: PermissionsShema,
-    _user: String,
+    _id: String,
+    email: String,
   },
   { _id: false }
 );

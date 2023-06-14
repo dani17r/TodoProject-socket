@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import SelectAscDesc from "@components/SelectAscDesc.vue";
 import { validationForm } from "@utils/validations";
 import shareComposable from "@composables/share";
 import { projectStore } from "@stores/project";
@@ -6,18 +7,11 @@ import taskComposable from "@composables/task";
 import { superErrors } from "@utils/main";
 import useTaskStore from "@stores/task";
 import Icons from "@components/icons";
-import { computed } from "vue";
-
 import Popper from "vue3-popper";
+import { computed } from "vue";
 
 const taskStore = useTaskStore();
 const { project } = projectStore();
-
-const {
-  allowIfPermission,
-
-  permissions,
-} = shareComposable();
 
 const {
   moveSelectToRecycleBin,
@@ -30,6 +24,7 @@ const {
 } = taskComposable();
 
 const { check, errors } = validationForm({ nameTask: ["empty"] });
+const { allowIfPermission, permissions } = shareComposable();
 const tasks = computed(() => taskStore.tasks.data);
 
 const addNewTask = () => {
@@ -37,110 +32,91 @@ const addNewTask = () => {
   if (status.value) create();
 };
 
-const sortActive = (val: string) => {
-  return query.value.sort.includes(val) && "bg-zinc-300 text-zinc-800";
-};
-
 const inputError = superErrors(errors);
 </script>
 
 <template>
-  <div>
-    <h1 class="text-grey-darkest">
-      <i class="text-sm font-sans">Project: </i>
-      <br />
-      <span class="text-2xl font-bold">{{ project?.title }}</span>
-    </h1>
+  <h1 class="text-grey-darkest">
+    <i class="text-sm font-sans">Project: </i>
+    <br />
+    <span class="text-2xl font-bold">{{ project?.title }}</span>
+  </h1>
 
-    <Popper
-      class="w-full"
-      content="You don't have allow for created"
-      :disabled="permissions.c"
+  <Popper
+    class="w-full !m-0 !border-0"
+    content="You don't have allow for created"
+    :disabled="permissions.c"
+  >
+    <div class="flex mt-4">
+      <input
+        v-model="form.name"
+        :class="['input py-2 px-3 mr-4', inputError('nameTask')]"
+        placeholder="New task"
+        @keyup.enter="allowIfPermission('u', () => addNewTask())"
+      />
+      <button
+        class="btn-main !w-auto flex items-center uppercase"
+        @click="allowIfPermission('c', () => addNewTask())"
+      >
+        <Icons.Plus class="inline" />
+        <span class="ml-1 mr-2"> Add </span>
+      </button>
+    </div>
+  </Popper>
+
+  <div v-if="tasks.length" class="flex mt-5 justify-between items-center">
+    <SelectAscDesc
+      v-show="!multiSelect.button.value"
+      class="flex items-center h-6"
+      :query="query"
+      @asc="ascDesc('asc')"
+      @desc="ascDesc('desc')"
+    />
+
+    <div v-show="multiSelect.button.value" class="flex gap-3 items-center">
+      <button
+        v-show="multiSelect.button.value"
+        class="btn-two !flex !bg-red-600"
+        @click="multiSelect.button.toggle()"
+      >
+        <Icons.Close class="inline mt-[2px]" />
+        <span class="ml-1 mr-2">Cancel</span>
+      </button>
+
+      <Popper
+        class="w-full !m-0 !border-0"
+        content="You don't have allow for removed"
+        :disabled="permissions.r"
+      >
+        <Icons.Delete
+          v-show="multiSelect.all.value.length"
+          class="icon-task-delete"
+          @click="allowIfPermission('r', () => moveSelectToRecycleBin())"
+        />
+      </Popper>
+    </div>
+
+    <div
+      :class="[
+        'flex items-center gap-3',
+        multiSelect.button.value ? 'pr-[18px]' : '',
+      ]"
     >
-      <div class="flex mt-4">
-        <input
-          v-model="form.name"
-          :class="['input py-2 px-3 mr-4', inputError('nameTask')]"
-          placeholder="New task"
-          @keyup.enter="allowIfPermission('u', () => addNewTask())"
-        />
-        <button
-          class="p-2 rounded bg-blue-500 text-zinc-100 hover:text-zinc-300 hover:bg-blue-600"
-          @click="allowIfPermission('c', () => addNewTask())"
-        >
-          Add
-        </button>
-      </div>
-    </Popper>
-
-    <div v-if="tasks.length" class="flex mt-5 justify-between items-center">
-      <div
+      <button
         v-show="!multiSelect.button.value"
-        class="flex items-center h-6 pl-2"
+        class="btn-two flex justify-center items-center"
+        @click="multiSelect.button.toggle()"
       >
-        <button
-          :class="['btn-sort rounded-l-md', sortActive('asc')]"
-          @click="ascDesc('asc')"
-        >
-          Asc
-        </button>
-        <button
-          :class="['btn-sort rounded-r-md', sortActive('desc')]"
-          @click="ascDesc('desc')"
-        >
-          Desc
-        </button>
-      </div>
+        <Icons.Select class="inline -mt-1" />
+        <span class="ml-1 mr-2"> Selection </span>
+      </button>
 
-      <div v-show="multiSelect.button.value" class="flex gap-3 pl-2">
-        <button
-          v-show="multiSelect.button.value"
-          class="px-2 border border-zinc-300 rounded text-zinc-200"
-          @click="multiSelect.button.toggle()"
-        >
-          Cancel
-        </button>
-
-        <Popper
-          class="w-full"
-          content="You don't have allow for removed"
-          :disabled="permissions.r"
-        >
-          <Icons.Delete
-            v-show="multiSelect.all.value.length"
-            class="icon-task-delete"
-            @click="allowIfPermission('r', () => moveSelectToRecycleBin())"
-          />
-        </Popper>
-      </div>
-
-      <div
-        :class="[
-          'flex items-center gap-3',
-          multiSelect.button.value ? 'pr-[18px]' : 'pr-1',
-        ]"
-      >
-        <button
-          v-show="!multiSelect.button.value"
-          class="px-2 border border-zinc-400 rounded"
-          @click="multiSelect.button.toggle()"
-        >
-          MultiSelect
-        </button>
-
-        <input
-          v-show="multiSelect.button.value"
-          v-model="multiSelect.all.status"
-          type="checkbox"
-          @change="multiSelect.all.selectAll(tasks)"
-        />
-      </div>
+      <input
+        v-show="multiSelect.button.value"
+        v-model="multiSelect.all.status"
+        type="checkbox"
+        @change="multiSelect.all.selectAll(tasks)"
+      />
     </div>
   </div>
 </template>
-
-<style>
-.btn-sort {
-  @apply px-2 border border-zinc-400;
-}
-</style>

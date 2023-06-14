@@ -11,8 +11,4 @@ export default {
     () => import("@modules/project/MenuOptions.vue")
   ),
   List: defineAsyncComponent(() => import("@modules/project/ViewList.vue")),
-
-  MenuShare: defineAsyncComponent(
-    () => import("@modules/project/MenuBtnForShare.vue")
-  ),
 };

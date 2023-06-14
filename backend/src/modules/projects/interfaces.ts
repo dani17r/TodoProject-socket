@@ -13,7 +13,8 @@ interface PermissionsI {
 
 interface GroupI {
   permissions: PermissionsI;
-  _user: String;
+  _id: String;
+  email: String;
 }
 
 export interface ProjectI extends Document {

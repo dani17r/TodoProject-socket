@@ -16,7 +16,8 @@ export interface PermissionsI {
 
 export interface GroupI {
   permissions: PermissionsI;
-  _user: string;
+  _id: string;
+  email: string;
 }
 
 export interface ProjectI {

@@ -6,15 +6,57 @@ import { isEmpty } from "lodash";
 import {
   LoginI,
   UpdateI,
+  AllDataI,
   RegisterI,
   ChangePasswordI,
 } from "@modules/users/interfaces";
 
+import { QueryI } from "@modules/interfaces";
+import { newPassword } from "@utils/auth";
 import User from "@modules/users/model";
 import validate from "@utils/validate";
-import { newPassword } from "@utils/auth";
+import {
+  getPaginateQuery,
+  getSearchQuery,
+  getFieldQuery,
+  getFieldSort,
+} from "@utils/querys";
+
+const getAll = async (query: QueryI, _ids: string[]) => {
+  const search = getSearchQuery(query);
+  const pag = getPaginateQuery(query);
+  const fields = getFieldQuery(query);
+  const order = getFieldSort(query);
+
+  if (query.search.length) {
+    return await User.find({ _id: { $nin: _ids }, ...search }, fields)
+      .sort(order)
+      .paginate(pag);
+  } else {
+    return {
+      paginate: {
+        currentPag: pag.pag,
+        totalPaginate: 0,
+        limit: pag.limit,
+        totalPag: 0,
+        total: 0,
+      },
+      data: [],
+    };
+  }
+};
 
 export default () => {
+  io.of("/user").on("connection", (socket) => {
+    socket.on("all", async ({ query, _ids }: AllDataI) => {
+      getAll(query, _ids)
+        .then((users) => {
+          socket.emit("all/success", users);
+        })
+        .catch(() => socket.emit("all/error"));
+    });
+  });
+
   io.of("/auth").on("connection", (socket) => {
     const validation = validate(socket);
 

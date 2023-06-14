@@ -43,9 +43,16 @@ export default {
   Danger: defineAsyncComponent(
     () => import("@components/icons/IconDanger.vue")
   ),
+  OpenIn: defineAsyncComponent(
+    () => import("@components/icons/IconOpenIn.vue")
+  ),
+  Select: defineAsyncComponent(
+    () => import("@components/icons/IconSelect.vue")
+  ),
   Share: defineAsyncComponent(() => import("@components/icons/IconShare.vue")),
   Close: defineAsyncComponent(() => import("@components/icons/IconClose.vue")),
   Login: defineAsyncComponent(() => import("@components/icons/IconLogin.vue")),
+  Limit: defineAsyncComponent(() => import("@components/icons/IconLimit.vue")),
   Back: defineAsyncComponent(() => import("@components/icons/IconBack.vue")),
   Edit: defineAsyncComponent(() => import("@components/icons/IconEdit.vue")),
   Next: defineAsyncComponent(() => import("@components/icons/IconNext.vue")),

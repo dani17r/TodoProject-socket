@@ -110,8 +110,16 @@ body::-webkit-scrollbar-thumb {
   @apply text-red-500 text-xs mt-1;
 }
 .btn-main {
-  @apply bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none w-full;
+  @apply bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded focus:outline-none w-full;
 }
+.btn-one {
+  @apply inline-block rounded-full hover:border-gray-200 hover:text-blue-600 text-white hover:bg-gray-200 py-1 px-1;
+}
+
+.btn-two {
+  @apply inline-block py-1 px-2 bg-zinc-700 rounded-md uppercase focus:outline-none font-bold;
+}
+/* */
 .disabled-btn-main {
   @apply disabled:opacity-30 disabled:bg-blue-400;
 }

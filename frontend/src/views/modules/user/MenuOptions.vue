@@ -44,13 +44,13 @@ const logOut = () => {
   >
     <div class="bg-zinc-700 w-[140px] py-1 rounded-md">
       <RouterLink :to="{ name: 'profile', params: { id: user?._id } }">
-        <button class="btn-two w-full" @click="emit('close')">
+        <button class="btn-two w-full !capitalize" @click="emit('close')">
           <Icons.Profile />
           Profile
         </button>
       </RouterLink>
       <button
-        class="btn-two w-full"
+        class="btn-two w-full !capitalize"
         @click="modals.toggle('confirm'), emit('close')"
       >
         <Icons.Logout />

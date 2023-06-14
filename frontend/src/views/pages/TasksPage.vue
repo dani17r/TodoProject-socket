@@ -3,7 +3,6 @@
 import shareComposable from "@composables/share";
 import { onUnmounted, onMounted } from "vue";
 import broadcastTask from "@services/tasks";
-import Project from "@modules/project";
 import { useRoute } from "vue-router";
 import Task from "@modules/task";
 // internal libraries
@@ -23,7 +22,7 @@ onMounted(() => {
 
 <template>
   <Task.Content>
-    <Project.MenuShare />
+    <Task.MenuShare />
     <Task.Options />
     <Task.List />
   </Task.Content>

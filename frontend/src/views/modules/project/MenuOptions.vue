@@ -1,68 +1,40 @@
 <script setup lang="ts">
+import SelectAscDesc from "@components/SelectAscDesc.vue";
+import InputSearch from "@components/InputSearch.vue";
 import projectComposable from "@composables/project";
 import Project from "@modules/project";
 import Icons from "@components/icons";
 
 const { getAll, ascDesc, select, modals, search, query } = projectComposable();
-
-const sortActive = (val: string) =>
-  query.value.sort.includes(val) && "bg-zinc-300 text-zinc-800";
 </script>
 
 <template>
   <div class="content-filter">
     <div class="content-menu-one-filters">
-      <div class="flex">
-        <div class="search">
-          <input
-            id="search"
-            v-model="search.input"
-            placeholder="Search Projects"
-            class="input-search"
-            @keydown.enter="search.find()"
-          />
-          <Icons.Search class="icon-search" @click="search.find()" />
-          <Icons.Close
-            v-show="search.input.length > 0"
-            class="icon-clear"
-            @click="[search.clear(), search.find()]"
-          />
-        </div>
-        <button
-          class="bg-zinc-200 rounded-r-lg px-3 text-zinc-900"
-          @click="search.find()"
-        >
-          Search
-        </button>
-      </div>
+      <InputSearch
+        v-model="search.input"
+        placeholder="Search Projects"
+        @accept="search.find()"
+        @clear="search.clear()"
+      />
 
-      <button class="btn-create-project" @click="modals.open.create()">
-        <span> Create </span>
-        <Icons.Plus />
+      <button class="btn-main !w-auto uppercase" @click="modals.open.create()">
+        <Icons.Plus class="inline -mt-1" />
+        <span class="mr-2">Create</span>
       </button>
     </div>
     <div class="content-menu-two-filters">
-      <div class="actions">
-        <button
-          :class="['btn-sort rounded-l-md', sortActive('asc')]"
-          @click="ascDesc('asc')"
-        >
-          Asc
-        </button>
-        <button
-          :class="['btn-sort rounded-r-md', sortActive('desc')]"
-          @click="ascDesc('desc')"
-        >
-          Desc
-        </button>
-      </div>
+      <SelectAscDesc
+        :query="query"
+        @asc="ascDesc('asc')"
+        @desc="ascDesc('desc')"
+      />
       <div class="content-select-limit">
-        <label id="label-limit">Limit</label>
+        <Icons.Limit class="inline absolute" />
         <select
-          id="limit"
-          ref="selectLimit"
+          id="limit-two"
           v-model="query.limit"
-          class="select-limit"
+          class="select-limit pl-8"
           @change="getAll()"
         >
           <option value="5">5</option>
@@ -94,39 +66,11 @@ const sortActive = (val: string) =>
   @apply w-full flex items-center rounded-lg justify-between my-3;
 }
 
-.search {
-  @apply relative;
-}
-
-.input-search {
-  @apply appearance-none border rounded-l-md py-2 pl-[45px] pr-3 text-gray-700 leading-tight focus:outline-none dark:text-white dark:bg-zinc-700 dark:border-zinc-400 min-w-[340px];
-}
-
-.icon-search {
-  @apply absolute top-2 left-3;
-}
-
-.icon-clear {
-  @apply absolute top-[9px] right-3;
-}
-
-.actions {
-  @apply flex;
-}
-
-.btn-create-project {
-  @apply flex gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none;
-}
-
-.btn-sort {
-  @apply px-2 border border-zinc-400;
-}
-
 .select-limit {
-  @apply text-zinc-900 text-sm block bg-zinc-300 pl-2 py-1 focus:outline-none focus:ring-0;
+  @apply text-sm block w-full py-2 pr-1 bg-zinc-700 border-zinc-600 text-white focus:ring-blue-500 focus:border-blue-500 focus:outline-none rounded-lg;
 }
 
 .content-select-limit {
-  @apply text-zinc-900 bg-zinc-300 text-sm inline-flex gap-2 items-center pl-2;
+  @apply text-zinc-200 w-[100px] rounded-lg bg-zinc-700 text-sm inline-flex gap-2 items-center pl-2;
 }
 </style>

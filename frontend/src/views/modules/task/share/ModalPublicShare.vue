@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import InputToggle from "@components/InputToggle.vue";
 import { projectStore } from "@stores/project";
 import Modals from "@components/modals";
 import { useRoute } from "vue-router";
 import { computed, ref } from "vue";
+import Tasks from "@modules/task";
 
 const events = defineEmits(["close"]);
 const props = defineProps({ status: Boolean });
@@ -13,8 +15,10 @@ const route = useRoute();
 
 let share = ref(project.value?.share);
 
+const projectId = String(route.params.id);
+
 const savePublicShare = () => {
-  update({ _id: String(route.params.id), share: share.value });
+  update({ _id: projectId, share: share.value });
   events("close");
 };
 </script>
@@ -22,20 +26,10 @@ const savePublicShare = () => {
 <template>
   <Modals.Main v-model="modal" :width="'470px'" @close="events('close')">
     <div v-if="share">
-      <p class="font-sans font-extralight">
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input
-            v-model="share.public.status"
-            type="checkbox"
-            value=""
-            class="sr-only peer"
-          />
-          <div
-            class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
-          ></div>
-          <span class="ml-3 dark:text-gray-300">Share board publicly</span>
-        </label>
-      </p>
+      <Tasks.UrlShare />
+
+      <InputToggle v-model="share.public.status" title="Share public board" />
+
       <h1 class="py-4 text-xl font-semibold">Permissions</h1>
       <div class="grid grid-cols-2 gap-5 mt-2">
         <div>
@@ -97,7 +91,7 @@ const savePublicShare = () => {
         </div>
       </div>
 
-      <button class="btn-main mt-7" @click="savePublicShare()">Acept</button>
+      <button class="btn-main mt-7" @click="savePublicShare()">Accept</button>
     </div>
   </Modals.Main>
 </template>

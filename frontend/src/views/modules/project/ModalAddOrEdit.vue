@@ -51,6 +51,7 @@ const update = () => {
     });
   }
 };
+
 const create = () => {
   const status = check(omit(form, ["clear"]));
   if (status.value) {
@@ -73,18 +74,20 @@ const inputError = superErrors(errors);
       <h1 class="text-xl">
         {{ isEmpty(props?.updated) ? "New Project" : "Update project" }}
       </h1>
+
       <div class="content">
         <div>
           <label for="title">Title</label>
           <input
             id="title"
             v-model="form.title"
-            :class="['input', inputError('title')]"
+            :class="['input capitalize', inputError('title')]"
             placeholder="Title project"
             @keyup.enter="isEmpty(props?.updated) ? create() : update()"
           />
           <p class="input-error">{{ errors.title }}</p>
         </div>
+
         <div class="mb-3">
           <label for="description">Description</label>
           <input
@@ -113,5 +116,9 @@ const inputError = superErrors(errors);
 }
 .add_edit .content {
   @apply flex flex-col gap-5 mt-5;
+}
+
+input:first-letter {
+  text-transform: uppercase !important;
 }
 </style>

@@ -1,10 +1,12 @@
 import type { CallbacksI, NotifyI } from "@interfaces/interfaces.generals";
 import userLocalStorageComposable from "@composables/userLocalStorage";
+import shareComposable from "@composables/share";
 import { defineStore, storeToRefs } from "pinia";
 import { useSocketAction } from "@utils/main";
 import useProjectStore from "@stores/project";
 import { socketBase } from "@services/main";
 import eventBus from "@services/eventBus";
+import query from "@utils/querys";
 import { isEmpty } from "lodash";
 import type {
   FormsI,
@@ -17,15 +19,26 @@ const { removeUserId, setUserId, getUserId } = userLocalStorageComposable();
 
 const store = defineStore("user", {
   state: (): StateI => ({
-    user: null,
     lifecicles: {
       mounted: false,
     },
+    query: query.user,
+    users: { data: [] },
+    user: null,
   }),
   getters: {
     isLogin: (store) => store.user == null,
   },
   actions: {
+    onceMounted(callback: CallbacksI["actions"], verifyMounted = true) {
+      if (verifyMounted) {
+        if (!this.lifecicles.mounted) {
+          this.lifecicles.mounted = true;
+          callback && callback();
+        }
+      } else callback && callback();
+    },
+
     clear() {
       this.lifecicles.mounted = false;
       this.user = null;
@@ -137,6 +150,31 @@ const store = defineStore("user", {
       });
 
       run(form);
+    },
+
+    insert(users?: StateI["users"]) {
+      if (users) this.users = users;
+    },
+    restartUsers() {
+      this.users = { data: [] };
+    },
+
+    getAll(callbacks?: CallbacksI<StateI["users"]>, verifyMounted = false) {
+      const { droupPrivateIds } = shareComposable();
+
+      this.onceMounted(() => {
+        const socket = socketBase("/user", getUserId.value);
+
+        const init = useSocketAction("all", socket);
+        const run = init<StateI["users"]>({
+          actions: (users) => {
+            this.insert(users);
+            callbacks?.actions && callbacks.actions(users);
+          },
+        });
+
+        run({ query: this.query, _ids: droupPrivateIds.value });
+      }, verifyMounted);
     },
   },
 });

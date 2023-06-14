@@ -72,16 +72,19 @@ const store = defineStore("project", {
       run({ form, query: this.query });
     },
 
-    update(form: Partial<FormsI["full"]>, callbacks?: CallbacksI) {
+    update(form: Partial<FormsI["full"]>, callbacks?: CallbacksI<ProjectI>) {
       eventBus.emit("project/update");
 
       const socket = socketBase("/project", getUserId.value);
 
       const init = useSocketAction("update", socket);
       const run = init<ProjectI>(callbacks, {
-        actions: (newProject) => {
+        actions: (updatedProject) => {
           const index = findIndex(this.projects.data, { _id: form._id });
-          if (newProject) this.projects.data[index] = newProject;
+          if (updatedProject) {
+            this.projects.data[index] = updatedProject;
+            this.project = updatedProject;
+          }
         },
       });
 

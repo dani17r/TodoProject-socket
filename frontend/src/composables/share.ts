@@ -1,9 +1,14 @@
-import type { PermissionsI } from "@interfaces/interfaces.project";
+import userLocalStorageComposable from "@composables/userLocalStorage";
+import type { PermissionsI, ProjectI } from "@interfaces/interfaces.project";
+import type { UserI } from "@interfaces/interfaces.user";
 import { projectStore } from "@stores/project";
 import { userStore } from "@stores/user";
+import { cloneDeep } from "lodash";
 import { computed, ref } from "vue";
 
-const permissions = ref({
+const { getUserId } = userLocalStorageComposable();
+
+const defaultPermissions = <PermissionsI>{
   st: false,
   d: false,
   m: false,
@@ -11,17 +16,37 @@ const permissions = ref({
   r: false,
   c: false,
   s: true,
-});
+};
+
+const permissions = ref({ ...defaultPermissions });
+
+const droupPrivateIds = ref<string[]>([]);
+
+const share = ref<ProjectI["share"]>();
 
 export default () => {
   const { project } = projectStore();
   const { user } = userStore();
 
+  const getGroupPrivateIds = () => {
+    droupPrivateIds.value = [];
+    const sharePrivate = share.value?.private;
+    droupPrivateIds.value.push(getUserId.value);
+    sharePrivate?.group.forEach(({ _id }) => {
+      droupPrivateIds.value.push(_id);
+    });
+  };
+
+  const restarOrInitSharePrivate = () => {
+    share.value = cloneDeep(project.value?.share);
+    getGroupPrivateIds();
+  };
+
   const isOwner = computed(() => user.value?._id == project.value?._autor);
   const isGuest = computed(() => {
-    const sharePrivate = project.value?.share.private;
+    const sharePrivate = share.value?.private;
     if (sharePrivate?.status) {
-      return sharePrivate?.group.some(({ _user }) => _user == user.value?._id);
+      return sharePrivate?.group.some(({ _id }) => _id == user.value?._id);
     } else return false;
   });
 
@@ -32,21 +57,23 @@ export default () => {
   };
 
   const getPermissionsPrivate = () => {
-    const sharePrivate = project.value?.share.private;
+    const sharePrivate = share.value?.private;
     if (sharePrivate?.group.length) {
       for (const grp of sharePrivate.group) {
-        if (grp._user == user.value?._id)
+        if (grp._id == user.value?._id)
           return (permissions.value = grp.permissions);
       }
     }
   };
 
   const getPermissionsPublic = () => {
-    const sharePublic = project.value?.share.public;
+    const sharePublic = share.value?.public;
     permissions.value = sharePublic?.permissions as PermissionsI;
   };
 
   const initPermissions = () => {
+    restarOrInitSharePrivate();
+
     if (isOwner.value) getPermissionsAutor();
     else if (isGuest.value) getPermissionsPrivate();
     else getPermissionsPublic();
@@ -56,5 +83,29 @@ export default () => {
     permissions.value[val] && func();
   };
 
-  return { isOwner, isGuest, permissions, initPermissions, allowIfPermission };
+  const addNewUser = (user: UserI) => {
+    droupPrivateIds.value.push(user._id);
+
+    const sharePrivate = share.value?.private;
+    sharePrivate?.group.push({
+      permissions: defaultPermissions,
+      email: user.email,
+      _id: user._id,
+    });
+  };
+
+  return {
+    defaultPermissions,
+    droupPrivateIds,
+    permissions,
+    isOwner,
+    isGuest,
+    share,
+
+    restarOrInitSharePrivate,
+    getGroupPrivateIds,
+    allowIfPermission,
+    initPermissions,
+    addNewUser,
+  };
 };
