@@ -9,7 +9,6 @@ import config from "@main/config";
 import { readFile } from "node:fs/promises";
 var serve = require("koa-static");
 import run from "@main/run";
-import path from "path";
 
 //init
 const app = new koa();
