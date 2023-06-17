@@ -16,10 +16,6 @@ export default {
 
   URL_FRONTEND: FRONTEND,
 
-  MONGO_OPTIONS: {
-    keepAlive: true,
-    keepAliveInitialDelay: 300000,
-  },
   CORS: {
     origin: FRONTEND,
     credential: false,

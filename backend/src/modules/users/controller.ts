@@ -145,7 +145,7 @@ export default () => {
       );
 
       if (user) {
-        socket.broadcast.timeout(8000).emit(`broadcast:${userId}/update`);
+        socket.broadcast.emit(`broadcast:${userId}/update`);
         socket.emit("update/success", user);
       } else socket.emit("logout/error", msg.error);
     });

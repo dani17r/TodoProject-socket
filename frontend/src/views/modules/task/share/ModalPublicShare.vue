@@ -1,25 +1,34 @@
 <script setup lang="ts">
 import InputToggle from "@components/InputToggle.vue";
+import shareComposable from "@composables/share";
 import { projectStore } from "@stores/project";
 import Modals from "@components/modals";
 import { useRoute } from "vue-router";
-import { computed, ref } from "vue";
 import Tasks from "@modules/task";
+import { computed } from "vue";
 
 const events = defineEmits(["close"]);
 const props = defineProps({ status: Boolean });
 const modal = computed(() => props.status);
-const { update, project } = projectStore();
+const { update, changeShare } = projectStore();
 
 const route = useRoute();
 
-let share = ref(project.value?.share);
+const { share } = shareComposable();
 
 const projectId = String(route.params.id);
 
 const savePublicShare = () => {
-  update({ _id: projectId, share: share.value });
-  events("close");
+  if (share.value) share.value.private.status = false;
+  update(
+    { _id: projectId, share: share.value },
+    {
+      actions: (updatedProject) => {
+        setTimeout(() => events("close"));
+        if (updatedProject) changeShare(updatedProject);
+      },
+    }
+  );
 };
 </script>
 

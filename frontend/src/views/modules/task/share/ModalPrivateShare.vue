@@ -5,26 +5,27 @@ import { projectStore } from "@stores/project";
 import Modals from "@components/modals";
 import { useRoute } from "vue-router";
 import Tasks from "@modules/task";
-import { computed, ref } from "vue";
+import { computed } from "vue";
 
 const events = defineEmits(["close"]);
 const props = defineProps({ status: Boolean });
 const modal = computed(() => props.status);
 
 const { share } = shareComposable();
-const { update } = projectStore();
+const { update, changeShare } = projectStore();
 const route = useRoute();
-
-const status = ref(share.value?.private.status || false);
 
 const projectId = String(route.params.id);
 
 const saveModalPrivateShare = () => {
-  if (share.value) share.value.private.status = status.value;
+  if (share.value) share.value.public.status = false;
   update(
     { _id: projectId, share: share.value },
     {
-      actions: () => setTimeout(() => events("close")),
+      actions: (updatedProject) => {
+        setTimeout(() => events("close"));
+        if (updatedProject) changeShare(updatedProject);
+      },
     }
   );
 };
@@ -32,9 +33,15 @@ const saveModalPrivateShare = () => {
 
 <template>
   <Modals.Main v-model="modal" :width="'950px'" @close="events('close')">
-    <div>
+    <div v-if="share">
       <Tasks.UrlShare />
-      <InputToggle v-model="status" title="Share private board" class="mb-5" />
+
+      <InputToggle
+        v-model="share.private.status"
+        title="Share private board"
+        class="mb-5"
+      />
+
       <Tasks.TablePrivateShare />
       <button
         class="btn-main mt-4 float-right !w-32"

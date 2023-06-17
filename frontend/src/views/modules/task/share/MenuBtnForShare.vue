@@ -7,7 +7,7 @@ import Icons from "@components/icons";
 import Tasks from "@modules/task";
 
 // project libraries
-const { restarOrInitSharePrivate } = shareComposable();
+const { restarOrInitSharePrivate, restarOrInitSharePublic } = shareComposable();
 const { restartUsers } = userStore();
 
 const model = superModals({
@@ -20,6 +20,11 @@ const closeModalPrivateShare = () => {
   model.toggle("sharePrivate");
   restarOrInitSharePrivate();
   restartUsers();
+};
+
+const closeModalPublicShare = () => {
+  model.toggle("sharePublic");
+  restarOrInitSharePublic();
 };
 </script>
 
@@ -58,7 +63,7 @@ const closeModalPrivateShare = () => {
 
   <Tasks.ModalPublicShare
     :status="model.sharePublic"
-    @close="model.toggle('sharePublic')"
+    @close="closeModalPublicShare()"
   />
 
   <Tasks.ModalPrivateShare

@@ -30,6 +30,7 @@ const getAll = async (query: QueryI, _autor: string) => {
 export default () => {
   io.of("/project").on("connection", (socket) => {
     let userId = socket.handshake.headers["user"];
+    let projectId = socket.handshake.headers["project_id"];
 
     socket.on(
       "create",
@@ -46,7 +47,7 @@ export default () => {
 
         if (isInsert) {
           getAll(query, form._autor).then((projects) => {
-            socket.broadcast.timeout(8000).emit(`broadcast:${userId}/create`);
+            socket.broadcast.emit(`broadcast:${userId}/create`);
             socket.emit("create/success", projects);
           });
         } else
@@ -65,7 +66,7 @@ export default () => {
       );
 
       if (updateProject) {
-        socket.broadcast.timeout(8000).emit(`broadcast:${userId}/update`);
+        socket.broadcast.emit(`broadcast:${userId}/update`);
         socket.emit("update/success", updateProject);
       } else
         socket.emit("update/error", {
@@ -81,9 +82,10 @@ export default () => {
       if (isDelete) {
         getAll(query, _autor).then((projects) => {
           socket.emit("delete/success", projects);
-          socket.broadcast
-            .timeout(8000)
-            .emit(`broadcast:${userId}/delete`, { _id, projects });
+          socket.broadcast.emit(`broadcast:${userId}/delete`, {
+            _id,
+            projects,
+          });
         });
       } else
         socket.emit("delete/error", {

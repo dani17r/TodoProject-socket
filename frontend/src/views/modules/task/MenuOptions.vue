@@ -36,7 +36,7 @@ const inputError = superErrors(errors);
 </script>
 
 <template>
-  <h1 class="text-grey-darkest">
+  <h1 class="text-grey-darkest mt-16">
     <i class="text-sm font-sans">Project: </i>
     <br />
     <span class="text-2xl font-bold">{{ project?.title }}</span>

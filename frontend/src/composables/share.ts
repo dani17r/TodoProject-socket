@@ -42,6 +42,10 @@ export default () => {
     getGroupPrivateIds();
   };
 
+  const restarOrInitSharePublic = () => {
+    share.value = cloneDeep(project.value?.share);
+  };
+
   const isOwner = computed(() => user.value?._id == project.value?._autor);
   const isGuest = computed(() => {
     const sharePrivate = share.value?.private;
@@ -103,6 +107,7 @@ export default () => {
     share,
 
     restarOrInitSharePrivate,
+    restarOrInitSharePublic,
     getGroupPrivateIds,
     allowIfPermission,
     initPermissions,

@@ -1,9 +1,9 @@
 import type { FormsI, StateI, ProjectI } from "@interfaces/interfaces.project";
 import userLocalStorageComposable from "@composables/userLocalStorage";
 import type { CallbacksI } from "@interfaces/interfaces.generals";
+import { socketBase, socketTask } from "@services/main";
 import { defineStore, storeToRefs } from "pinia";
 import { useSocketAction } from "@utils/main";
-import { socketBase } from "@services/main";
 import { findIndex, isEmpty } from "lodash";
 import eventBus from "@services/eventBus";
 import { userStore } from "@stores/user";
@@ -70,6 +70,13 @@ const store = defineStore("project", {
       });
 
       run({ form, query: this.query });
+    },
+
+    changeShare(newUpdate: ProjectI) {
+      eventBus.emit("task/change-share");
+
+      const socket = socketTask("/task", String(this.project?._id));
+      socket.emit(`change-share`, newUpdate);
     },
 
     update(form: Partial<FormsI["full"]>, callbacks?: CallbacksI<ProjectI>) {

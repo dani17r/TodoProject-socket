@@ -1,3 +1,4 @@
+import { ProjectI } from "@modules/projects/interfaces";
 import { TaskI } from "@modules/tasks/Interfaces";
 // import { rules } from "@modules/tasks/validate";
 import Tasks from "@modules/tasks/model";
@@ -55,7 +56,7 @@ export default () => {
 
       if (isInsert) {
         getAll(query, form._project).then((tasks) => {
-          socket.broadcast.timeout(8000).emit(`broadcast:${projectId}/create`);
+          socket.broadcast.emit(`broadcast:${projectId}/create`);
           socket.emit("create/success", tasks);
         });
       } else
@@ -73,7 +74,7 @@ export default () => {
       );
 
       if (newTask) {
-        socket.broadcast.timeout(8000).emit(`broadcast:${projectId}/update`);
+        socket.broadcast.emit(`broadcast:${projectId}/update`);
         socket.emit("update/success", newTask);
       } else
         socket.emit("update/error", {
@@ -93,9 +94,7 @@ export default () => {
       }
 
       if (successTasks.length) {
-        socket.broadcast
-          .timeout(8000)
-          .emit(`broadcast:${projectId}/change-position`);
+        socket.broadcast.emit(`broadcast:${projectId}/change-position`);
 
         socket.emit("change-position/success", "success");
       } else
@@ -112,7 +111,7 @@ export default () => {
 
       if (Number(update?.modifiedCount) > 0) {
         getAll(query, _project).then((tasks) => {
-          socket.broadcast.timeout(8000).emit(`broadcast:${projectId}/update`);
+          socket.broadcast.emit(`broadcast:${projectId}/update`);
           socket.emit("trash/success", tasks);
         });
       } else
@@ -130,9 +129,10 @@ export default () => {
         getAll(query, _project).then((tasks) => {
           socket.emit("delete/success", tasks);
 
-          socket.broadcast
-            .timeout(8000)
-            .emit(`broadcast:${projectId}/delete`, { _id, tasks });
+          socket.broadcast.emit(`broadcast:${projectId}/delete`, {
+            _id,
+            tasks,
+          });
         });
       } else
         socket.emit("delete/error", {
@@ -145,9 +145,7 @@ export default () => {
 
       if (isDelete) {
         getAll(query, _project).then((tasks) => {
-          socket.broadcast
-            .timeout(8000)
-            .emit(`broadcast:${projectId}/delete-all`);
+          socket.broadcast.emit(`broadcast:${projectId}/delete-all`);
           socket.emit("delete-all/success", tasks);
         });
       } else
@@ -162,6 +160,13 @@ export default () => {
           socket.emit("all/success", tasks);
         });
       }
+    });
+
+    socket.on("change-share", async (updateProject: ProjectI) => {
+      socket.broadcast.emit(
+        `broadcast:${projectId}/change-share`,
+        updateProject
+      );
     });
   });
 };

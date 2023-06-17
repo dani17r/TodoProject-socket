@@ -17,7 +17,7 @@ export default () => {
 
   const socket = computed(() => socketBase("/auth", getUserId.value));
 
-  socket.value.timeout(8000).on(`${urlSocket}/update`, () => {
+  socket.value.on(`${urlSocket}/update`, () => {
     setTimeout(() => (status.update = true), 300);
     if (status.update) refresh();
   });
