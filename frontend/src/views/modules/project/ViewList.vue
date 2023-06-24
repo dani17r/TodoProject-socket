@@ -21,6 +21,8 @@ let selectProject = computed(() => select.data as FormsI["full"]);
 let isEmptyProject = computed(() => projects.value.data.length);
 
 onMounted(() => projectStore.getAll(true));
+
+projectStore.getShared();
 </script>
 
 <template>

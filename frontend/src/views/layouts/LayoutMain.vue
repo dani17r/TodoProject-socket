@@ -42,10 +42,7 @@ onMounted(() => socket.open());
       </ul>
     </nav>
   </div>
-
-  <div class="pt-20">
-    <RouterView />
-  </div>
+  <RouterView />
 </template>
 
 <style>

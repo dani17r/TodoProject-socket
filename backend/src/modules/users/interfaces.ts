@@ -1,5 +1,6 @@
 import { QueryI } from "@modules/interfaces";
 import { Types } from "mongoose";
+
 export interface ValidateAuthI {
   LoginI: {
     password: string;
@@ -21,8 +22,8 @@ interface ActionsAuthI extends Document {
 }
 
 interface SessionsI {
-  status: Boolean;
-  token: String;
+  status: boolean;
+  token: string;
 }
 
 export interface UserI extends ActionsAuthI {

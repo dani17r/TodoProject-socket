@@ -7,7 +7,7 @@ export interface TaskI {
   position: number;
   select: boolean;
   content: string;
-  _autor: string;
+  _author: string;
   trash: boolean;
   done: boolean;
   name: string;
@@ -22,7 +22,7 @@ export type SelectTaskT =
 
 export interface FormsI {
   basic: Pick<TaskI, "name" | "position">;
-  inter: Pick<TaskI, "name" | "position" | "_autor" | "_project">;
+  inter: Pick<TaskI, "name" | "position" | "_author" | "_project">;
   full: TaskI;
 }
 

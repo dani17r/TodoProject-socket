@@ -65,7 +65,7 @@ export default () => {
   });
 
   const form = superForm({
-    _autor: "",
+    _author: "",
     _project: "",
     position: 0,
     name: "",
@@ -89,7 +89,7 @@ export default () => {
 
   const create = () => {
     form._project = String(project.value?._id);
-    form._autor = String(project.value?._autor);
+    form._author = String(project.value?._author);
     form.position = countTask.value + 1;
 
     createTask(omit(form, ["clear"]), {

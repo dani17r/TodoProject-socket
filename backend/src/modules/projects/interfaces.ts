@@ -1,7 +1,7 @@
 import { QueryI } from "@modules/interfaces";
 import { Document } from "mongoose";
 
-interface PermissionsI {
+export interface PermissionsI {
   st: Boolean;
   d: Boolean;
   m: Boolean;
@@ -11,7 +11,7 @@ interface PermissionsI {
   s: Boolean;
 }
 
-interface GroupI {
+export interface GroupI {
   permissions: PermissionsI;
   _id: String;
   email: String;
@@ -21,7 +21,7 @@ export interface ProjectI extends Document {
   description: string;
   createdAt: string;
   updatedAt: string;
-  _autor: string;
+  _author: string;
   title: string;
   _id: string;
   share: {
@@ -40,7 +40,7 @@ export interface ProjectI extends Document {
 
 export interface AllDataI {
   query: QueryI;
-  _autor: string;
+  _author: string;
 }
 export interface OneDataI {
   _id: string;
@@ -48,6 +48,6 @@ export interface OneDataI {
 
 export interface DeleteProject {
   _id: string;
-  _autor: string;
+  _author: string;
   query: QueryI;
 }

@@ -50,7 +50,7 @@ export default () => {
     socket.on("create", async ({ form, query }: CreateResI) => {
       const isInsert = await Tasks.create({
         ...form,
-        _autor: new Types.ObjectId(form._autor),
+        _author: new Types.ObjectId(form._author),
         _project: new Types.ObjectId(form._project),
       });
 

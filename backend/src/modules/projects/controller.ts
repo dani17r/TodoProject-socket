@@ -16,13 +16,13 @@ import {
   getFieldSort,
 } from "@utils/querys";
 
-const getAll = async (query: QueryI, _autor: string) => {
+const getAll = async (query: QueryI, _author: string) => {
   const search = getSearchQuery(query);
   const pag = getPaginateQuery(query);
   const fields = getFieldQuery(query);
   const order = getFieldSort(query);
 
-  return await Projects.find({ ...search, _autor }, fields)
+  return await Projects.find({ ...search, _author }, fields)
     .sort(order)
     .paginate(pag);
 };
@@ -30,23 +30,22 @@ const getAll = async (query: QueryI, _autor: string) => {
 export default () => {
   io.of("/project").on("connection", (socket) => {
     let userId = socket.handshake.headers["user"];
-    let projectId = socket.handshake.headers["project_id"];
 
     socket.on(
       "create",
       async ({ form, query }: { form: ProjectI; query: QueryI }) => {
-        const _autor = new Types.ObjectId(form._autor);
+        const _author = new Types.ObjectId(form._author);
 
         const isInsert = await Projects.findOneAndUpdate(
           { title: form.title },
           {
-            $setOnInsert: { ...form, _autor },
+            $setOnInsert: { ...form, _author },
           },
           { upsert: true }
         ).then((doc) => doc == null);
 
         if (isInsert) {
-          getAll(query, form._autor).then((projects) => {
+          getAll(query, form._author).then((projects) => {
             socket.broadcast.emit(`broadcast:${userId}/create`);
             socket.emit("create/success", projects);
           });
@@ -75,12 +74,12 @@ export default () => {
         });
     });
 
-    socket.on("delete", async ({ _id, _autor, query }: DeleteProject) => {
+    socket.on("delete", async ({ _id, _author, query }: DeleteProject) => {
       await Projects.findByIdAndDelete(_id);
       const isDelete = Projects.findById(_id).then((doc) => doc == null);
 
       if (isDelete) {
-        getAll(query, _autor).then((projects) => {
+        getAll(query, _author).then((projects) => {
           socket.emit("delete/success", projects);
           socket.broadcast.emit(`broadcast:${userId}/delete`, {
             _id,
@@ -93,8 +92,8 @@ export default () => {
         });
     });
 
-    socket.on("all", async ({ query, _autor }: AllDataI) => {
-      getAll(query, _autor)
+    socket.on("all", async ({ query, _author }: AllDataI) => {
+      getAll(query, _author)
         .then((projects) => {
           socket.emit("all/success", projects);
         })
@@ -109,6 +108,44 @@ export default () => {
         .catch(() => socket.emit("one/error"));
     });
 
+    socket.on("shared", async () => {
+      await Projects.aggregate([
+        { $match: { "share.private.group._id": userId } },
+        { $unwind: "$share.private.group" },
+        { $match: { "share.private.group._id": userId } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "_author",
+            foreignField: "_id",
+            as: "author",
+          },
+        },
+        {
+          $project: {
+            permissions: "$share.private.group.permissions",
+            author: { $arrayElemAt: ["$author", 0] },
+          },
+        },
+        {
+          $project: {
+            _id: true,
+            title: true,
+            description: true,
+            permissions: true,
+            author: {
+              fullname: true,
+              email: true,
+            },
+          },
+        },
+      ])
+        .then((projects) => {
+          socket.emit("shared/success", projects);
+        })
+        .catch(() => socket.emit("shared/error"));
+    });
+
     //Verify Id
     socket.on("verify-id", async (_id: string) => {
       const project = await Projects.findById(_id).catch(() => false);
@@ -118,3 +155,11 @@ export default () => {
     });
   });
 };
+// db.getCollection("projects").find(
+//   { "share.private.group._id": "6476635ea145d4a789aaba4e" },
+//   {
+//     _id: true,
+//     _author: true,
+//     title: true,
+//   }
+// );

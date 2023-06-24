@@ -46,7 +46,7 @@ export default () => {
     share.value = cloneDeep(project.value?.share);
   };
 
-  const isOwner = computed(() => user.value?._id == project.value?._autor);
+  const isOwner = computed(() => user.value?._id == project.value?._author);
   const isGuest = computed(() => {
     const sharePrivate = share.value?.private;
     if (sharePrivate?.status) {

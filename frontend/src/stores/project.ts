@@ -56,7 +56,22 @@ const store = defineStore("project", {
           actions: (projects) => this.insert(projects),
         });
 
-        run({ _autor: user.value?._id, query: this.query });
+        run({ _author: user.value?._id, query: this.query });
+      }, verifyMounted);
+    },
+
+    getShared(verifyMounted = false) {
+      this.onceMounted(() => {
+        const socket = socketBase("/project", getUserId.value);
+
+        const init = useSocketAction("shared", socket);
+        const run = init<StateI["projects"]>({
+          actions: (projects) => {
+            console.log(projects);
+          },
+        });
+
+        run();
       }, verifyMounted);
     },
 
@@ -108,7 +123,7 @@ const store = defineStore("project", {
         actions: (projects) => this.removeAndPreviePaginate(projects),
       });
 
-      run({ _autor: user.value?._id, query: this.query, _id });
+      run({ _author: user.value?._id, query: this.query, _id });
     },
 
     removeAndPreviePaginate(projects?: StateI["projects"]) {

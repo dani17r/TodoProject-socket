@@ -79,7 +79,7 @@ const ProjectSchema = new Schema(
       type: String,
       trim: true,
     },
-    _autor: {
+    _author: {
       type: Schema.Types.ObjectId,
       ref: "Users",
     },

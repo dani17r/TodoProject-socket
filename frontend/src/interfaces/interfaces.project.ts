@@ -24,7 +24,7 @@ export interface ProjectI {
   description: string;
   createdAt: string;
   updatedAt: string;
-  _autor: string;
+  _author: string;
   title: string;
   _id: string;
   share: {
@@ -49,7 +49,7 @@ export type SelectProjectT =
 
 export interface FormsI {
   basic: Pick<ProjectI, "title" | "description">;
-  inter: Pick<ProjectI, "title" | "description" | "_autor">;
+  inter: Pick<ProjectI, "title" | "description" | "_author">;
   full: ProjectI;
 }
 

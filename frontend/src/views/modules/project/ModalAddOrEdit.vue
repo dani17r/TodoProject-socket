@@ -56,7 +56,7 @@ const create = () => {
   const status = check(omit(form, ["clear"]));
   if (status.value) {
     projectStore.create(
-      { ...form, _autor: String(user.value?._id) },
+      { ...form, _author: String(user.value?._id) },
       {
         actions: () => closeModal(),
         error: (err) => setError(err),
