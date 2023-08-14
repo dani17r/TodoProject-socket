@@ -35,7 +35,7 @@ const savePublicShare = () => {
 <template>
   <Modals.Main v-model="modal" :width="'470px'" @close="events('close')">
     <div v-if="share">
-      <Tasks.UrlShare />
+      <Tasks.UrlShare :project-id="projectId" />
 
       <InputToggle v-model="share.public.status" title="Share public board" />
 

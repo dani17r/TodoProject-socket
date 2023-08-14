@@ -1,6 +1,13 @@
 <script setup lang="ts">
-import notifyComposable from "@composables/notify";
+// import ModalSharedWithMe from "@modules/user/ModalSharedWithMe.vue";
 import Confirm from "@components/modals/ModalConfirm.vue";
+import notifyComposable from "@composables/notify";
+
+import { defineAsyncComponent } from "vue";
+
+const ModalSharedWithMe = defineAsyncComponent(
+  () => import("@modules/user/ModalSharedWithMe.vue")
+);
 
 import { superModals } from "@utils/inputs";
 import { userStore } from "@/stores/user";
@@ -19,6 +26,7 @@ const router = useRouter();
 
 const modals = superModals({
   confirm: false,
+  sharedWithMe: false,
 });
 
 const logOut = () => {
@@ -44,13 +52,20 @@ const logOut = () => {
   >
     <div class="bg-zinc-700 w-[140px] py-1 rounded-md">
       <RouterLink :to="{ name: 'profile', params: { id: user?._id } }">
-        <button class="btn-two w-full !capitalize" @click="emit('close')">
+        <button class="btn-two w-full !capitalize my-2" @click="emit('close')">
           <Icons.Profile />
           Profile
         </button>
       </RouterLink>
       <button
-        class="btn-two w-full !capitalize"
+        class="btn-two w-full !capitalize my-2"
+        @click="modals.toggle('sharedWithMe'), emit('close')"
+      >
+        <Icons.SharedWithMe class="mr-2 -ml-1" />
+        Shared
+      </button>
+      <button
+        class="btn-two w-full !capitalize my-2"
         @click="modals.toggle('confirm'), emit('close')"
       >
         <Icons.Logout />
@@ -64,5 +79,10 @@ const logOut = () => {
     message="Are you sure to close the session ?"
     @close="modals.toggle('confirm')"
     @confirm="logOut()"
+  />
+
+  <ModalSharedWithMe
+    v-model="modals.sharedWithMe"
+    @close="modals.toggle('sharedWithMe')"
   />
 </template>

@@ -19,6 +19,7 @@ const store = defineStore("project", {
     },
     projects: { data: [] },
     query: query.project,
+    shared: null,
     project: null,
   }),
   actions: {
@@ -61,18 +62,23 @@ const store = defineStore("project", {
     },
 
     getShared(verifyMounted = false) {
-      this.onceMounted(() => {
-        const socket = socketBase("/project", getUserId.value);
+      return new Promise((resolver) => {
+        eventBus.emit("user/change-share");
 
-        const init = useSocketAction("shared", socket);
-        const run = init<StateI["projects"]>({
-          actions: (projects) => {
-            console.log(projects);
-          },
-        });
+        this.onceMounted(() => {
+          const socket = socketBase("/project", getUserId.value);
 
-        run();
-      }, verifyMounted);
+          const init = useSocketAction("shared", socket);
+          const run = init<StateI["shared"]>({
+            actions: (shared) => {
+              if (shared) this.shared = shared;
+              resolver(shared);
+            },
+          });
+
+          run();
+        }, verifyMounted);
+      });
     },
 
     create(form: FormsI["inter"], callbacks?: CallbacksI) {

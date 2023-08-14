@@ -34,7 +34,7 @@ const saveModalPrivateShare = () => {
 <template>
   <Modals.Main v-model="modal" :width="'950px'" @close="events('close')">
     <div v-if="share">
-      <Tasks.UrlShare />
+      <Tasks.UrlShare :project-id="projectId" />
 
       <InputToggle
         v-model="share.private.status"

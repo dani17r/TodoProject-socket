@@ -28,7 +28,7 @@ const status = computed({
       />
       <Icons.Close
         v-show="status.length > 0"
-        class="icon-clear"
+        class="icon-clear cursor-pointer"
         @click="[emit('clear'), emit('accept')]"
       />
     </div>

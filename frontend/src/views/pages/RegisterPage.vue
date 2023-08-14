@@ -43,6 +43,7 @@ const inputError = superErrors(errors);
           v-model="form.password"
           :class="['input', inputError('password')]"
           placeholder="******************"
+          autocomplete="true"
           type="password"
         />
         <p class="input-error">{{ errors?.password }}</p>

@@ -110,7 +110,12 @@ export default () => {
 
     socket.on("shared", async () => {
       await Projects.aggregate([
-        { $match: { "share.private.group._id": userId } },
+        {
+          $match: {
+            "share.private.group._id": userId,
+            "share.private.status": true,
+          },
+        },
         { $unwind: "$share.private.group" },
         { $match: { "share.private.group._id": userId } },
         {
@@ -123,13 +128,14 @@ export default () => {
         },
         {
           $project: {
+            title: true,
+            description: true,
             permissions: "$share.private.group.permissions",
             author: { $arrayElemAt: ["$author", 0] },
           },
         },
         {
           $project: {
-            _id: true,
             title: true,
             description: true,
             permissions: true,

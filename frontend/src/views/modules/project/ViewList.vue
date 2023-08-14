@@ -5,24 +5,20 @@ import Project from "@modules/project";
 import Icons from "@components/icons";
 
 import { onMounted, computed } from "vue";
-import { storeToRefs } from "pinia";
 import { truncate } from "lodash";
 
 import type { FormsI } from "@interfaces/interfaces.project";
 import projectComposable from "@composables/project";
 import { nowTime, pushLink } from "@utils/main";
-import useProjectStore from "@stores/project";
+import { projectStore } from "@stores/project";
 
-const projectStore = useProjectStore();
-const { projects } = storeToRefs(projectStore);
 const { dropdown, remove, select, modals, query } = projectComposable();
+const { projects, getAll } = projectStore();
 
 let selectProject = computed(() => select.data as FormsI["full"]);
 let isEmptyProject = computed(() => projects.value.data.length);
 
-onMounted(() => projectStore.getAll(true));
-
-projectStore.getShared();
+onMounted(() => getAll(true));
 </script>
 
 <template>

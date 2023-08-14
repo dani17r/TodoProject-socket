@@ -68,6 +68,7 @@ export default (projectId: string) => {
     setTimeout(() => (status.changeShare = true), 300);
     if (status.changeShare) {
       projectStore.project = updateProject;
+      projectStore.getShared();
       initPermissions();
       route.meta.type = updateProject.share.public.status
         ? "public"

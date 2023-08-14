@@ -49,6 +49,9 @@ export default {
   Select: defineAsyncComponent(
     () => import("@components/icons/IconSelect.vue")
   ),
+  SharedWithMe: defineAsyncComponent(
+    () => import("@components/icons/IconSharedWithMe.vue")
+  ),
   Share: defineAsyncComponent(() => import("@components/icons/IconShare.vue")),
   Close: defineAsyncComponent(() => import("@components/icons/IconClose.vue")),
   Login: defineAsyncComponent(() => import("@components/icons/IconLogin.vue")),

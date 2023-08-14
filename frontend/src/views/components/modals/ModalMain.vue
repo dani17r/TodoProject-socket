@@ -4,6 +4,7 @@ import { computed } from "vue";
 defineEmits(["close"]);
 
 interface PropsI {
+  zIndexImportant?: boolean;
   classContent?: string;
   modelValue: boolean;
   transition?: string;
@@ -14,6 +15,7 @@ interface PropsI {
 
 const props = withDefaults(defineProps<PropsI>(), {
   classContent: "flex justify-center items-center",
+  zIndexImportant: false,
   minHeight: "250px",
   transition: "fade",
   modelValue: true,
@@ -50,6 +52,11 @@ export default {
           `content-modal-main z-[${Number(props.zIndex) + 20}]`,
           props.classContent,
         ]"
+        :style="
+          props.zIndexImportant
+            ? `z-index:${Number(props.zIndex) + 20} !important`
+            : ''
+        "
       >
         <div
           :id="String($attrs.id) && randomId(10)"

@@ -53,6 +53,17 @@ export interface FormsI {
   full: ProjectI;
 }
 
+export interface Shared {
+  title: string;
+  description: string;
+  author: {
+    email: string;
+    fullname: string;
+  };
+  permisions: PermissionsI;
+  _id: string;
+}
+
 export interface StateI {
   lifecicles: {
     mounted: boolean;
@@ -63,5 +74,6 @@ export interface StateI {
     data: ProjectI[];
   };
   project: ProjectI | null;
+  shared: Shared[] | null;
   query: QueryI;
 }

@@ -26,7 +26,7 @@ onMounted(() => socket.open());
 
 <style>
 .content-project {
-  @apply px-10;
+  @apply px-10 pt-20;
 }
 .name-project {
   @apply text-zinc-300 text-4xl mb-5;

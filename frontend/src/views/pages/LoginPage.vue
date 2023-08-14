@@ -36,6 +36,7 @@ const inputError = superErrors(errors);
           :class="['input', inputError('password')]"
           placeholder="••••••••"
           type="password"
+          autocomplete="true"
         />
         <p class="input-error">
           {{ errors?.password }}
