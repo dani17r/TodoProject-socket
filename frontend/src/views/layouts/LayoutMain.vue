@@ -23,20 +23,23 @@ onMounted(() => socket.open());
 
 <template>
   <div class="base content-nav">
-    <nav class="flex items-center">
+    <nav class="flex items-center !pr-[30px] !pl-[35px]">
       <ul class="ul-left">
-        <li v-show="$route.meta.back">
-          <button class="btn-one" @click="$router.push({ name: 'home' })">
+        <li>
+          <button class="btn-one" @click="$router.push({ name: 'home' })" :disabled="Boolean(!$route.meta.back)">
             <Icons.Back />
           </button>
         </li>
         <li class="cursor-pointer">
-          <h1 class="name">{{ startCase(user?.fullname) }}</h1>
+          <div class="flex items-center gap-3" @click="$router.push({ name: 'profile', params: { id: user?._id } })">
+            <ViewImgProfile />
+            <h1 class="name">{{ startCase(user?.fullname) }}</h1>
+          </div>
         </li>
       </ul>
       <ul class="ul-right">
-        <li>
-          <ViewImgProfile @click="menu = true" />
+        <li class="cursor-pointer">
+          <Icons.Menu @click="menu = true"/>
           <MenuOptions :status="menu" @close="menu = false" />
         </li>
       </ul>
@@ -59,7 +62,7 @@ onMounted(() => socket.open());
 }
 
 .base.content-nav nav .ul-left {
-  @apply flex;
+  @apply flex items-center;
 }
 
 .base.content-nav nav .ul-right {
@@ -72,5 +75,12 @@ onMounted(() => socket.open());
 
 .base.content-nav .name {
   @apply text-lg;
+}
+.btn-one:disabled{
+  opacity: 0.30;
+}
+.btn-one:disabled:hover{
+  background-color: transparent;
+  color: white;
 }
 </style>

@@ -64,7 +64,6 @@ watchEffect(() => {
   <div class="content-profile">
     <h1 class="font-bold text-xl mb-2">Change data user</h1>
     <div class="box-field">
-      <label>Imagen</label>
       <UploadImgProfile
         :clean="cleanFile"
         :preview="`${url}/${form.image}`"

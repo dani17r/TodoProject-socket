@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { FormsI } from "@interfaces/interfaces.task";
 import { validationForm } from "@utils/validations";
-// import TextEditor from "@components/TextEditor.vue";
+import TextEditor from "@components/TextEditor.vue";
 import DOMPurify from "isomorphic-dompurify";
 import { superForm } from "@utils/inputs";
 import useTaskStore from "@stores/task";
@@ -72,11 +72,11 @@ const updateTask = () => {
         </div>
         <div class="mb-3">
           <label for="description">Content</label>
-          <!-- <TextEditor
+          <TextEditor
             v-model:content="form.content"
             theme="snow"
             placeholder="Content an epic..."
-          /> -->
+          />
         </div>
         <button class="btn-main" @click="updateTask()">Update</button>
       </div>

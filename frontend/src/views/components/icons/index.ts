@@ -52,6 +52,7 @@ export default {
   SharedWithMe: defineAsyncComponent(
     () => import("@components/icons/IconSharedWithMe.vue")
   ),
+  Loading: defineAsyncComponent(() => import("@components/icons/LoadingAnimate.vue")),
   Share: defineAsyncComponent(() => import("@components/icons/IconShare.vue")),
   Close: defineAsyncComponent(() => import("@components/icons/IconClose.vue")),
   Login: defineAsyncComponent(() => import("@components/icons/IconLogin.vue")),
@@ -60,4 +61,5 @@ export default {
   Edit: defineAsyncComponent(() => import("@components/icons/IconEdit.vue")),
   Next: defineAsyncComponent(() => import("@components/icons/IconNext.vue")),
   Plus: defineAsyncComponent(() => import("@components/icons/IconPlus.vue")),
+  Menu: defineAsyncComponent(() => import("@components/icons/IconMenu.vue")),
 };

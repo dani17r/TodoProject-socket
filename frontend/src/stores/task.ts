@@ -1,6 +1,7 @@
 import type { CallbacksI } from "@interfaces/interfaces.generals";
 import { defineStore, storeToRefs } from "pinia";
 import { useSocketAction } from "@utils/main";
+import { onceMounted } from "@utils/actions";
 import { socketTask } from "@services/main";
 import { findIndex, isEmpty } from "lodash";
 import eventBus from "@services/eventBus";
@@ -29,15 +30,6 @@ const store = defineStore("task", {
       this.query = query.task;
     },
 
-    onceMounted(callback: CallbacksI["actions"], verifyMounted = true) {
-      if (verifyMounted) {
-        if (!this.lifecicles.mounted) {
-          this.lifecicles.mounted = true;
-          callback && callback();
-        }
-      } else callback && callback();
-    },
-
     setProjectId(id: string) {
       if (this.project_id != id) this.project_id = id;
     },
@@ -46,14 +38,18 @@ const store = defineStore("task", {
       if (!isEmpty(tasks)) this.tasks = tasks;
     },
 
-    getAll(verifyMounted = false) {
+    async getAll(verifyMounted = false) {
       this.countTask;
 
-      this.onceMounted(() => {
+      await onceMounted(this, (promise) => {
         const socket = socketTask("/task", this.project_id);
         const init = useSocketAction("all", socket);
         const run = init<StateI["tasks"]>({
-          actions: (tasks) => this.insert(tasks),
+          error: () => promise?.reject(),
+          actions: (tasks) => {
+            this.insert(tasks);
+            promise?.resolve();
+          }
         });
 
         run({ query: this.query, _project: this.project_id });

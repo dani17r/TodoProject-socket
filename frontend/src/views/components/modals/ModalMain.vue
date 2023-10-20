@@ -20,7 +20,7 @@ const props = withDefaults(defineProps<PropsI>(), {
   transition: "fade",
   modelValue: true,
   width: "400px",
-  zIndex: 30,
+  zIndex: 120,
 });
 
 const size = computed(() => ({
@@ -43,19 +43,20 @@ export default {
   <Teleport to="#area">
     <div
       v-if="props.modelValue"
-      :class="['bg-modal', `z-[${props.zIndex}]`]"
+      class="bg-modal"
+      :style="`z-index:${Number(props.zIndex) + 20}`"
     ></div>
     <Transition :name="props.transition">
       <div
         v-if="props.modelValue"
         :class="[
-          `content-modal-main z-[${Number(props.zIndex) + 20}]`,
+          `content-modal-main`,
           props.classContent,
         ]"
         :style="
           props.zIndexImportant
             ? `z-index:${Number(props.zIndex) + 20} !important`
-            : ''
+            : `z-index:${Number(props.zIndex) + 20}`
         "
       >
         <div

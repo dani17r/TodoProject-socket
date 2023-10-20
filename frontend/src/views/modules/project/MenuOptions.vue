@@ -35,7 +35,7 @@ const { getAll, ascDesc, select, modals, search, query } = projectComposable();
           id="limit-two"
           v-model="query.limit"
           class="select-limit pl-8"
-          @change="getAll()"
+          @change="getAll"
         >
           <option value="5">5</option>
           <option value="10">10</option>
@@ -55,7 +55,19 @@ const { getAll, ascDesc, select, modals, search, query } = projectComposable();
 
 <style>
 .content-filter {
-  @apply my-5;
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+  position: fixed;
+  left: 0;
+  top: 36px;
+  width: 100%;
+  padding: 0px 40px;
+  background-color: #27272ac9;
+  z-index: 30;
+  padding-bottom: 5px;
+  padding-top: 20px;
+  backdrop-filter: blur(6px);
+  opacity: 0.95;
 }
 
 .content-menu-one-filters {

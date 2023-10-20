@@ -7,6 +7,7 @@ import {
 // import { rules } from "@modules/projects/validate";
 import Projects from "@modules/projects/model";
 import { QueryI } from "@modules/interfaces";
+import querystring from "querystring";
 import { io } from "@main/server";
 import { Types } from "mongoose";
 import {
@@ -31,9 +32,8 @@ export default () => {
   io.of("/project").on("connection", (socket) => {
     let userId = socket.handshake.headers["user"];
 
-    socket.on(
-      "create",
-      async ({ form, query }: { form: ProjectI; query: QueryI }) => {
+    socket.on("create", async ({ form, query }: { form: ProjectI; query: QueryI }) => {
+        
         const _author = new Types.ObjectId(form._author);
 
         const isInsert = await Projects.findOneAndUpdate(
@@ -161,6 +161,15 @@ export default () => {
     });
   });
 };
+
+export const all = async (ctx) => {
+  const { query, _author } = ctx.request.query;
+  const queryParams = querystring.parse(query) as unknown as AllDataI["query"]; ;
+  const data = await getAll(queryParams, _author);
+  return ctx.body = data;
+};
+
+
 // db.getCollection("projects").find(
 //   { "share.private.group._id": "6476635ea145d4a789aaba4e" },
 //   {

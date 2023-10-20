@@ -27,45 +27,47 @@ const isNext = computed(() => {
 </script>
 
 <template>
-  <div class="content-paginate">
-    <div class="box-paginate">
-      <div>
-        <p class="description-paginate">
-          Showing
-          <span class="font-medium">{{ paginate?.currentPag }}</span>
-          to
-          <span class="font-medium">{{ paginate?.totalPag }}</span>
-          of
-          <span class="font-medium">{{ paginate?.total }}</span>
-          results
-        </p>
-      </div>
-      <div>
-        <nav v-show="Number(paginate?.totalPag) > 1" class="group-btn-paginate">
-          <button
-            :class="['previe-paginate', !isPrevie && 'opacity-30']"
-            @click="emits('previe', isPrevie)"
-          >
-            <Icons.Previe />
-          </button>
-          <template v-for="item in paginate?.totalPag" :key="item">
+  <Transition name="fade">
+    <div v-if="paginate" class="content-paginate">
+      <div class="box-paginate">
+        <div>
+          <p class="description-paginate">
+            Showing
+            <span class="font-medium">{{ paginate?.currentPag }}</span>
+            to
+            <span class="font-medium">{{ paginate?.totalPag }}</span>
+            of
+            <span class="font-medium">{{ paginate?.total }}</span>
+            results
+          </p>
+        </div>
+        <div>
+          <nav v-show="Number(paginate?.totalPag) > 1" class="group-btn-paginate">
             <button
-              :class="isCurrentPag(item)"
-              @click="emits('selectPag', item)"
+              :class="['previe-paginate', !isPrevie && 'opacity-30']"
+              @click="emits('previe', isPrevie)"
             >
-              {{ item }}
+              <Icons.Previe />
             </button>
-          </template>
-          <button
-            :class="['next-paginate', !isNext && 'opacity-30']"
-            @click="emits('next', isNext)"
-          >
-            <Icons.Next />
-          </button>
-        </nav>
+            <template v-for="item in paginate?.totalPag" :key="item">
+              <button
+                :class="isCurrentPag(item)"
+                @click="emits('selectPag', item)"
+              >
+                {{ item }}
+              </button>
+            </template>
+            <button
+              :class="['next-paginate', !isNext && 'opacity-30']"
+              @click="emits('next', isNext)"
+            >
+              <Icons.Next />
+            </button>
+          </nav>
+        </div>
       </div>
     </div>
-  </div>
+  </Transition>
 </template>
 
 <style>

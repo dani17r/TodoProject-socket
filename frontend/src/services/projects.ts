@@ -34,13 +34,13 @@ export default () => {
 
   socket.value.on(
     `${urlSocket}/delete`,
-    ({ _id, projects }: { _id: string; projects: StateI["projects"] }) => {
+    async ({ _id, projects }: { _id: string; projects: StateI["projects"] }) => {
       setTimeout(() => (status.delete = true), 300);
       if (status.delete) {
         document.getElementById(`modal_add_or_edit-${_id}`)?.click();
         document.getElementById(`dropdown_blur-${_id}`)?.click();
         document.getElementById(`modal_confirm-${_id}`)?.click();
-        projectStore.removeAndPreviePaginate(projects);
+        await projectStore.removeAndPreviePaginate(projects);
       }
     }
   );

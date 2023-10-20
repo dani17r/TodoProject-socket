@@ -4,6 +4,7 @@ import shareComposable from "@composables/share";
 import { defineStore, storeToRefs } from "pinia";
 import { useSocketAction } from "@utils/main";
 import useProjectStore from "@stores/project";
+import { onceMounted } from "@utils/actions";
 import { socketBase } from "@services/main";
 import eventBus from "@services/eventBus";
 import query from "@utils/querys";
@@ -30,15 +31,6 @@ const store = defineStore("user", {
     isLogin: (store) => store.user == null,
   },
   actions: {
-    onceMounted(callback: CallbacksI["actions"], verifyMounted = true) {
-      if (verifyMounted) {
-        if (!this.lifecicles.mounted) {
-          this.lifecicles.mounted = true;
-          callback && callback();
-        }
-      } else callback && callback();
-    },
-
     clear() {
       this.lifecicles.mounted = false;
       this.user = null;
@@ -48,16 +40,22 @@ const store = defineStore("user", {
       if (!this.lifecicles.mounted) !isEmpty(newUser) && (this.user = newUser);
     },
 
-    refresh() {
+    async refresh() {
       const socket = socketBase("/auth");
-
       const token = localStorage.getItem("token") ?? null;
-      socket.emit("status", token);
-      socket.on("status/response", ({ user }) => {
-        if (!isEmpty(user)) this.addUser(user);
-        socket.close();
-      });
-      socket.io.on("error", () => socket.close());
+      
+      await new Promise<void>((resolve, reject)=> {
+        socket.emit("status", token);
+        socket.on("status/response", ({ user }) => {
+          if (!isEmpty(user)) this.addUser(user);
+          socket.close();
+          resolve();
+        });
+        socket.io.on("error", () => {
+          socket.close();
+          reject();
+        });
+      })
     },
 
     login(form: FormsI["login"], callbacks?: CallbacksI<NotifyI>) {
@@ -159,21 +157,33 @@ const store = defineStore("user", {
       this.users = { data: [] };
     },
 
-    getAll(callbacks?: CallbacksI<StateI["users"]>, verifyMounted = false) {
-      const { droupPrivateIds } = shareComposable();
-
-      this.onceMounted(() => {
+    async getAll(callbacks?: CallbacksI<StateI["users"]>, verifyMounted = false) {
+      
+      await onceMounted(this, (promise) => {
+        const { droupPrivateIds } = shareComposable();
         const socket = socketBase("/user", getUserId.value);
 
         const init = useSocketAction("all", socket);
         const run = init<StateI["users"]>({
+          error: () => promise?.reject(),
           actions: (users) => {
             this.insert(users);
             callbacks?.actions && callbacks.actions(users);
+            promise?.resolve();
           },
         });
 
         run({ query: this.query, _ids: droupPrivateIds.value });
+
+        //  api
+        //    .get(`/user/${getUserId.value}`, {
+        //      params: { query: this.query, _ids: droupPrivateIds.value },
+        //    })
+        //    .then(({ data }) => {
+        //       this.insert(data);
+        //       callbacks?.actions && callbacks.actions(data);
+        //     })
+        //   .finally(() => promise.resolve());
       }, verifyMounted);
     },
   },

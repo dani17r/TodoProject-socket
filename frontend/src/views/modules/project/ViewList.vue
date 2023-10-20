@@ -4,7 +4,7 @@ import Modals from "@components/modals";
 import Project from "@modules/project";
 import Icons from "@components/icons";
 
-import { onMounted, computed } from "vue";
+import { computed } from "vue";
 import { truncate } from "lodash";
 
 import type { FormsI } from "@interfaces/interfaces.project";
@@ -12,89 +12,94 @@ import projectComposable from "@composables/project";
 import { nowTime, pushLink } from "@utils/main";
 import { projectStore } from "@stores/project";
 
-const { dropdown, remove, select, modals, query } = projectComposable();
+const { dropdown, remove, select, modals, query, loading } = projectComposable();
 const { projects, getAll } = projectStore();
 
 let selectProject = computed(() => select.data as FormsI["full"]);
 let isEmptyProject = computed(() => projects.value.data.length);
 
-onMounted(() => getAll(true));
+await getAll(true);
 </script>
 
 <template>
   <div
-    :class="[
-      !isEmptyProject && 'flex justify-center items-center',
-      'min-h-[48vh] w-full',
-    ]"
+    :class="!isEmptyProject && 'flex justify-center items-center'"
+    class="min-h-[48vh] w-full relative pt-[110px]"
   >
-    <TransitionGroup
-      v-if="isEmptyProject"
-      name="list"
-      tag="div"
-      class="list-project"
-    >
-      <div
-        v-for="(project, index) in projects.data"
-        :key="index"
-        class="relative"
-      >
-        <div :class="['zoom', dropdown.get(index) && 'cool-zoom']">
+    <Transition name="fade">
+     <div v-if="loading.val" class="fixed left-0 z-50 w-full h-[50vh] flex justify-center items-center">
+       <Icons.Loading/>
+     </div>
+    </Transition>
+    <TransitionGroup name="fade">
+      <div v-if="!loading.val" class="content-list-project">
+        <div v-if="isEmptyProject" class="list-project">
           <div
-            class="card-project"
-            @click="pushLink('project-one', { id: project._id })"
+            v-for="(project, index) in projects.data"
+            :key="index"
+            class="relative"
           >
-            <h2 class="text-2xl">
-              {{ truncate(project.title, { length: 18 }) }}
-            </h2>
-            <p class="text-md">
-              {{ truncate(project.description, { length: 53 }) }}
-            </p>
-            <span class="card-now-time">{{ nowTime(project.createdAt) }}</span>
+            <div :class="['zoom', dropdown.get(index) && 'cool-zoom']">
+              <div
+                class="card-project"
+                @click="pushLink('project-one', { id: project._id })"
+              >
+                <h2 class="text-2xl">
+                  {{ truncate(project.title, { length: 18 }) }}
+                </h2>
+                <p class="text-md">
+                  {{ truncate(project.description, { length: 53 }) }}
+                </p>
+                <span class="card-now-time">{{ nowTime(project.createdAt) }}</span>
+              </div>
+              <button class="btn-options btn-one" @click="dropdown.toggle(index)">
+                <Icons.MenuVertical />
+              </button>
+            </div>
+            <Dropdown
+              :id="project._id"
+              :state="dropdown.get(index)"
+              @close="dropdown.toggle(index)"
+            >
+              <div
+                class="flex flex-col gap-4 dark:bg-zinc-700 bg-zinc-200 dark:text-zinc-300 p-3 rounded-lg cursor-pointer"
+              >
+                <div
+                  class="flex justify-between items-center hover:text-white"
+                  @click="modals.open.update(project, index)"
+                >
+                  <span>Edite</span>
+                  <Icons.Edit class="inline" />
+                </div>
+                <div
+                  class="flex justify-between items-center hover:text-white"
+                  @click="modals.open.delete(project._id, index)"
+                >
+                  <span>Delete</span>
+                  <Icons.Delete class="inline" />
+                </div>
+              </div>
+            </Dropdown>
           </div>
-          <button class="btn-options btn-one" @click="dropdown.toggle(index)">
-            <Icons.MenuVertical />
-          </button>
         </div>
-        <Dropdown
-          :id="project._id"
-          :state="dropdown.get(index)"
-          @close="dropdown.toggle(index)"
-        >
-          <div
-            class="flex flex-col gap-4 dark:bg-zinc-700 bg-zinc-200 dark:text-zinc-300 p-3 rounded-lg cursor-pointer"
-          >
-            <div
-              class="flex justify-between items-center hover:text-white"
-              @click="modals.open.update(project, index)"
-            >
-              <span>Edite</span>
-              <Icons.Edit class="inline" />
-            </div>
-            <div
-              class="flex justify-between items-center hover:text-white"
-              @click="modals.open.delete(project._id, index)"
-            >
-              <span>Delete</span>
-              <Icons.Delete class="inline" />
-            </div>
-          </div>
-        </Dropdown>
       </div>
     </TransitionGroup>
-
-    <div v-else class="flex flex-col justify-center items-center">
-      <template v-if="query.search != ''">
-        <h2 class="text-xl font-semibold">Nothing found</h2>
-        <p class="text-lg">Maybe you should look for something else</p>
-      </template>
-      <template v-else>
-        <h1 class="mb-10 text-2xl">Welcome to To-Do-Projects</h1>
-        <div class="new-card-project zoom" @click="modals.open.create()">
-          <Icons.Plus />
-        </div>
-      </template>
-    </div>
+    
+    
+    <Transition name="fade">
+      <div v-if="!isEmptyProject" class="flex flex-col justify-center items-center">
+        <template v-if="query.search != ''">
+          <h2 class="text-xl font-semibold">Nothing found</h2>
+          <p class="text-lg">Maybe you should look for something else</p>
+        </template>
+        <template v-else>
+          <h1 class="mb-10 text-2xl">Welcome to To-Do-Projects</h1>
+          <div class="new-card-project zoom" @click="modals.open.create()">
+            <Icons.Plus />
+          </div>
+        </template>
+      </div> 
+    </Transition>
   </div>
 
   <Project.ModalAddOrEdit
@@ -114,6 +119,9 @@ onMounted(() => getAll(true));
 </template>
 
 <style>
+.content-list-project {
+  padding-bottom: 70px;;
+}
 .list-project {
   @apply w-full grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8;
 }

@@ -33,6 +33,6 @@ const props = withDefaults(defineProps<PropsI>(), {
 }
 
 .dropdown-menu {
-  @apply absolute top-1 right-8 z-50 min-w-[150px] min-h-[30px];
+  @apply absolute top-1 right-8 z-20 min-w-[150px] min-h-[30px];
 }
 </style>

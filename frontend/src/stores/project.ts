@@ -5,6 +5,7 @@ import { socketBase, socketTask } from "@services/main";
 import { defineStore, storeToRefs } from "pinia";
 import { useSocketAction } from "@utils/main";
 import { findIndex, isEmpty } from "lodash";
+import { onceMounted } from "@utils/actions";
 import eventBus from "@services/eventBus";
 import { userStore } from "@stores/user";
 import query from "@utils/querys";
@@ -29,15 +30,6 @@ const store = defineStore("project", {
       this.query = query.project;
     },
 
-    onceMounted(callback: CallbacksI["actions"], verifyMounted = true) {
-      if (verifyMounted) {
-        if (!this.lifecicles.mounted) {
-          this.lifecicles.mounted = true;
-          callback && callback();
-        }
-      } else callback && callback();
-    },
-
     insert(projects?: StateI["projects"]) {
       if (!isEmpty(projects)) this.projects = projects;
     },
@@ -46,42 +38,49 @@ const store = defineStore("project", {
       if (!isEmpty(project)) this.project = project;
     },
 
-    getAll(verifyMounted = false) {
-      this.onceMounted(() => {
-        const { user } = userStore();
+    async getAll(verifyMounted = false) {
+      await onceMounted(this, (promise) => {
+          const { user } = userStore();
 
-        const socket = socketBase("/project", getUserId.value);
+          const socket = socketBase("/project", getUserId.value);
 
-        const init = useSocketAction("all", socket);
-        const run = init<StateI["projects"]>({
-          actions: (projects) => this.insert(projects),
-        });
+          const init = useSocketAction("all", socket);
+          const run = init<StateI["projects"]>({
+            error: () => promise?.reject(),
+            actions: (projects) => {
+              this.insert(projects);
+              promise?.resolve();
+            },
+          });
 
-        run({ _author: user.value?._id, query: this.query });
-      }, verifyMounted);
+          run({ _author: user.value?._id, query: this.query });
+        },
+        verifyMounted
+      );
     },
 
-    getShared(verifyMounted = false) {
-      return new Promise((resolver) => {
-        eventBus.emit("user/change-share");
+    async getShared(verifyMounted = false) {
+      eventBus.emit("user/change-share");
 
-        this.onceMounted(() => {
+      await onceMounted(this, (promise) => {
           const socket = socketBase("/project", getUserId.value);
 
           const init = useSocketAction("shared", socket);
           const run = init<StateI["shared"]>({
             actions: (shared) => {
               if (shared) this.shared = shared;
-              resolver(shared);
+              promise?.resolve();
             },
+            error: () => promise?.reject(),
           });
 
           run();
-        }, verifyMounted);
-      });
+        },
+        verifyMounted
+      );
     },
 
-    create(form: FormsI["inter"], callbacks?: CallbacksI) {
+    create(form: FormsI["inter"], callbacks?: CallbacksI<StateI["projects"]>) {
       eventBus.emit("project/create");
 
       const socket = socketBase("/project", getUserId.value);
@@ -119,20 +118,20 @@ const store = defineStore("project", {
       run(form);
     },
 
-    remove(_id: ProjectI["_id"], callbacks?: CallbacksI) {
+    remove(_id: ProjectI["_id"], callbacks?: CallbacksI<StateI["projects"]>) {
       eventBus.emit("project/delete");
       const { user } = userStore();
 
       const socket = socketBase("/project", getUserId.value);
       const init = useSocketAction("delete", socket);
       const run = init<StateI["projects"]>(callbacks, {
-        actions: (projects) => this.removeAndPreviePaginate(projects),
+        actions: async (projects) => await this.removeAndPreviePaginate(projects),
       });
 
       run({ _author: user.value?._id, query: this.query, _id });
     },
 
-    removeAndPreviePaginate(projects?: StateI["projects"]) {
+    async removeAndPreviePaginate(projects?: StateI["projects"]) {
       if (projects) {
         if (this.lifecicles.broadcast) {
           setTimeout(() => (this.lifecicles.broadcast = true), 1000);
@@ -141,7 +140,7 @@ const store = defineStore("project", {
             if (this.query.pag > 1) {
               this.query.pag = Number(this.query.pag) - 1;
             }
-            this.getAll();
+            await this.getAll();
           } else this.insert(projects);
         }
       }

@@ -9,10 +9,18 @@ import notifyComposable from "@composables/notify";
 import { superModals } from "@utils/inputs";
 import useProjectStore from "@stores/project";
 
+const loading = reactive({
+  val: false,
+  enable: () => loading.val = true,
+  disable: () => loading.val = false,
+});
+
 export default () => {
   const store = useProjectStore();
   const { query } = storeToRefs(store);
   const Notify = notifyComposable();
+
+
 
   const select = reactive({
     data: <SelectProjectT>{},
@@ -77,27 +85,31 @@ export default () => {
   };
 
   const getAll = () => {
+    loading.enable();
     if (query.value.pag > 1) query.value.pag = 1;
-    store.getAll();
+    store.getAll().finally(() => loading.disable());
   };
 
   const pagination = {
     next(isNext: boolean) {
       if (isNext) {
+        loading.enable()
         query.value.pag = Number(query.value.pag) + 1;
-        store.getAll();
+        store.getAll().finally(() => loading.disable());
       }
     },
     previe(isPrevie: boolean) {
       if (isPrevie) {
+        loading.enable();
         query.value.pag = Number(query.value.pag) - 1;
-        store.getAll();
+        store.getAll().finally(() => loading.disable());
       }
     },
     selectPag(item: number) {
       if (item != query.value.pag) {
+        loading.enable();
         query.value.pag = item;
-        store.getAll();
+        store.getAll().finally(() => loading.disable());
       }
     },
   };
@@ -106,6 +118,7 @@ export default () => {
     pagination,
     dropdown,
     ascDesc,
+    loading,
     getAll,
     select,
     remove,

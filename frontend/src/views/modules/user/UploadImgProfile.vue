@@ -12,7 +12,7 @@ const emits = defineEmits({
   update: (file: Blob) => file,
 });
 
-const preview = ref(props.preview);
+const previewImg = ref('');
 const isFile = ref(new Blob());
 
 const clickUploadImg = () => {
@@ -22,6 +22,7 @@ const clickUploadImg = () => {
 const cleanFile = () => {
   isFile.value = new Blob();
   emits("update", isFile.value);
+  previewImg.value = props.preview;
 };
 
 const previewImage = (event: Event) => {
@@ -29,7 +30,7 @@ const previewImage = (event: Event) => {
   if (input.files) {
     let reader = new FileReader();
     reader.onload = (e: ProgressEvent<FileReader>) => {
-      preview.value = String(e.target?.result);
+      previewImg.value = String(e.target?.result);
     };
 
     if (input.files[0]) {
@@ -41,7 +42,7 @@ const previewImage = (event: Event) => {
 };
 
 watchEffect(() => props.clean == true && cleanFile());
-watchEffect(() => (preview.value = props.preview));
+watchEffect(() => setTimeout(() => (previewImg.value = props.preview), 300));
 </script>
 
 <template>
@@ -52,8 +53,9 @@ watchEffect(() => (preview.value = props.preview));
     type="file"
     @change="previewImage"
   />
-  <div class="flex justify-center bg-zinc-700 rounded-md relative">
-    <img :src="preview" class="image-profile" @click="clickUploadImg()" />
+  <div class="flex justify-center items-center bg-zinc-700 rounded-md relative h-[21vh]">
+    <img :src="previewImg" class="image-profile" @click="clickUploadImg()" v-if="previewImg"/>
+    <Icons.Loading v-else/>
     <Icons.Close
       v-show="isFile.size"
       class="btn-cancel-img-profile"

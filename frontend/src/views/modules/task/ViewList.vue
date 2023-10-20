@@ -111,6 +111,7 @@ onMounted(() => {
               :class="task.done && 'opacity-50 line-through'"
             >
               <div
+                id="editor"
                 class="ql-editor ql-blank"
                 v-html="truncate(task.content, { length: 80 })"
               ></div>
@@ -174,5 +175,10 @@ onMounted(() => {
 }
 .popper {
   @apply !bg-red-600 !px-3 !py-2 !rounded-lg;
+}
+.ql-editor.ql-blank > p.not-before {
+    font-size: 12px;
+    margin: 12px 15px;
+    background-color: red;
 }
 </style>
