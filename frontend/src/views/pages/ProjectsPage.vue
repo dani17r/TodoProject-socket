@@ -21,11 +21,13 @@ onMounted(() => socket.open());
     <Suspense>
       <Project.Options />
     </Suspense>
-     <Suspense>
+    <Suspense>
       <template #fallback>
         <Transition name="fade">
-          <div class="fixed left-0 z-50 w-full h-[77.5vh] flex justify-center items-center">
-            <Icon.Loading/>
+          <div
+            class="fixed left-0 z-50 w-full h-[77.5vh] flex justify-center items-center"
+          >
+            <Icon.Loading />
           </div>
         </Transition>
       </template>

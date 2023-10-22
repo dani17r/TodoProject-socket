@@ -12,7 +12,8 @@ import projectComposable from "@composables/project";
 import { nowTime, pushLink } from "@utils/main";
 import { projectStore } from "@stores/project";
 
-const { dropdown, remove, select, modals, query, loading } = projectComposable();
+const { dropdown, remove, select, modals, query, loading } =
+  projectComposable();
 const { projects, getAll } = projectStore();
 
 let selectProject = computed(() => select.data as FormsI["full"]);
@@ -27,9 +28,12 @@ await getAll(true);
     class="min-h-[48vh] w-full relative pt-[110px]"
   >
     <Transition name="fade">
-     <div v-if="loading.val" class="fixed left-0 z-50 w-full h-[50vh] flex justify-center items-center">
-       <Icons.Loading/>
-     </div>
+      <div
+        v-if="loading.val"
+        class="fixed left-0 z-50 w-full h-[50vh] flex justify-center items-center"
+      >
+        <Icons.Loading />
+      </div>
     </Transition>
     <TransitionGroup name="fade">
       <div v-if="!loading.val" class="content-list-project">
@@ -50,9 +54,14 @@ await getAll(true);
                 <p class="text-md">
                   {{ truncate(project.description, { length: 53 }) }}
                 </p>
-                <span class="card-now-time">{{ nowTime(project.createdAt) }}</span>
+                <span class="card-now-time">{{
+                  nowTime(project.createdAt)
+                }}</span>
               </div>
-              <button class="btn-options btn-one" @click="dropdown.toggle(index)">
+              <button
+                class="btn-options btn-one"
+                @click="dropdown.toggle(index)"
+              >
                 <Icons.MenuVertical />
               </button>
             </div>
@@ -84,10 +93,12 @@ await getAll(true);
         </div>
       </div>
     </TransitionGroup>
-    
-    
+
     <Transition name="fade">
-      <div v-if="!isEmptyProject" class="flex flex-col justify-center items-center">
+      <div
+        v-if="!isEmptyProject"
+        class="flex flex-col justify-center items-center"
+      >
         <template v-if="query.search != ''">
           <h2 class="text-xl font-semibold">Nothing found</h2>
           <p class="text-lg">Maybe you should look for something else</p>
@@ -98,7 +109,7 @@ await getAll(true);
             <Icons.Plus />
           </div>
         </template>
-      </div> 
+      </div>
     </Transition>
   </div>
 
@@ -120,7 +131,7 @@ await getAll(true);
 
 <style>
 .content-list-project {
-  padding-bottom: 70px;;
+  padding-bottom: 70px;
 }
 .list-project {
   @apply w-full grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8;

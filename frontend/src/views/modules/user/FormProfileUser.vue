@@ -19,7 +19,7 @@ const form = reactive({
 const cleanFile = ref(false);
 
 const ifNotEmptyFields = computed(() =>
-  Boolean(checkUpdate() && form.fullname?.length && form.email?.length)
+  Boolean(checkUpdate() && form.fullname?.length && form.email?.length),
 );
 
 const checkUpdate = () => {

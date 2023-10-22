@@ -177,8 +177,8 @@ onMounted(() => {
   @apply !bg-red-600 !px-3 !py-2 !rounded-lg;
 }
 .ql-editor.ql-blank > p.not-before {
-    font-size: 12px;
-    margin: 12px 15px;
-    background-color: red;
+  font-size: 12px;
+  margin: 12px 15px;
+  background-color: red;
 }
 </style>

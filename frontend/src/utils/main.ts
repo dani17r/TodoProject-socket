@@ -82,7 +82,7 @@ export const TitleHeader = (title: string) => `ToDoProj - ${title}`;
 export const superErrors = (
   errors: Ref<ObjectI<unknown>>,
   style?: string,
-  reverse = false
+  reverse = false,
 ) => {
   //Si no hay un estilo entonces por defecto deja este.
   const className = style ?? "!border-red-500";

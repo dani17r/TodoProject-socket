@@ -34,7 +34,13 @@ export default () => {
 
   socket.value.on(
     `${urlSocket}/delete`,
-    async ({ _id, projects }: { _id: string; projects: StateI["projects"] }) => {
+    async ({
+      _id,
+      projects,
+    }: {
+      _id: string;
+      projects: StateI["projects"];
+    }) => {
       setTimeout(() => (status.delete = true), 300);
       if (status.delete) {
         document.getElementById(`modal_add_or_edit-${_id}`)?.click();
@@ -42,7 +48,7 @@ export default () => {
         document.getElementById(`modal_confirm-${_id}`)?.click();
         await projectStore.removeAndPreviePaginate(projects);
       }
-    }
+    },
   );
 
   return socket.value;

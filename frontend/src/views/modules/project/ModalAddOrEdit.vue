@@ -60,7 +60,7 @@ const create = () => {
       {
         actions: () => closeModal(),
         error: (err) => setError(err),
-      }
+      },
     );
   }
 };

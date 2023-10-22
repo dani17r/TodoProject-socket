@@ -43,8 +43,8 @@ const store = defineStore("user", {
     async refresh() {
       const socket = socketBase("/auth");
       const token = localStorage.getItem("token") ?? null;
-      
-      await new Promise<void>((resolve, reject)=> {
+
+      await new Promise<void>((resolve, reject) => {
         socket.emit("status", token);
         socket.on("status/response", ({ user }) => {
           if (!isEmpty(user)) this.addUser(user);
@@ -55,7 +55,7 @@ const store = defineStore("user", {
           socket.close();
           reject();
         });
-      })
+      });
     },
 
     login(form: FormsI["login"], callbacks?: CallbacksI<NotifyI>) {
@@ -135,7 +135,7 @@ const store = defineStore("user", {
 
     changePassword(
       form: FormsI["changePassword"],
-      callbacks?: CallbacksI<NotifyI>
+      callbacks?: CallbacksI<NotifyI>,
     ) {
       const socket = socketBase("/auth");
 
@@ -157,34 +157,40 @@ const store = defineStore("user", {
       this.users = { data: [] };
     },
 
-    async getAll(callbacks?: CallbacksI<StateI["users"]>, verifyMounted = false) {
-      
-      await onceMounted(this, (promise) => {
-        const { droupPrivateIds } = shareComposable();
-        const socket = socketBase("/user", getUserId.value);
+    async getAll(
+      callbacks?: CallbacksI<StateI["users"]>,
+      verifyMounted = false,
+    ) {
+      await onceMounted(
+        this,
+        (promise) => {
+          const { droupPrivateIds } = shareComposable();
+          const socket = socketBase("/user", getUserId.value);
 
-        const init = useSocketAction("all", socket);
-        const run = init<StateI["users"]>({
-          error: () => promise?.reject(),
-          actions: (users) => {
-            this.insert(users);
-            callbacks?.actions && callbacks.actions(users);
-            promise?.resolve();
-          },
-        });
+          const init = useSocketAction("all", socket);
+          const run = init<StateI["users"]>({
+            error: () => promise?.reject(),
+            actions: (users) => {
+              this.insert(users);
+              callbacks?.actions && callbacks.actions(users);
+              promise?.resolve();
+            },
+          });
 
-        run({ query: this.query, _ids: droupPrivateIds.value });
+          run({ query: this.query, _ids: droupPrivateIds.value });
 
-        //  api
-        //    .get(`/user/${getUserId.value}`, {
-        //      params: { query: this.query, _ids: droupPrivateIds.value },
-        //    })
-        //    .then(({ data }) => {
-        //       this.insert(data);
-        //       callbacks?.actions && callbacks.actions(data);
-        //     })
-        //   .finally(() => promise.resolve());
-      }, verifyMounted);
+          //  api
+          //    .get(`/user/${getUserId.value}`, {
+          //      params: { query: this.query, _ids: droupPrivateIds.value },
+          //    })
+          //    .then(({ data }) => {
+          //       this.insert(data);
+          //       callbacks?.actions && callbacks.actions(data);
+          //     })
+          //   .finally(() => promise.resolve());
+        },
+        verifyMounted,
+      );
     },
   },
 });

@@ -6,7 +6,7 @@ import notifyComposable from "@composables/notify";
 import { defineAsyncComponent } from "vue";
 
 const ModalSharedWithMe = defineAsyncComponent(
-  () => import("@modules/user/ModalSharedWithMe.vue")
+  () => import("@modules/user/ModalSharedWithMe.vue"),
 );
 
 import { superModals } from "@utils/inputs";

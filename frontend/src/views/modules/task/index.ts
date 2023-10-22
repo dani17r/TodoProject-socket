@@ -2,28 +2,28 @@ import { defineAsyncComponent } from "vue";
 
 export default {
   ModalSelectUserForShare: defineAsyncComponent(
-    () => import("@modules/task/share/ModalSelectUserForShare.vue")
+    () => import("@modules/task/share/ModalSelectUserForShare.vue"),
   ),
   ModalPublicShare: defineAsyncComponent(
-    () => import("@modules/task/share/ModalPublicShare.vue")
+    () => import("@modules/task/share/ModalPublicShare.vue"),
   ),
   ModalPrivateShare: defineAsyncComponent(
-    () => import("@modules/task/share/ModalPrivateShare.vue")
+    () => import("@modules/task/share/ModalPrivateShare.vue"),
   ),
   TablePrivateShare: defineAsyncComponent(
-    () => import("@modules/task/share/TablePrivateShare.vue")
+    () => import("@modules/task/share/TablePrivateShare.vue"),
   ),
   MenuShare: defineAsyncComponent(
-    () => import("@modules/task/share/MenuBtnForShare.vue")
+    () => import("@modules/task/share/MenuBtnForShare.vue"),
   ),
   Content: defineAsyncComponent(
-    () => import("@modules/task/share/ContentShare.vue")
+    () => import("@modules/task/share/ContentShare.vue"),
   ),
   UrlShare: defineAsyncComponent(
-    () => import("@modules/task/share/ShareUrl.vue")
+    () => import("@modules/task/share/ShareUrl.vue"),
   ),
   ModalTrash: defineAsyncComponent(
-    () => import("@modules/task/ModalTrash.vue")
+    () => import("@modules/task/ModalTrash.vue"),
   ),
   ModalEdit: defineAsyncComponent(() => import("@modules/task/ModalEdit.vue")),
   Options: defineAsyncComponent(() => import("@modules/task/MenuOptions.vue")),

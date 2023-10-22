@@ -49,10 +49,7 @@ export default {
     <Transition :name="props.transition">
       <div
         v-if="props.modelValue"
-        :class="[
-          `content-modal-main`,
-          props.classContent,
-        ]"
+        :class="[`content-modal-main`, props.classContent]"
         :style="
           props.zIndexImportant
             ? `z-index:${Number(props.zIndex) + 20} !important`

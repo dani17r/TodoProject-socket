@@ -5,7 +5,7 @@ import { computed } from "vue";
 const { user } = userStore();
 
 const preview = computed(
-  () => `${import.meta.env.VITE_URL_UPLOAD}/${user.value?.image}`
+  () => `${import.meta.env.VITE_URL_UPLOAD}/${user.value?.image}`,
 );
 </script>
 

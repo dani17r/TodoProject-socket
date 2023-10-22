@@ -41,7 +41,7 @@ const search = superForm({
 const usersGroup = computed(() =>
   users.value.data.filter((user) => {
     return !droupPrivateIds.value?.includes(user._id);
-  })
+  }),
 );
 </script>
 

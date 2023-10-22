@@ -26,7 +26,7 @@ const saveModalPrivateShare = () => {
         setTimeout(() => events("close"));
         if (updatedProject) changeShare(updatedProject);
       },
-    }
+    },
   );
 };
 </script>

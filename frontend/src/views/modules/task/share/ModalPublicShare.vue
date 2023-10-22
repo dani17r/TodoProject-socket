@@ -27,7 +27,7 @@ const savePublicShare = () => {
         setTimeout(() => events("close"));
         if (updatedProject) changeShare(updatedProject);
       },
-    }
+    },
   );
 };
 </script>

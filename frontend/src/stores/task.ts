@@ -41,19 +41,23 @@ const store = defineStore("task", {
     async getAll(verifyMounted = false) {
       this.countTask;
 
-      await onceMounted(this, (promise) => {
-        const socket = socketTask("/task", this.project_id);
-        const init = useSocketAction("all", socket);
-        const run = init<StateI["tasks"]>({
-          error: () => promise?.reject(),
-          actions: (tasks) => {
-            this.insert(tasks);
-            promise?.resolve();
-          }
-        });
+      await onceMounted(
+        this,
+        (promise) => {
+          const socket = socketTask("/task", this.project_id);
+          const init = useSocketAction("all", socket);
+          const run = init<StateI["tasks"]>({
+            error: () => promise?.reject(),
+            actions: (tasks) => {
+              this.insert(tasks);
+              promise?.resolve();
+            },
+          });
 
-        run({ query: this.query, _project: this.project_id });
-      }, verifyMounted);
+          run({ query: this.query, _project: this.project_id });
+        },
+        verifyMounted,
+      );
     },
 
     create(form: FormsI["inter"], callbacks?: CallbacksI) {

@@ -42,7 +42,10 @@ const isNext = computed(() => {
           </p>
         </div>
         <div>
-          <nav v-show="Number(paginate?.totalPag) > 1" class="group-btn-paginate">
+          <nav
+            v-show="Number(paginate?.totalPag) > 1"
+            class="group-btn-paginate"
+          >
             <button
               :class="['previe-paginate', !isPrevie && 'opacity-30']"
               @click="emits('previe', isPrevie)"

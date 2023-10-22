@@ -12,7 +12,7 @@ const emits = defineEmits({
   update: (file: Blob) => file,
 });
 
-const previewImg = ref('');
+const previewImg = ref("");
 const isFile = ref(new Blob());
 
 const clickUploadImg = () => {
@@ -53,9 +53,16 @@ watchEffect(() => setTimeout(() => (previewImg.value = props.preview), 300));
     type="file"
     @change="previewImage"
   />
-  <div class="flex justify-center items-center bg-zinc-700 rounded-md relative h-[21vh]">
-    <img :src="previewImg" class="image-profile" @click="clickUploadImg()" v-if="previewImg"/>
-    <Icons.Loading v-else/>
+  <div
+    class="flex justify-center items-center bg-zinc-700 rounded-md relative h-[21vh]"
+  >
+    <img
+      v-if="previewImg"
+      :src="previewImg"
+      class="image-profile"
+      @click="clickUploadImg()"
+    />
+    <Icons.Loading v-else />
     <Icons.Close
       v-show="isFile.size"
       class="btn-cancel-img-profile"

@@ -14,7 +14,7 @@ const form = reactive({
 });
 
 const ifNotEmptyFields = computed(() =>
-  Boolean(form.current.length && form.new.length && form.verify.length)
+  Boolean(form.current.length && form.new.length && form.verify.length),
 );
 
 const { check, errors, setError } = validationForm({
@@ -43,7 +43,7 @@ const updatePassword = () => {
         {
           actions: (notify) => Notify.success(String(notify?.message)),
           error: (msg) => Notify.error(msg.message),
-        }
+        },
       );
     }
 };

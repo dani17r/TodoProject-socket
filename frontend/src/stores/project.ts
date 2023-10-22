@@ -39,7 +39,9 @@ const store = defineStore("project", {
     },
 
     async getAll(verifyMounted = false) {
-      await onceMounted(this, (promise) => {
+      await onceMounted(
+        this,
+        (promise) => {
           const { user } = userStore();
 
           const socket = socketBase("/project", getUserId.value);
@@ -55,14 +57,16 @@ const store = defineStore("project", {
 
           run({ _author: user.value?._id, query: this.query });
         },
-        verifyMounted
+        verifyMounted,
       );
     },
 
     async getShared(verifyMounted = false) {
       eventBus.emit("user/change-share");
 
-      await onceMounted(this, (promise) => {
+      await onceMounted(
+        this,
+        (promise) => {
           const socket = socketBase("/project", getUserId.value);
 
           const init = useSocketAction("shared", socket);
@@ -76,7 +80,7 @@ const store = defineStore("project", {
 
           run();
         },
-        verifyMounted
+        verifyMounted,
       );
     },
 
@@ -125,7 +129,8 @@ const store = defineStore("project", {
       const socket = socketBase("/project", getUserId.value);
       const init = useSocketAction("delete", socket);
       const run = init<StateI["projects"]>(callbacks, {
-        actions: async (projects) => await this.removeAndPreviePaginate(projects),
+        actions: async (projects) =>
+          await this.removeAndPreviePaginate(projects),
       });
 
       run({ _author: user.value?._id, query: this.query, _id });

@@ -9,7 +9,7 @@ const dontCallback = ref(true);
 
 export const auth = (
   next: MiddlewareI["next"],
-  { actions, error }: CallbacksMiddlI
+  { actions, error }: CallbacksMiddlI,
 ) => {
   const socket = socketBase("/auth");
 

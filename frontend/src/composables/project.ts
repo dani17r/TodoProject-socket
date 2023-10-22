@@ -11,16 +11,14 @@ import useProjectStore from "@stores/project";
 
 const loading = reactive({
   val: false,
-  enable: () => loading.val = true,
-  disable: () => loading.val = false,
+  enable: () => (loading.val = true),
+  disable: () => (loading.val = false),
 });
 
 export default () => {
   const store = useProjectStore();
   const { query } = storeToRefs(store);
   const Notify = notifyComposable();
-
-
 
   const select = reactive({
     data: <SelectProjectT>{},
@@ -93,7 +91,7 @@ export default () => {
   const pagination = {
     next(isNext: boolean) {
       if (isNext) {
-        loading.enable()
+        loading.enable();
         query.value.pag = Number(query.value.pag) + 1;
         store.getAll().finally(() => loading.disable());
       }
