@@ -41,11 +41,13 @@ export default {
 
 <template>
   <Teleport to="#area">
-    <div
-      v-if="props.modelValue"
-      class="bg-modal"
-      :style="`z-index:${Number(props.zIndex) + 20}`"
-    ></div>
+    <Transition name="fade">
+      <div
+        v-if="props.modelValue"
+        class="bg-modal"
+        :style="`z-index:${Number(props.zIndex) + 20}`"
+      ></div>
+    </Transition>
     <Transition :name="props.transition">
       <div
         v-if="props.modelValue"

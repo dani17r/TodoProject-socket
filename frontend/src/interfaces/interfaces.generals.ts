@@ -5,6 +5,7 @@ import type { NavigationGuardNext, RouteLocationNormalized } from "vue-router";
 export interface CallbacksI<T = unknown> {
   actions?: (value?: T) => void;
   error?: (err: NotifyErrorI) => void;
+  finally?: () => void;
 }
 
 export interface QueryI {

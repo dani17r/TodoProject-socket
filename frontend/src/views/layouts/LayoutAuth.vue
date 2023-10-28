@@ -33,17 +33,24 @@ const pushLink = (name: string) => ({ name });
       </ul>
     </nav>
   </div>
-  <div class="pt-20">
-    <RouterView />
+  <div class="content-layout-auth">
+    <router-view v-slot="{ Component }">
+      <transition name="page" mode="out-in">
+        <component :is="Component"/>
+      </transition>
+    </router-view>
   </div>
 </template>
 
 <style>
+.content-layout-auth {
+  @apply mt-40;
+}
 .auth .active-link {
   @apply bg-gray-100 text-blue-500 !important;
 }
 .auth.content-nav {
-  @apply w-full mb-10 fixed z-50;
+  @apply w-full top-0 fixed z-50;
 }
 .auth.content-nav nav {
   @apply bg-blue-500 px-4 py-2 dark:bg-blue-900;

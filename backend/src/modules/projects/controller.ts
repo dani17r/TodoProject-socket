@@ -152,6 +152,9 @@ export default () => {
         .catch(() => socket.emit("shared/error"));
     });
 
+    socket.on("shared-users", async () => {
+    });
+
     //Verify Id
     socket.on("verify-id", async (_id: string) => {
       const project = await Projects.findById(_id).catch(() => false);

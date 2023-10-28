@@ -5,7 +5,7 @@ import { socketBase, socketTask } from "@services/main";
 import { defineStore, storeToRefs } from "pinia";
 import { useSocketAction } from "@utils/main";
 import { findIndex, isEmpty } from "lodash";
-import { onceMounted } from "@utils/actions";
+import { onceMountedTwo } from "@utils/actions";
 import eventBus from "@services/eventBus";
 import { userStore } from "@stores/user";
 import query from "@utils/querys";
@@ -17,6 +17,11 @@ const store = defineStore("project", {
     lifecicles: {
       mounted: false,
       broadcast: true,
+    },
+    loading: {
+      val: false,
+      enable: () => (store().$state.loading.val = true),
+      disable: () => (store().$state.loading.val = false),
     },
     projects: { data: [] },
     query: query.project,
@@ -34,78 +39,82 @@ const store = defineStore("project", {
       if (!isEmpty(projects)) this.projects = projects;
     },
 
+    insertShared(shared?: StateI["shared"]) {
+      if (shared?.length) this.shared = shared
+    },
+
     insertOne(project?: StateI["project"]) {
       if (!isEmpty(project)) this.project = project;
     },
 
-    async getAll(verifyMounted = false) {
-      await onceMounted(
+    getAll(verifyMounted = false) {
+      onceMountedTwo(
         this,
-        (promise) => {
+        () => {
+          this.loading.enable();
           const { user } = userStore();
-
           const socket = socketBase("/project", getUserId.value);
 
           const init = useSocketAction("all", socket);
           const run = init<StateI["projects"]>({
-            error: () => promise?.reject(),
-            actions: (projects) => {
-              this.insert(projects);
-              promise?.resolve();
-            },
+            actions: (projects) => this.insert(projects),
+            finally: () => this.loading.disable(),
           });
 
           run({ _author: user.value?._id, query: this.query });
         },
-        verifyMounted,
+        verifyMounted
       );
     },
 
-    async getShared(verifyMounted = false) {
+    getShared(callbacks?: CallbacksI<StateI["shared"]>, verifyMounted = false) {
       eventBus.emit("user/change-share");
-
-      await onceMounted(
+      
+      onceMountedTwo(
         this,
-        (promise) => {
+        () => {
           const socket = socketBase("/project", getUserId.value);
-
           const init = useSocketAction("shared", socket);
-          const run = init<StateI["shared"]>({
-            actions: (shared) => {
-              if (shared) this.shared = shared;
-              promise?.resolve();
-            },
-            error: () => promise?.reject(),
+          const run = init<StateI["shared"]>(callbacks, {
+            actions: (shared) => this.insertShared(shared),
           });
 
           run();
         },
-        verifyMounted,
+        verifyMounted
       );
     },
 
     create(form: FormsI["inter"], callbacks?: CallbacksI<StateI["projects"]>) {
       eventBus.emit("project/create");
+      this.loading.enable();
 
       const socket = socketBase("/project", getUserId.value);
       const init = useSocketAction("create", socket);
       const run = init<StateI["projects"]>(callbacks, {
         actions: (projects) => this.insert(projects),
+        finally: () => this.loading.disable(),
       });
 
       run({ form, query: this.query });
     },
 
     changeShare(newUpdate: ProjectI) {
+      this.loading.enable();
       eventBus.emit("task/change-share");
-
       const socket = socketTask("/task", String(this.project?._id));
-      socket.emit(`change-share`, newUpdate);
+
+      const init = useSocketAction("change-share", socket);
+      const run = init<StateI["projects"]>({
+        finally: () => this.loading.disable(),
+      });
+
+      run(newUpdate);
     },
 
     update(form: Partial<FormsI["full"]>, callbacks?: CallbacksI<ProjectI>) {
+      this.loading.enable();
       eventBus.emit("project/update");
-
       const socket = socketBase("/project", getUserId.value);
 
       const init = useSocketAction("update", socket);
@@ -117,6 +126,7 @@ const store = defineStore("project", {
             this.project = updatedProject;
           }
         },
+        finally: () => this.loading.disable()
       });
 
       run(form);
@@ -129,23 +139,20 @@ const store = defineStore("project", {
       const socket = socketBase("/project", getUserId.value);
       const init = useSocketAction("delete", socket);
       const run = init<StateI["projects"]>(callbacks, {
-        actions: async (projects) =>
-          await this.removeAndPreviePaginate(projects),
+        actions: (projects) => this.removeAndPreviePaginate(projects),
       });
 
       run({ _author: user.value?._id, query: this.query, _id });
     },
 
-    async removeAndPreviePaginate(projects?: StateI["projects"]) {
+    removeAndPreviePaginate(projects?: StateI["projects"]) {
       if (projects) {
         if (this.lifecicles.broadcast) {
           setTimeout(() => (this.lifecicles.broadcast = true), 1000);
           this.lifecicles.broadcast = false;
           if (projects.paginate?.totalPaginate == 0) {
-            if (this.query.pag > 1) {
-              this.query.pag = Number(this.query.pag) - 1;
-            }
-            await this.getAll();
+            this.query.pag > 1 && (this.query.pag = Number(this.query.pag) - 1);
+            this.getAll();
           } else this.insert(projects);
         }
       }

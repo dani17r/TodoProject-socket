@@ -36,7 +36,7 @@ const close = () => {
     :z-index="100"
     @close="close()"
   >
-    <button class="float-right" @click="close()">
+    <button class="absolute right-[20px]" @click="close()">
       <Icons.Close />
     </button>
     <div class="content-confirm">

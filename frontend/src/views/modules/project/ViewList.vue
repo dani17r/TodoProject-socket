@@ -12,25 +12,25 @@ import projectComposable from "@composables/project";
 import { nowTime, pushLink } from "@utils/main";
 import { projectStore } from "@stores/project";
 
-const { dropdown, remove, select, modals, query, loading } =
+const { dropdown, deleted, select, modals, query, loading } =
   projectComposable();
 const { projects, getAll } = projectStore();
 
 let selectProject = computed(() => select.data as FormsI["full"]);
 let isEmptyProject = computed(() => projects.value.data.length);
 
-await getAll(true);
+getAll(true);
 </script>
 
 <template>
   <div
-    :class="!isEmptyProject && 'flex justify-center items-center'"
-    class="min-h-[48vh] w-full relative pt-[110px]"
+    :class="!isEmptyProject && !loading.val && 'flex justify-center items-center'"
+    class="min-h-[48vh] w-full pt-[110px]"
   >
     <Transition name="fade">
       <div
         v-if="loading.val"
-        class="fixed left-0 z-50 w-full h-[50vh] flex justify-center items-center"
+        class="fixed left-0 top-0 z-50 w-full h-[100vh] flex justify-center items-center"
       >
         <Icons.Loading />
       </div>
@@ -96,7 +96,7 @@ await getAll(true);
 
     <Transition name="fade">
       <div
-        v-if="!isEmptyProject"
+        v-if="!isEmptyProject && !loading.val"
         class="flex flex-col justify-center items-center"
       >
         <template v-if="query.search != ''">
@@ -125,7 +125,7 @@ await getAll(true);
     v-model="modals.confirm"
     message="Do you want to delete this project?"
     @close="modals.toggle('confirm')"
-    @confirm="remove()"
+    @confirm="deleted()"
   />
 </template>
 

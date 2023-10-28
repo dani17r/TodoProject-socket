@@ -1,7 +1,7 @@
 import type { CallbacksI } from "@interfaces/interfaces.generals";
 import { defineStore, storeToRefs } from "pinia";
 import { useSocketAction } from "@utils/main";
-import { onceMounted } from "@utils/actions";
+import { onceMountedTwo } from "@utils/actions";
 import { socketTask } from "@services/main";
 import { findIndex, isEmpty } from "lodash";
 import eventBus from "@services/eventBus";
@@ -19,6 +19,11 @@ const store = defineStore("task", {
     tasks: { data: [], trash: [] },
     query: query.task,
     project_id: "",
+    loading: {
+      val: false,
+      enable: () => (store().$state.loading.val = true),
+      disable: () => (store().$state.loading.val = false),
+    },
   }),
   getters: {
     countTask: (state) => state.tasks.data.length,
@@ -38,25 +43,23 @@ const store = defineStore("task", {
       if (!isEmpty(tasks)) this.tasks = tasks;
     },
 
-    async getAll(verifyMounted = false) {
+   getAll(verifyMounted = false) {
       this.countTask;
 
-      await onceMounted(
+      onceMountedTwo(
         this,
-        (promise) => {
+        () => {
+          this.loading.enable();
           const socket = socketTask("/task", this.project_id);
           const init = useSocketAction("all", socket);
           const run = init<StateI["tasks"]>({
-            error: () => promise?.reject(),
-            actions: (tasks) => {
-              this.insert(tasks);
-              promise?.resolve();
-            },
+            actions: (tasks) => this.insert(tasks),
+            finally: () => this.loading.disable()
           });
 
           run({ query: this.query, _project: this.project_id });
         },
-        verifyMounted,
+        verifyMounted
       );
     },
 

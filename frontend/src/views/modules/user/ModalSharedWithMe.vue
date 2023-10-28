@@ -55,8 +55,10 @@ const search = superForm({
 });
 
 onMounted(() => {
-  getShared().then(() => {
-    shareFilter.value = cloneShared.value;
+  getShared({ 
+    actions: () => {
+      setTimeout(() => shareFilter.value = cloneShared.value, 200)
+    },
   });
 });
 </script>
@@ -70,7 +72,7 @@ onMounted(() => {
     :z-index="1000"
     @close="close()"
   >
-    <button class="float-right" @click="close()">
+    <button class="absolute right-[20px]" @click="close()">
       <Icons.Close />
     </button>
     <div class="content-modal-shared">

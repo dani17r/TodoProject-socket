@@ -36,7 +36,7 @@ const state = computed(() => {
 
 <template>
   <Transition name="fade">
-    <div v-show="state" class="notify">
+    <div v-if="state" class="notify">
       <div class="mx-auto">
         <div :class="`content ${props.classContent}`">
           <component :is="Icons[props.icon]" />
@@ -52,7 +52,7 @@ const state = computed(() => {
 
 <style>
 .notify {
-  @apply fixed bottom-3 right-3 z-50;
+  @apply fixed bottom-3 right-3 z-[110];
 }
 .notify .content {
   @apply flex items-center w-full max-w-xs p-4 rounded-lg shadow;

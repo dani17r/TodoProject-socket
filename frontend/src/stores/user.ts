@@ -1,10 +1,11 @@
 import type { CallbacksI, NotifyI } from "@interfaces/interfaces.generals";
 import userLocalStorageComposable from "@composables/userLocalStorage";
+import generalComposable from "@composables/general";
 import shareComposable from "@composables/share";
 import { defineStore, storeToRefs } from "pinia";
+import { onceMountedTwo } from "@utils/actions";
 import { useSocketAction } from "@utils/main";
 import useProjectStore from "@stores/project";
-import { onceMounted } from "@utils/actions";
 import { socketBase } from "@services/main";
 import eventBus from "@services/eventBus";
 import query from "@utils/querys";
@@ -17,6 +18,7 @@ import type {
 } from "@interfaces/interfaces.user";
 
 const { removeUserId, setUserId, getUserId } = userLocalStorageComposable();
+const { loading } = generalComposable();
 
 const store = defineStore("user", {
   state: (): StateI => ({
@@ -26,6 +28,11 @@ const store = defineStore("user", {
     query: query.user,
     users: { data: [] },
     user: null,
+    loading: {
+      val: false,
+      enable: () => (store().$state.loading.val = true),
+      disable: () => (store().$state.loading.val = false),
+    },
   }),
   getters: {
     isLogin: (store) => store.user == null,
@@ -37,30 +44,27 @@ const store = defineStore("user", {
     },
 
     addUser(newUser: UserI) {
-      if (!this.lifecicles.mounted) !isEmpty(newUser) && (this.user = newUser);
+      if (!this.lifecicles.mounted) {
+        !isEmpty(newUser) && (this.user = newUser);
+      }
     },
 
-    async refresh() {
+    refresh() {
       const socket = socketBase("/auth");
       const token = localStorage.getItem("token") ?? null;
 
-      await new Promise<void>((resolve, reject) => {
-        socket.emit("status", token);
-        socket.on("status/response", ({ user }) => {
-          if (!isEmpty(user)) this.addUser(user);
-          socket.close();
-          resolve();
-        });
-        socket.io.on("error", () => {
-          socket.close();
-          reject();
-        });
+      socket.emit("status", token);
+      socket.io.on("error", () => socket.close());
+      socket.on("status/response", ({ user }) => {
+        if (!isEmpty(user)) this.addUser(user);
+        socket.close();
       });
     },
 
     login(form: FormsI["login"], callbacks?: CallbacksI<NotifyI>) {
       const socket = socketBase("/auth");
-
+      
+      loading.enable();
       const init = useSocketAction("login", socket);
       const run = init<LoginI>({
         actions: (response) => {
@@ -70,7 +74,7 @@ const store = defineStore("user", {
           setUserId(user._id);
           this.addUser(user);
         },
-        error: (err) => callbacks?.error && callbacks.error(err),
+        finally: () => loading.disable(),
       });
 
       run(form);
@@ -80,21 +84,21 @@ const store = defineStore("user", {
       const token = localStorage.getItem("token");
       const socket = socketBase("/auth");
       const project = useProjectStore();
-
+      
+      loading.enable();
       const init = useSocketAction("logout", socket);
-      const run = init<{ notify: NotifyI }>({
+      const run = init<NotifyI, { notify: NotifyI }>(callbacks, {
         actions: (response) => {
-          const notify = response?.notify;
+          const { notify } = response as LoginI;
           callbacks?.actions && callbacks.actions(notify);
-
           localStorage.removeItem("token");
-          setTimeout(() => {
+        },
+        finally: () => setTimeout(() => {
+            loading.disable();
             project.clear();
             removeUserId();
             this.clear();
-          }, 400);
-        },
-        error: (err) => callbacks?.error && callbacks.error(err),
+        }, 300),
       });
 
       run(token);
@@ -102,16 +106,15 @@ const store = defineStore("user", {
 
     register(form: FormsI["register"], callbacks?: CallbacksI<NotifyI>) {
       const socket = socketBase("/auth");
-
+      
+      loading.enable();
       const init = useSocketAction("register", socket);
       const run = init<{ notify: NotifyI }>({
         actions: (response) => {
-          if (response) {
-            const notify = response.notify;
-            callbacks?.actions && callbacks.actions(notify);
-          }
+          const { notify } = response as LoginI;
+          callbacks?.actions && callbacks.actions(notify);
         },
-        error: (err) => callbacks?.error && callbacks.error(err),
+        finally: () => loading.disable(),
       });
 
       run(form);
@@ -122,29 +125,19 @@ const store = defineStore("user", {
       const socket = socketBase("/auth", getUserId.value);
 
       const init = useSocketAction("update", socket);
-      const run = init<UserI>({
-        actions: (user) => {
-          user && this.addUser(user);
-          callbacks?.actions && callbacks.actions();
-        },
-        error: (err) => callbacks?.error && callbacks.error(err),
+      const run = init<NotifyI, UserI>(callbacks, {
+        actions: (user) => user && this.addUser(user),
       });
 
       run(form);
     },
 
-    changePassword(
-      form: FormsI["changePassword"],
-      callbacks?: CallbacksI<NotifyI>,
-    ) {
+    changePassword(form: FormsI["changePassword"], callbacks?: CallbacksI<NotifyI>) {
       const socket = socketBase("/auth");
 
       const init = useSocketAction("change-password", socket);
       const run = init<NotifyI>({
-        actions: (notify) => {
-          callbacks?.actions && callbacks.actions(notify);
-        },
-        error: (err) => callbacks?.error && callbacks.error(err),
+        actions: (notify) => callbacks?.actions && callbacks.actions(notify),
       });
 
       run(form);
@@ -157,39 +150,19 @@ const store = defineStore("user", {
       this.users = { data: [] };
     },
 
-    async getAll(
-      callbacks?: CallbacksI<StateI["users"]>,
-      verifyMounted = false,
-    ) {
-      await onceMounted(
-        this,
-        (promise) => {
+    getAll(callbacks?: CallbacksI<StateI["users"]>, verifyMounted = false) {
+      onceMountedTwo(this, () => {
           const { droupPrivateIds } = shareComposable();
           const socket = socketBase("/user", getUserId.value);
 
           const init = useSocketAction("all", socket);
-          const run = init<StateI["users"]>({
-            error: () => promise?.reject(),
-            actions: (users) => {
-              this.insert(users);
-              callbacks?.actions && callbacks.actions(users);
-              promise?.resolve();
-            },
+          const run = init<StateI["users"]>(callbacks, {
+            actions: (data) => this.insert(data),
           });
 
           run({ query: this.query, _ids: droupPrivateIds.value });
-
-          //  api
-          //    .get(`/user/${getUserId.value}`, {
-          //      params: { query: this.query, _ids: droupPrivateIds.value },
-          //    })
-          //    .then(({ data }) => {
-          //       this.insert(data);
-          //       callbacks?.actions && callbacks.actions(data);
-          //     })
-          //   .finally(() => promise.resolve());
         },
-        verifyMounted,
+        verifyMounted
       );
     },
   },

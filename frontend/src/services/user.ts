@@ -20,12 +20,12 @@ export default () => {
 
   const socket = computed(() => socketBase("/auth", getUserId.value));
 
-  socket.value.on(`${urlSocket}/update`, async () => {
+  socket.value.on(`${urlSocket}/update`, () => {
     setTimeout(() => (status.update = true), 300);
-    if (status.update) await refresh();
+    if (status.update) refresh();
   });
 
-  // socket.value.on(`broadcast:${projectId}/change-share`, (updateProject) => {
+  // socket.value.on(`broadcast:${projectId}/change-share`, () => {
   //   setTimeout(() => (status.changeShare = true), 300);
   //   if (status.changeShare) {
   //     projectStore.getShared();

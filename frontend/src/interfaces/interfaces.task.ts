@@ -38,6 +38,11 @@ export interface StateI {
   };
   query: QueryI;
   project_id: string;
+  loading: {
+    val: boolean;
+    enable: () => boolean;
+    disable: () => boolean;
+  };
 }
 
 export interface OnChangeDroggableI {

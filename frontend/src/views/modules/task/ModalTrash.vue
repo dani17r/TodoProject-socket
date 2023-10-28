@@ -93,8 +93,8 @@ const deleteAllTrash = () => {
 
   <Confirm
     v-model="modals.confirm"
+    :z-index="200"
     message="Are you sure to delete all ?"
-    class="!z-[200]"
     @close="modals.toggle('confirm')"
     @confirm="deleteAllTrash()"
   />

@@ -3,6 +3,7 @@ import InputToggle from "@components/InputToggle.vue";
 import shareComposable from "@composables/share";
 import { projectStore } from "@stores/project";
 import Modals from "@components/modals";
+import Icons from "@components/icons";
 import { useRoute } from "vue-router";
 import Tasks from "@modules/task";
 import { computed } from "vue";
@@ -12,7 +13,7 @@ const props = defineProps({ status: Boolean });
 const modal = computed(() => props.status);
 
 const { share } = shareComposable();
-const { update, changeShare } = projectStore();
+const { update, changeShare, loading } = projectStore();
 const route = useRoute();
 
 const projectId = String(route.params.id);
@@ -22,10 +23,8 @@ const saveModalPrivateShare = () => {
   update(
     { _id: projectId, share: share.value },
     {
-      actions: (updatedProject) => {
-        setTimeout(() => events("close"));
-        if (updatedProject) changeShare(updatedProject);
-      },
+      actions: (project) => project && changeShare(project),
+      finally: () => events("close"),
     },
   );
 };
@@ -33,6 +32,14 @@ const saveModalPrivateShare = () => {
 
 <template>
   <Modals.Main v-model="modal" :width="'950px'" @close="events('close')">
+     <Transition name="fade">
+      <div
+        v-if="loading.val"
+        class="absolute left-0 top-0 z-50 w-full h-[100%] bg-black opacity-50 flex justify-center items-center"
+      >
+        <Icons.Loading />
+      </div>
+    </Transition>
     <div v-if="share">
       <Tasks.UrlShare :project-id="projectId" />
 

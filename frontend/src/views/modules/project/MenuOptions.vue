@@ -5,7 +5,7 @@ import projectComposable from "@composables/project";
 import Project from "@modules/project";
 import Icons from "@components/icons";
 
-const { getAll, ascDesc, select, modals, search, query } = projectComposable();
+const { refresh, ascDesc, select, modals, search, query } = projectComposable();
 </script>
 
 <template>
@@ -35,7 +35,7 @@ const { getAll, ascDesc, select, modals, search, query } = projectComposable();
           id="limit-two"
           v-model="query.limit"
           class="select-limit pl-8"
-          @change="getAll"
+          @change="refresh"
         >
           <option value="5">5</option>
           <option value="10">10</option>

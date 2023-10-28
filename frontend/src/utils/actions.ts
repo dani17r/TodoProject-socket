@@ -20,3 +20,16 @@ export const onceMounted = async (
     }
   } else await awaitCallback(callback);
 };
+
+export const onceMountedTwo = (
+  $this = { lifecicles: { mounted: false } },
+  callback: CallbacksI<PromiseT>["actions"],
+  verifyMounted = true,
+) => {
+  if (verifyMounted) {
+    if (!$this.lifecicles.mounted) {
+      $this.lifecicles.mounted = true;
+      callback && callback();
+    }
+  } else callback && callback();
+};

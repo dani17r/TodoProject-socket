@@ -1,9 +1,12 @@
 import type { MiddlewareI } from "@interfaces/interfaces.generals";
+import generalComposable from "@composables/general";
 import { projectStore } from "@stores/project";
 import { socketBase } from "@services/main";
 import { auth } from "@middlewares/auth";
 import { userStore } from "@stores/user";
 import { isEmpty } from "lodash";
+
+const { loading } = generalComposable();
 
 export const isRealId: MiddlewareI["function"] = (to, from, next) => {
   const socket = socketBase("/project");
@@ -29,17 +32,18 @@ export const isShareProject: MiddlewareI["function"] = (to, from, next) => {
   const socket = socketBase("/project");
   const { insertOne } = projectStore();
   const { addUser } = userStore();
+  loading.enable();
 
   auth(next, {
     actions: ({ user, isSession }) => {
       isSession && !isEmpty(user) && addUser(user);
     },
+    final: () => loading.disable()
   });
 
   socket.emit("one", { _id: to.params.id });
   socket.on("one/success", (project) => {
     socket.close();
-
     if (project) {
       insertOne(project);
       const publicStatus = project.share.public.status ? "public" : "private";

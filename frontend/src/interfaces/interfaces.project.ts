@@ -76,4 +76,9 @@ export interface StateI {
   project: ProjectI | null;
   shared: Shared[] | null;
   query: QueryI;
+  loading: {
+    val: boolean,
+    enable: () => boolean
+    disable: () => boolean
+  };
 }

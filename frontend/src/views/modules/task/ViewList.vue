@@ -20,6 +20,7 @@ const {
 
   optionsDragg,
   multiSelect,
+  loading,
   select,
   modals,
 } = taskComposable();
@@ -41,86 +42,97 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="tasks.length" class="content-list scrollable">
-    <draggable
-      v-model="taskStore.tasks.data"
-      v-bind="optionsDragg"
-      :disabled="!permissions.m"
-      @change="changePositionTask"
+  <Transition name="fade">
+    <div
+      v-if="loading.val"
+      class="fixed left-0 top-0 z-50 w-full h-[100vh] flex justify-center items-center"
     >
-      <template #item="{ element: task }">
-        <div class="list">
-          <div class="flex flex-col w-full" @dblclick="modals.open.view(task)">
-            <div class="w-full inline-flex justify-between">
-              <div class="inline-flex gap-4">
-                <h2
-                  class="text-zinc-200 font-bold text-lg"
-                  :class="
-                    task.done && 'opacity-50 line-through !text-green-600'
-                  "
-                >
-                  {{ truncate(task.name, { length: 28 }) }}
-                </h2>
-              </div>
-              <div v-show="!multiSelect.button.value" class="inline-flex gap-1">
-                <Popper
-                  content="You don't have allow for edited"
-                  :disabled="permissions.u"
-                >
-                  <Icons.Edit
-                    v-show="!task.done"
-                    class="icon-task-edit"
-                    @click="
-                      allowIfPermission('u', () => modals.open.update(task))
-                    "
-                  />
-                </Popper>
-                <Popper
-                  content="You don't have allow for removed"
-                  :disabled="permissions.r"
-                >
-                  <Icons.Delete
-                    class="icon-task-delete"
-                    @click="
-                      allowIfPermission('r', () => moveToRecycleBin(task._id))
-                    "
-                  />
-                </Popper>
+      <Icons.Loading />
+    </div>
+  </Transition>
 
-                <Popper
-                  content="You don't have allow for verify or unverify a task"
-                  :disabled="permissions.u"
-                >
-                  <Icons.CircleCheck
-                    class="icon-task-check h-8 w-8 -mt-[3px] ml-3"
-                    :class="task.done && 'stroke-green-600'"
-                    @click="allowIfPermission('u', () => done(task))"
-                  />
-                </Popper>
+  <TransitionGroup name="fade">
+    <div v-if="tasks.length" class="content-list scrollable">
+      <draggable
+        v-model="taskStore.tasks.data"
+        v-bind="optionsDragg"
+        :disabled="!permissions.m"
+        @change="changePositionTask"
+      >
+        <template #item="{ element: task }">
+          <div class="list">
+            <div class="flex flex-col w-full" @dblclick="modals.open.view(task)">
+              <div class="w-full inline-flex justify-between">
+                <div class="inline-flex gap-4">
+                  <h2
+                    class="text-zinc-200 font-bold text-lg"
+                    :class="
+                      task.done && 'opacity-50 line-through !text-green-600'
+                    "
+                  >
+                    {{ truncate(task.name, { length: 28 }) }}
+                  </h2>
+                </div>
+                <div v-show="!multiSelect.button.value" class="inline-flex gap-1">
+                  <Popper
+                    content="You don't have allow for edited"
+                    :disabled="permissions.u"
+                  >
+                    <Icons.Edit
+                      v-show="!task.done"
+                      class="icon-task-edit"
+                      @click="
+                        allowIfPermission('u', () => modals.open.update(task))
+                      "
+                    />
+                  </Popper>
+                  <Popper
+                    content="You don't have allow for removed"
+                    :disabled="permissions.r"
+                  >
+                    <Icons.Delete
+                      class="icon-task-delete"
+                      @click="
+                        allowIfPermission('r', () => moveToRecycleBin(task._id))
+                      "
+                    />
+                  </Popper>
+  
+                  <Popper
+                    content="You don't have allow for verify or unverify a task"
+                    :disabled="permissions.u"
+                  >
+                    <Icons.CircleCheck
+                      class="icon-task-check h-8 w-8 -mt-[3px] ml-3"
+                      :class="task.done && 'stroke-green-600'"
+                      @click="allowIfPermission('u', () => done(task))"
+                    />
+                  </Popper>
+                </div>
+                <input
+                  v-show="multiSelect.button.value"
+                  :id="task._id"
+                  v-model="task.select"
+                  type="checkbox"
+                  @change="multiSelect.all.selectOne(tasks)"
+                />
               </div>
-              <input
-                v-show="multiSelect.button.value"
-                :id="task._id"
-                v-model="task.select"
-                type="checkbox"
-                @change="multiSelect.all.selectOne(tasks)"
-              />
-            </div>
-            <div
-              class="ql-container ql-disabled ql-snow !bg-transparent"
-              :class="task.done && 'opacity-50 line-through'"
-            >
               <div
-                id="editor"
-                class="ql-editor ql-blank"
-                v-html="truncate(task.content, { length: 80 })"
-              ></div>
+                class="ql-container ql-disabled ql-snow !bg-transparent"
+                :class="task.done && 'opacity-50 line-through'"
+              >
+                <div
+                  id="editor"
+                  class="ql-editor ql-blank"
+                  v-html="truncate(task.content, { length: 80 })"
+                ></div>
+              </div>
             </div>
           </div>
-        </div>
-      </template>
-    </draggable>
-  </div>
+        </template>
+      </draggable>
+    </div>
+  </TransitionGroup>
 
   <template v-if="permissions.st">
     <button

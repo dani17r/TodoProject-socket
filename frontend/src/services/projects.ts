@@ -34,7 +34,7 @@ export default () => {
 
   socket.value.on(
     `${urlSocket}/delete`,
-    async ({
+    ({
       _id,
       projects,
     }: {
@@ -46,7 +46,7 @@ export default () => {
         document.getElementById(`modal_add_or_edit-${_id}`)?.click();
         document.getElementById(`dropdown_blur-${_id}`)?.click();
         document.getElementById(`modal_confirm-${_id}`)?.click();
-        await projectStore.removeAndPreviePaginate(projects);
+        projectStore.removeAndPreviePaginate(projects);
       }
     },
   );

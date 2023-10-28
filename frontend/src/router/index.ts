@@ -53,7 +53,7 @@ const router = createRouter({
         type: "private",
       },
       beforeEnter: [isShareProject],
-      component: () => import("@pages/ShareProjectPage.vue"),
+      component: () => import("@pages/ShareTasksPage.vue"),
     },
     {
       path: "/",

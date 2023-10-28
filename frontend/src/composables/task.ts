@@ -56,10 +56,13 @@ export default () => {
     getAll,
 
     countTask,
+    loading,
     query,
     tasks,
   } = taskStore();
+  
   const { project } = projectStore();
+
   const select = reactive({
     data: <SelectTaskT>{},
   });
@@ -155,6 +158,7 @@ export default () => {
 
     optionsDragg,
     multiSelect,
+    loading,
     select,
     modals,
     query,

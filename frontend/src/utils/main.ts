@@ -98,24 +98,34 @@ export const superErrors = (
   };
 };
 
+//callbackExt
 export const useSocketAction = (name: string, socket: Socket) => {
-  return <T>(callbackExt?: CallbacksI<T>, callbacks?: CallbacksI<T>) =>
+  return <T, G=T>(callbackOne?: CallbacksI<T>, callbackTwo?: CallbacksI<G>) =>
     (params?: unknown) => {
       if (params) socket.emit(name, params);
       else socket.emit(name);
 
-      socket.on(`${name}/success`, (body?: T) => {
-        if (body) {
-          callbackExt?.actions && callbackExt.actions(body);
-          callbacks?.actions && callbacks.actions(body);
-          socket.close();
-        }
+      socket.on(`${name}/success`, (body?: T & G) => {
+        
+        callbackOne?.actions && callbackOne.actions(body);
+        callbackTwo?.actions && callbackTwo.actions(body);
+        
+        setTimeout(() => {
+          callbackOne?.finally && callbackOne?.finally()
+          callbackTwo?.finally && callbackTwo?.finally()
+          socket.close()
+        }, 600);
       });
 
       socket.on(`${name}/error`, (err: NotifyErrorI) => {
-        callbackExt?.error && callbackExt.error(err);
-        callbacks?.error && callbacks.error(err);
-        socket.close();
+        callbackOne?.error && callbackOne.error(err);
+        callbackTwo?.error && callbackTwo.error(err);
+
+        setTimeout(() => {
+          callbackOne?.finally && callbackOne?.finally();
+          callbackTwo?.finally && callbackTwo?.finally();
+          socket.close();
+        }, 200);
       });
     };
 };

@@ -7,6 +7,7 @@ import type {
 /*eslint no-unused-vars: ["error", { "args": "none" }]*/
 export interface CallbacksMiddlI {
   actions: (value: StatusMiddlI) => void;
+  final?: () => void;
   error?: () => void;
 }
 
@@ -60,4 +61,9 @@ export interface StateI {
   };
   user: UserI | null;
   query: QueryI;
+  loading: {
+    val: boolean;
+    enable: () => boolean;
+    disable: () => boolean;
+  };
 }

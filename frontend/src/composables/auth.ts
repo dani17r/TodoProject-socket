@@ -22,6 +22,7 @@ const formLogin = {
 export const signupComposable = () => {
   /** Composables */
   const Notify = notifyComposable();
+
   /** Stores */
   const useState = userStore();
 
@@ -44,8 +45,8 @@ export const signupComposable = () => {
     if (status.value)
       useState.register(form, {
         actions: (notify) => {
-          setTimeout(() => router.push({ name: "login" }), 300);
-          Notify.success(String(notify?.message));
+          Notify.success(String(notify?.message))
+          router.push({ name: "login" });
         },
         error: (error) => setError(error),
       });
@@ -61,6 +62,7 @@ export const signupComposable = () => {
 export const loginComposable = () => {
   /** Composables */
   const Notify = notifyComposable();
+
   /** Stores */
   const useState = userStore();
 
@@ -76,8 +78,8 @@ export const loginComposable = () => {
     if (status.value)
       useState.login(form, {
         actions: (notify) => {
-          setTimeout(() => router.push({ name: "home" }), 300);
-          Notify.success(String(notify?.message));
+          Notify.success(String(notify?.message))
+          router.push({ name: "home" });
         },
         error: (error) => setError(error),
       });

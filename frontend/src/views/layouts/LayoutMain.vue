@@ -54,16 +54,30 @@ onMounted(() => socket.open());
       </ul>
     </nav>
   </div>
-  <RouterView />
+  <div class="content-layout-main">
+    <router-view v-slot="{ Component }">
+      <transition name="page" mode="out-in">
+        <component :is="Component"/>
+      </transition>
+    </router-view>
+  </div>
 </template>
 
 <style>
+.content-layout-main{
+  @apply relative;
+}
+
+.base .content {
+  padding-top: 10px;
+}
+
 .base .active-link {
   @apply bg-gray-100 text-blue-500 !important;
 }
 
 .base.content-nav {
-  @apply w-full mb-10 fixed z-50;
+  @apply w-full top-0 fixed z-50;
 }
 
 .base.content-nav nav {

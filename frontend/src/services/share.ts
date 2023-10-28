@@ -64,11 +64,11 @@ export default (projectId: string) => {
     if (status.deleteAll) taskStore.getAll();
   });
 
-  socket.value.on(`${urlSocket}/change-share`, async (updateProject) => {
+  socket.value.on(`${urlSocket}/change-share`, (updateProject) => {
     setTimeout(() => (status.changeShare = true), 300);
     if (status.changeShare) {
       projectStore.project = updateProject;
-      await projectStore.getShared();
+      projectStore.getShared();
       initPermissions();
       route.meta.type = updateProject.share.public.status
         ? "public"
