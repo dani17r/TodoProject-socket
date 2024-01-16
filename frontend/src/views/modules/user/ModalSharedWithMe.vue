@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import ShareUrl from "@modules/task/share/ShareUrl.vue";
 import InputSearch from "@components/InputSearch.vue";
-import { computed, onMounted, ref } from "vue";
-import { projectStore } from "@stores/project";
+import { computed, onMounted, ref, watchEffect } from "vue";
+import { userStore } from "@stores/user";
 import { debounce, lowerCase } from "lodash";
 import { superForm } from "@utils/inputs";
 import Modals from "@components/modals";
@@ -19,11 +19,11 @@ const props = withDefaults(defineProps<PropsI>(), {
   modelValue: false,
 });
 
-const { getShared, shared } = projectStore();
+const { getSharedUser, shared } = userStore();
 
 const status = computed(() => props.modelValue);
 const cloneShared = computed(() => shared.value);
-const shareFilter = ref();
+const shareFilter = ref(shared.value);
 let memory = ref(true);
 
 const close = () => {
@@ -34,30 +34,32 @@ const close = () => {
   }
 };
 
-const FindShared = () => {
-  return shared.value?.filter((val) => {
+const findShared = computed(() => {
+  return cloneShared.value?.filter((val) => {
     let searchDescription = lowerCase(val.description).includes(search.input);
     let searchName = lowerCase(val.author.fullname).includes(search.input);
     let searchEmail = lowerCase(val.author.email).includes(search.input);
     let searchTitle = lowerCase(val.title).includes(search.input);
 
     return searchDescription || searchName || searchEmail || searchTitle;
-  });
-};
+  }) || [];
+});
 
 const search = superForm({
   input: "",
-  find: debounce(() => (shareFilter.value = FindShared()), 900),
+  find: debounce(() => (shareFilter.value = findShared.value), 900),
   empty: () => {
-    shareFilter.value = cloneShared.value;
+    shareFilter.value = shared.value;
     search.input = "";
   },
 });
 
+watchEffect(()=> shareFilter.value = shared.value);
+
 onMounted(() => {
-  getShared({ 
+  getSharedUser({ 
     actions: () => {
-      setTimeout(() => shareFilter.value = cloneShared.value, 200)
+      setTimeout(() => shareFilter.value = shared.value, 200)
     },
   });
 });

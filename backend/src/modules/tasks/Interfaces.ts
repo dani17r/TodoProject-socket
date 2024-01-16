@@ -1,3 +1,4 @@
+import { QueryI } from "@modules/interfaces";
 import { Document } from "mongoose";
 
 export interface TaskI extends Document {
@@ -12,4 +13,23 @@ export interface TaskI extends Document {
   done?: boolean;
   name: string;
   _id?: string;
+}
+
+export interface AllResI {
+  query: QueryI;
+  _project: string;
+}
+export interface DeleteResI {
+_project: string;
+query: QueryI;
+  _id?: string;
+}
+export interface TrashResI {
+  _project: string;
+  query: QueryI;
+  _ids: string;
+}
+export interface CreateResI {
+  form: TaskI;
+  query: QueryI;
 }

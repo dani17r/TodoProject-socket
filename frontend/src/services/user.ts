@@ -1,5 +1,4 @@
 import userLocalStorageComposable from "@composables/userLocalStorage";
-// import useProjectStore from "@stores/project";
 import { socketBase } from "@services/main";
 import { computed, reactive } from "vue";
 import { userStore } from "@stores/user";
@@ -13,9 +12,9 @@ export const status = reactive({
 export default () => {
   const { getUserId } = userLocalStorageComposable();
   const urlSocket = `broadcast:${getUserId.value}`;
-  // const projectStore = useProjectStore();
-  const { refresh } = userStore();
+  const { refresh, getSharedUser } = userStore();
 
+  eventBus.on("user/change-share", () => (status.changeShare = false));
   eventBus.on("user/update", () => (status.update = false));
 
   const socket = computed(() => socketBase("/auth", getUserId.value));
@@ -25,12 +24,10 @@ export default () => {
     if (status.update) refresh();
   });
 
-  // socket.value.on(`broadcast:${projectId}/change-share`, () => {
-  //   setTimeout(() => (status.changeShare = true), 300);
-  //   if (status.changeShare) {
-  //     projectStore.getShared();
-  //   }
-  // });
+  socket.value.on(`${urlSocket}/change-share-user`, () => {
+    setTimeout(() => (status.changeShare = true), 300);
+    if (status.changeShare) getSharedUser();
+  });
 
   return socket.value;
 };

@@ -1,5 +1,4 @@
-import { ProjectI } from "@modules/projects/interfaces";
-import { TaskI } from "@modules/tasks/Interfaces";
+import { AllResI, CreateResI, DeleteResI, TaskI, TrashResI } from "@modules/tasks/Interfaces";
 // import { rules } from "@modules/tasks/validate";
 import Tasks from "@modules/tasks/model";
 import { io } from "@main/server";
@@ -8,24 +7,7 @@ import { getSearchQuery, getFieldQuery, getFieldSort } from "@utils/querys";
 import { QueryI } from "@modules/interfaces";
 import { Types } from "mongoose";
 
-interface AllResI {
-  query: QueryI;
-  _project: string;
-}
-interface DeleteResI {
-  _project: string;
-  query: QueryI;
-  _id?: string;
-}
-interface TrashResI {
-  _project: string;
-  query: QueryI;
-  _ids: string;
-}
-interface CreateResI {
-  form: TaskI;
-  query: QueryI;
-}
+
 
 const getAll = async (query: QueryI, _project: string) => {
   const search = getSearchQuery(query);
@@ -160,13 +142,6 @@ export default () => {
           socket.emit("all/success", tasks);
         });
       }
-    });
-
-    socket.on("change-share", async (updateProject: ProjectI) => {
-      socket.broadcast.emit(
-        `broadcast:${projectId}/change-share`,
-        updateProject
-      );
     });
   });
 };

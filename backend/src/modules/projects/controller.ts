@@ -31,6 +31,7 @@ const getAll = async (query: QueryI, _author: string) => {
 export default () => {
   io.of("/project").on("connection", (socket) => {
     let userId = socket.handshake.headers["user"];
+    let projectId = socket.handshake.headers["project_id"];
 
     socket.on("create", async ({ form, query }: { form: ProjectI; query: QueryI }) => {
         
@@ -108,51 +109,11 @@ export default () => {
         .catch(() => socket.emit("one/error"));
     });
 
-    socket.on("shared", async () => {
-      await Projects.aggregate([
-        {
-          $match: {
-            "share.private.group._id": userId,
-            "share.private.status": true,
-          },
-        },
-        { $unwind: "$share.private.group" },
-        { $match: { "share.private.group._id": userId } },
-        {
-          $lookup: {
-            from: "users",
-            localField: "_author",
-            foreignField: "_id",
-            as: "author",
-          },
-        },
-        {
-          $project: {
-            title: true,
-            description: true,
-            permissions: "$share.private.group.permissions",
-            author: { $arrayElemAt: ["$author", 0] },
-          },
-        },
-        {
-          $project: {
-            title: true,
-            description: true,
-            permissions: true,
-            author: {
-              fullname: true,
-              email: true,
-            },
-          },
-        },
-      ])
-        .then((projects) => {
-          socket.emit("shared/success", projects);
-        })
-        .catch(() => socket.emit("shared/error"));
-    });
-
-    socket.on("shared-users", async () => {
+    socket.on("change-share", async (updateProject: ProjectI) => {
+      socket.broadcast.emit(
+        `broadcast:${projectId}/change-share`,
+        updateProject
+      );
     });
 
     //Verify Id

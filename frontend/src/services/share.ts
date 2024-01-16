@@ -1,11 +1,10 @@
+import shareComposable from "@composables/share";
 import useProjectStore from "@stores/project";
 import { socketTask } from "@services/main";
 import { computed, reactive } from "vue";
 import useTaskStore from "@stores/task";
-import eventBus from "./eventBus";
 import { useRoute } from "vue-router";
-
-import shareComposable from "@composables/share";
+import eventBus from "./eventBus";
 
 const status = reactive({
   changeShare: true,
@@ -18,13 +17,14 @@ const status = reactive({
 });
 
 export default (projectId: string) => {
-  const { initPermissions } = shareComposable();
+  
   const urlSocket = `broadcast:${projectId}`;
+  const { initPermissions } = shareComposable();
   const projectStore = useProjectStore();
   const taskStore = useTaskStore();
   const route = useRoute();
 
-  eventBus.on("task/change-share", () => (status.changeShare = false));
+  eventBus.on("project/change-share", () => (status.changeShare = false));
   eventBus.on("task/delete-all", () => (status.deleteAll = false));
   eventBus.on("task/update", () => (status.update = false));
   eventBus.on("task/create", () => (status.create = false));
@@ -64,11 +64,10 @@ export default (projectId: string) => {
     if (status.deleteAll) taskStore.getAll();
   });
 
-  socket.value.on(`${urlSocket}/change-share`, (updateProject) => {
+  socketTask("/project", projectId).on(`${urlSocket}/change-share`, (updateProject) => {
     setTimeout(() => (status.changeShare = true), 300);
     if (status.changeShare) {
       projectStore.project = updateProject;
-      projectStore.getShared();
       initPermissions();
       route.meta.type = updateProject.share.public.status
         ? "public"

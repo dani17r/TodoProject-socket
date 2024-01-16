@@ -11,6 +11,7 @@ import {
   ChangePasswordI,
 } from "@modules/users/interfaces";
 
+import Projects from "@modules/projects/model";
 import { QueryI } from "@modules/interfaces";
 import { newPassword } from "@utils/auth";
 import User from "@modules/users/model";
@@ -21,6 +22,7 @@ import {
   getFieldQuery,
   getFieldSort,
 } from "@utils/querys";
+import { string } from "joi";
 
 const getAll = async (query: QueryI, _ids: string[]) => {
   const search = getSearchQuery(query);
@@ -48,6 +50,7 @@ const getAll = async (query: QueryI, _ids: string[]) => {
 
 export default () => {
   io.of("/user").on("connection", (socket) => {
+    
     socket.on("all", async ({ query, _ids }: AllDataI) => {
       getAll(query, _ids)
         .then((users) => {
@@ -55,9 +58,11 @@ export default () => {
         })
         .catch(() => socket.emit("all/error"));
     });
+   
   });
 
   io.of("/auth").on("connection", (socket) => {
+    let userId = socket.handshake.headers["user"];
     const validation = validate(socket);
 
     //Login
@@ -172,5 +177,56 @@ export default () => {
 
       await validation(form, rules.changePassword, action);
     });
+
+    socket.on("shared-with-user", async () => {
+      await Projects.aggregate([
+        {
+          $match: {
+            "share.private.group._id": userId,
+            "share.private.status": true,
+          },
+        },
+        { $unwind: "$share.private.group" },
+        { $match: { "share.private.group._id": userId } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "_author",
+            foreignField: "_id",
+            as: "author",
+          },
+        },
+        {
+          $project: {
+            title: true,
+            description: true,
+            permissions: "$share.private.group.permissions",
+            author: { $arrayElemAt: ["$author", 0] },
+          },
+        },
+        {
+          $project: {
+            title: true,
+            description: true,
+            permissions: true,
+            author: {
+              fullname: true,
+              email: true,
+            },
+          },
+        },
+      ])
+        .then((projects) => {
+          socket.emit("shared-with-user/success", projects);
+        })
+        .catch(() => socket.emit("shared-with-user/error"));
+    });
+
+    socket.on("change-share-user", async (usersIds) => {
+      usersIds.forEach((userId:string) => {
+        socket.broadcast.emit(`broadcast:${userId}/change-share-user`);
+      })
+    });
+
   });
 };

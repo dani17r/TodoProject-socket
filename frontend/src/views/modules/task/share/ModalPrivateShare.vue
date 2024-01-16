@@ -13,7 +13,7 @@ const props = defineProps({ status: Boolean });
 const modal = computed(() => props.status);
 
 const { share } = shareComposable();
-const { update, changeShare, loading } = projectStore();
+const { update, changeShare, changeShareUsers, loading } = projectStore();
 const route = useRoute();
 
 const projectId = String(route.params.id);
@@ -23,7 +23,10 @@ const saveModalPrivateShare = () => {
   update(
     { _id: projectId, share: share.value },
     {
-      actions: (project) => project && changeShare(project),
+      actions: (project) => {
+        project && changeShareUsers(project);
+        project && changeShare(project);
+      },
       finally: () => events("close"),
     },
   );
@@ -54,7 +57,7 @@ const saveModalPrivateShare = () => {
         class="btn-main mt-4 float-right !w-32"
         @click="saveModalPrivateShare()"
       >
-        Save
+        Accept
       </button>
     </div>
   </Modals.Main>

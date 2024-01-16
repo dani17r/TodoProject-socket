@@ -3,6 +3,7 @@ import type {
   PaginateI,
   QueryI,
 } from "@interfaces/interfaces.generals";
+import type { Shared } from "./interfaces.project";
 
 /*eslint no-unused-vars: ["error", { "args": "none" }]*/
 export interface CallbacksMiddlI {
@@ -61,6 +62,7 @@ export interface StateI {
   };
   user: UserI | null;
   query: QueryI;
+  shared: Shared[] | null;
   loading: {
     val: boolean;
     enable: () => boolean;

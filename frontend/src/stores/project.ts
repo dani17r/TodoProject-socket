@@ -25,7 +25,6 @@ const store = defineStore("project", {
     },
     projects: { data: [] },
     query: query.project,
-    shared: null,
     project: null,
   }),
   actions: {
@@ -37,10 +36,6 @@ const store = defineStore("project", {
 
     insert(projects?: StateI["projects"]) {
       if (!isEmpty(projects)) this.projects = projects;
-    },
-
-    insertShared(shared?: StateI["shared"]) {
-      if (shared?.length) this.shared = shared
     },
 
     insertOne(project?: StateI["project"]) {
@@ -67,24 +62,6 @@ const store = defineStore("project", {
       );
     },
 
-    getShared(callbacks?: CallbacksI<StateI["shared"]>, verifyMounted = false) {
-      eventBus.emit("user/change-share");
-      
-      onceMountedTwo(
-        this,
-        () => {
-          const socket = socketBase("/project", getUserId.value);
-          const init = useSocketAction("shared", socket);
-          const run = init<StateI["shared"]>(callbacks, {
-            actions: (shared) => this.insertShared(shared),
-          });
-
-          run();
-        },
-        verifyMounted
-      );
-    },
-
     create(form: FormsI["inter"], callbacks?: CallbacksI<StateI["projects"]>) {
       eventBus.emit("project/create");
       this.loading.enable();
@@ -101,8 +78,8 @@ const store = defineStore("project", {
 
     changeShare(newUpdate: ProjectI) {
       this.loading.enable();
-      eventBus.emit("task/change-share");
-      const socket = socketTask("/task", String(this.project?._id));
+      eventBus.emit("project/change-share");
+      const socket = socketTask("/project", String(this.project?._id));
 
       const init = useSocketAction("change-share", socket);
       const run = init<StateI["projects"]>({
@@ -110,6 +87,17 @@ const store = defineStore("project", {
       });
 
       run(newUpdate);
+    },
+
+    changeShareUsers(project: ProjectI){
+      eventBus.emit("user/change-share");
+      const socket = socketTask("/auth", getUserId.value);
+      const getUsersIds = project.share.private.group.map((item) => item._id);
+
+      const init = useSocketAction("change-share-user", socket);
+      const run = init({});
+      
+      run(getUsersIds);
     },
 
     update(form: Partial<FormsI["full"]>, callbacks?: CallbacksI<ProjectI>) {

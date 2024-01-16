@@ -28,6 +28,7 @@ const store = defineStore("user", {
     query: query.user,
     users: { data: [] },
     user: null,
+    shared: null,
     loading: {
       val: false,
       enable: () => (store().$state.loading.val = true),
@@ -50,7 +51,7 @@ const store = defineStore("user", {
     },
 
     refresh() {
-      const socket = socketBase("/auth");
+      const socket = socketBase("/auth", getUserId.value);
       const token = localStorage.getItem("token") ?? null;
 
       socket.emit("status", token);
@@ -62,7 +63,7 @@ const store = defineStore("user", {
     },
 
     login(form: FormsI["login"], callbacks?: CallbacksI<NotifyI>) {
-      const socket = socketBase("/auth");
+      const socket = socketBase("/auth", getUserId.value);
       
       loading.enable();
       const init = useSocketAction("login", socket);
@@ -82,7 +83,7 @@ const store = defineStore("user", {
 
     logout(callbacks?: CallbacksI<NotifyI>) {
       const token = localStorage.getItem("token");
-      const socket = socketBase("/auth");
+      const socket = socketBase("/auth", getUserId.value);
       const project = useProjectStore();
       
       loading.enable();
@@ -105,7 +106,7 @@ const store = defineStore("user", {
     },
 
     register(form: FormsI["register"], callbacks?: CallbacksI<NotifyI>) {
-      const socket = socketBase("/auth");
+      const socket = socketBase("/auth", getUserId.value);
       
       loading.enable();
       const init = useSocketAction("register", socket);
@@ -133,7 +134,7 @@ const store = defineStore("user", {
     },
 
     changePassword(form: FormsI["changePassword"], callbacks?: CallbacksI<NotifyI>) {
-      const socket = socketBase("/auth");
+      const socket = socketBase("/auth", getUserId.value);
 
       const init = useSocketAction("change-password", socket);
       const run = init<NotifyI>({
@@ -164,6 +165,21 @@ const store = defineStore("user", {
         },
         verifyMounted
       );
+    },
+
+    getSharedUser(callbacks?: CallbacksI<StateI["shared"]>, verifyMounted = false) {
+      onceMountedTwo(
+        this,
+        () => {
+          const socket = socketBase("/auth", getUserId.value);
+          const init = useSocketAction("shared-with-user", socket);
+          const run = init<StateI["shared"]>(callbacks, {
+            actions: (shared) => this.shared = shared as StateI['shared'],
+          });
+          run();
+        },
+        verifyMounted
+        );
     },
   },
 });

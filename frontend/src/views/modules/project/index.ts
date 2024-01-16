@@ -10,6 +10,5 @@ export default {
   Options: defineAsyncComponent(
     () => import("@modules/project/MenuOptions.vue"),
   ),
-  Test: defineAsyncComponent(() => import("@modules/project/testList.vue")),
   List: defineAsyncComponent(() => import("@modules/project/ViewList.vue")),
 };
