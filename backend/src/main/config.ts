@@ -1,6 +1,6 @@
 const env = process.env;
-const BASE = `${env.HOST}/` ?? "http://localhost:8000/";
-const FRONTEND = `${env.FRONTEND}` ?? "http://localhost:3000/";
+const BASE = `${env.HOST}/` ?? "";
+const FRONTEND = `${env.FRONTEND}` ?? "";
 
 export default {
   PORT: Number(env.PORT) ?? 8080,
