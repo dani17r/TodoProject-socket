@@ -43,7 +43,7 @@ const store = defineStore("task", {
       if (!isEmpty(tasks)) this.tasks = tasks;
     },
 
-   getAll(verifyMounted = false) {
+    getAll(verifyMounted = false) {
       this.countTask;
 
       onceMountedTwo(
@@ -54,12 +54,12 @@ const store = defineStore("task", {
           const init = useSocketAction("all", socket);
           const run = init<StateI["tasks"]>({
             actions: (tasks) => this.insert(tasks),
-            finally: () => this.loading.disable()
+            finally: () => this.loading.disable(),
           });
 
           run({ query: this.query, _project: this.project_id });
         },
-        verifyMounted
+        verifyMounted,
       );
     },
 

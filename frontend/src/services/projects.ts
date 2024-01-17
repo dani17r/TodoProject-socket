@@ -42,7 +42,7 @@ export default () => {
         document.getElementById(`modal_confirm-${_id}`)?.click();
         projectStore.removeAndPreviePaginate(projects);
       }
-    }
+    },
   );
 
   return socket.value;

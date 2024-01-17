@@ -7,7 +7,6 @@ const loading = reactive({
 });
 
 export default () => {
-
   return {
     loading,
   };

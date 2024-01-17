@@ -100,20 +100,19 @@ export const superErrors = (
 
 //callbackExt
 export const useSocketAction = (name: string, socket: Socket) => {
-  return <T, G=T>(callbackOne?: CallbacksI<T>, callbackTwo?: CallbacksI<G>) =>
+  return <T, G = T>(callbackOne?: CallbacksI<T>, callbackTwo?: CallbacksI<G>) =>
     (params?: unknown) => {
       if (params) socket.emit(name, params);
       else socket.emit(name);
 
       socket.on(`${name}/success`, (body?: T & G) => {
-        
         callbackOne?.actions && callbackOne.actions(body);
         callbackTwo?.actions && callbackTwo.actions(body);
-        
+
         setTimeout(() => {
-          callbackOne?.finally && callbackOne?.finally()
-          callbackTwo?.finally && callbackTwo?.finally()
-          socket.close()
+          callbackOne?.finally && callbackOne?.finally();
+          callbackTwo?.finally && callbackTwo?.finally();
+          socket.close();
         }, 600);
       });
 

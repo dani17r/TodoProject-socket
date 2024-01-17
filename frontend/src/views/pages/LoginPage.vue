@@ -44,7 +44,9 @@ const inputError = superErrors(errors);
           </p>
         </div>
         <div class="content-flex-between">
-          <button class="btn-main" type="button" @click="login()">Sign In</button>
+          <button class="btn-main" type="button" @click="login()">
+            Sign In
+          </button>
         </div>
       </form>
     </div>

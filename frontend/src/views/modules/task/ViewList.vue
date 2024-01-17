@@ -61,7 +61,10 @@ onMounted(() => {
       >
         <template #item="{ element: task }">
           <div class="list">
-            <div class="flex flex-col w-full" @dblclick="modals.open.view(task)">
+            <div
+              class="flex flex-col w-full"
+              @dblclick="modals.open.view(task)"
+            >
               <div class="w-full inline-flex justify-between">
                 <div class="inline-flex gap-4">
                   <h2
@@ -73,7 +76,10 @@ onMounted(() => {
                     {{ truncate(task.name, { length: 28 }) }}
                   </h2>
                 </div>
-                <div v-show="!multiSelect.button.value" class="inline-flex gap-1">
+                <div
+                  v-show="!multiSelect.button.value"
+                  class="inline-flex gap-1"
+                >
                   <Popper
                     content="You don't have allow for edited"
                     :disabled="permissions.u"
@@ -97,7 +103,7 @@ onMounted(() => {
                       "
                     />
                   </Popper>
-  
+
                   <Popper
                     content="You don't have allow for verify or unverify a task"
                     :disabled="permissions.u"

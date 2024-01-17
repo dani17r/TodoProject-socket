@@ -60,7 +60,7 @@ export default () => {
     query,
     tasks,
   } = taskStore();
-  
+
   const { project } = projectStore();
 
   const select = reactive({

@@ -38,7 +38,7 @@ export const isShareProject: MiddlewareI["function"] = (to, from, next) => {
     actions: ({ user, isSession }) => {
       isSession && !isEmpty(user) && addUser(user);
     },
-    final: () => loading.disable()
+    final: () => loading.disable(),
   });
 
   socket.emit("one", { _id: to.params.id });

@@ -57,14 +57,14 @@ onMounted(() => socket.open());
   <div class="content-layout-main">
     <router-view v-slot="{ Component }">
       <transition name="page" mode="out-in">
-        <component :is="Component"/>
+        <component :is="Component" />
       </transition>
     </router-view>
   </div>
 </template>
 
 <style>
-.content-layout-main{
+.content-layout-main {
   @apply relative;
 }
 

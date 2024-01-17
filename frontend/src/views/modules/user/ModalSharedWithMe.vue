@@ -35,14 +35,16 @@ const close = () => {
 };
 
 const findShared = computed(() => {
-  return cloneShared.value?.filter((val) => {
-    let searchDescription = lowerCase(val.description).includes(search.input);
-    let searchName = lowerCase(val.author.fullname).includes(search.input);
-    let searchEmail = lowerCase(val.author.email).includes(search.input);
-    let searchTitle = lowerCase(val.title).includes(search.input);
+  return (
+    cloneShared.value?.filter((val) => {
+      let searchDescription = lowerCase(val.description).includes(search.input);
+      let searchName = lowerCase(val.author.fullname).includes(search.input);
+      let searchEmail = lowerCase(val.author.email).includes(search.input);
+      let searchTitle = lowerCase(val.title).includes(search.input);
 
-    return searchDescription || searchName || searchEmail || searchTitle;
-  }) || [];
+      return searchDescription || searchName || searchEmail || searchTitle;
+    }) || []
+  );
 });
 
 const search = superForm({
@@ -54,12 +56,12 @@ const search = superForm({
   },
 });
 
-watchEffect(()=> shareFilter.value = shared.value);
+watchEffect(() => (shareFilter.value = shared.value));
 
 onMounted(() => {
-  getSharedUser({ 
+  getSharedUser({
     actions: () => {
-      setTimeout(() => shareFilter.value = shared.value, 200)
+      setTimeout(() => (shareFilter.value = shared.value), 200);
     },
   });
 });

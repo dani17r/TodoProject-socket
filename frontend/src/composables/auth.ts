@@ -45,7 +45,7 @@ export const signupComposable = () => {
     if (status.value)
       useState.register(form, {
         actions: (notify) => {
-          Notify.success(String(notify?.message))
+          Notify.success(String(notify?.message));
           router.push({ name: "login" });
         },
         error: (error) => setError(error),
@@ -78,7 +78,7 @@ export const loginComposable = () => {
     if (status.value)
       useState.login(form, {
         actions: (notify) => {
-          Notify.success(String(notify?.message))
+          Notify.success(String(notify?.message));
           router.push({ name: "home" });
         },
         error: (error) => setError(error),

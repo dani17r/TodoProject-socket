@@ -36,7 +36,7 @@ const inputError = superErrors(errors);
           />
           <p class="input-error">{{ errors?.email }}</p>
         </div>
-  
+
         <div class="mb-6">
           <label class="label" for="password"> Password </label>
           <input

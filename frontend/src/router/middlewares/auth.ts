@@ -1,6 +1,6 @@
 import type { CallbacksMiddlI } from "@interfaces/interfaces.user";
 import type { MiddlewareI } from "@interfaces/interfaces.generals";
-import generalComposable from '@composables/general';
+import generalComposable from "@composables/general";
 import { socketBase } from "@services/main";
 import { userStore } from "@stores/user";
 import { isEmpty } from "lodash";
@@ -14,7 +14,7 @@ loading.enable();
 
 export const auth = (
   next: MiddlewareI["next"],
-  { actions, error, final } : CallbacksMiddlI,
+  { actions, error, final }: CallbacksMiddlI,
 ) => {
   const socket = socketBase("/auth");
 
@@ -33,14 +33,12 @@ export const auth = (
       error && error();
       socket.close();
     });
-
   } else {
     final && setTimeout(() => final(), 400);
     dontCallback.value = true;
     socket.close();
     next();
   }
-
 };
 
 export const isAuthLoginUser: MiddlewareI["function"] = (to, from, next) => {
@@ -62,7 +60,7 @@ export const isAuthLoginUser: MiddlewareI["function"] = (to, from, next) => {
 
 export const isNotAuthLoginUser: MiddlewareI["function"] = (to, from, next) => {
   const { addUser } = userStore();
-  
+
   auth(next, {
     actions: ({ user, isSession }) => {
       if (isSession) {

@@ -17,7 +17,6 @@ const status = reactive({
 });
 
 export default (projectId: string) => {
-  
   const urlSocket = `broadcast:${projectId}`;
   const { initPermissions } = shareComposable();
   const projectStore = useProjectStore();
@@ -64,16 +63,19 @@ export default (projectId: string) => {
     if (status.deleteAll) taskStore.getAll();
   });
 
-  socketTask("/project", projectId).on(`${urlSocket}/change-share`, (updateProject) => {
-    setTimeout(() => (status.changeShare = true), 300);
-    if (status.changeShare) {
-      projectStore.project = updateProject;
-      initPermissions();
-      route.meta.type = updateProject.share.public.status
-        ? "public"
-        : "private";
-    }
-  });
+  socketTask("/project", projectId).on(
+    `${urlSocket}/change-share`,
+    (updateProject) => {
+      setTimeout(() => (status.changeShare = true), 300);
+      if (status.changeShare) {
+        projectStore.project = updateProject;
+        initPermissions();
+        route.meta.type = updateProject.share.public.status
+          ? "public"
+          : "private";
+      }
+    },
+  );
 
   return socket.value;
 };

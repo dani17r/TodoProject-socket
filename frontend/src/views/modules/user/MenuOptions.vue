@@ -30,7 +30,7 @@ const modals = superModals({
 });
 
 const logOut = () => {
-  modals.toggle('confirm');
+  modals.toggle("confirm");
   logout({
     actions: (notify) => {
       setTimeout(() => router.push({ name: "login" }), 200);

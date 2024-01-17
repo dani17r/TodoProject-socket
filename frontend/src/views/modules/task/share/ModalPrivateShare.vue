@@ -35,7 +35,7 @@ const saveModalPrivateShare = () => {
 
 <template>
   <Modals.Main v-model="modal" :width="'950px'" @close="events('close')">
-     <Transition name="fade">
+    <Transition name="fade">
       <div
         v-if="loading.val"
         class="absolute left-0 top-0 z-50 w-full h-[100%] bg-black opacity-50 flex justify-center items-center"

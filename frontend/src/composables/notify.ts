@@ -3,8 +3,6 @@ import Notify from "@components/BaseNotify.vue";
 import { createVNode, render } from "vue";
 import { cloneDeep } from "lodash";
 
-
-
 export default () => {
   const active = (options: Omit<NotifyOptionsI, "state">) => {
     const el = document.querySelector("#area") as HTMLElement;

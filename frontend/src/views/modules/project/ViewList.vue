@@ -24,7 +24,9 @@ getAll(true);
 
 <template>
   <div
-    :class="!isEmptyProject && !loading.val && 'flex justify-center items-center'"
+    :class="
+      !isEmptyProject && !loading.val && 'flex justify-center items-center'
+    "
     class="min-h-[48vh] w-full pt-[110px]"
   >
     <Transition name="fade">

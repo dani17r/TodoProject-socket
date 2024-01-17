@@ -58,7 +58,7 @@ const store = defineStore("project", {
 
           run({ _author: user.value?._id, query: this.query });
         },
-        verifyMounted
+        verifyMounted,
       );
     },
 
@@ -89,14 +89,14 @@ const store = defineStore("project", {
       run(newUpdate);
     },
 
-    changeShareUsers(project: ProjectI){
+    changeShareUsers(project: ProjectI) {
       eventBus.emit("user/change-share");
       const socket = socketTask("/auth", getUserId.value);
       const getUsersIds = project.share.private.group.map((item) => item._id);
 
       const init = useSocketAction("change-share-user", socket);
       const run = init({});
-      
+
       run(getUsersIds);
     },
 
@@ -114,7 +114,7 @@ const store = defineStore("project", {
             this.project = updatedProject;
           }
         },
-        finally: () => this.loading.disable()
+        finally: () => this.loading.disable(),
       });
 
       run(form);
