@@ -22,7 +22,7 @@ onMounted(() => socket.open());
 </script>
 
 <template>
-  <div class="base content-nav !z-[110]">
+  <div class="base content-nav !z-[210]">
     <nav class="flex items-center md:!pr-[30px] md:!pl-[35px]">
       <ul class="ul-left">
         <li>
