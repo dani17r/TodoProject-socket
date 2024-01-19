@@ -8,7 +8,7 @@ import Icons from "@components/icons";
 
 import { onUnmounted, onMounted } from "vue";
 
-import { startCase } from "lodash";
+import { startCase, truncate } from "lodash";
 import { ref } from "vue";
 
 const menu = ref(false);
@@ -22,8 +22,8 @@ onMounted(() => socket.open());
 </script>
 
 <template>
-  <div class="base content-nav">
-    <nav class="flex items-center !pr-[30px] !pl-[35px]">
+  <div class="base content-nav !z-[110]">
+    <nav class="flex items-center md:!pr-[30px] md:!pl-[35px]">
       <ul class="ul-left">
         <li>
           <button
@@ -42,7 +42,7 @@ onMounted(() => socket.open());
             "
           >
             <ViewImgProfile />
-            <h1 class="name">{{ startCase(user?.fullname) }}</h1>
+            <h1 class="name">{{ truncate(startCase(user?.fullname),{length: 13, omission:''} ) }}</h1>
           </div>
         </li>
       </ul>
@@ -65,7 +65,7 @@ onMounted(() => socket.open());
 
 <style>
 .content-layout-main {
-  @apply relative;
+  @apply px-5 md:px-10 relative;
 }
 
 .base .content {

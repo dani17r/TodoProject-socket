@@ -9,6 +9,10 @@ const { refresh, ascDesc, select, modals, search, query } = projectComposable();
 </script>
 
 <template>
+   <button class="btn-main btn-create-project-mobile" @click="modals.open.create()">
+      <Icons.Plus class="inline -mt-1" />
+    </button>
+
   <div class="content-filter">
     <div class="content-menu-one-filters">
       <InputSearch
@@ -18,7 +22,7 @@ const { refresh, ascDesc, select, modals, search, query } = projectComposable();
         @clear="search.clear()"
       />
 
-      <button class="btn-main !w-auto uppercase" @click="modals.open.create()">
+      <button class="btn-main btn-create-project" @click="modals.open.create()">
         <Icons.Plus class="inline -mt-1" />
         <span class="mr-2">Create</span>
       </button>
@@ -54,20 +58,15 @@ const { refresh, ascDesc, select, modals, search, query } = projectComposable();
 </template>
 
 <style>
+.btn-create-project{
+  @apply !w-auto uppercase hidden md:block;
+}
+.btn-create-project-mobile{
+  @apply !w-10 !h-10 !rounded-full fixed bottom-[50px] right-5 z-[200] md:relative block md:hidden;
+}
+
 .content-filter {
-  margin-top: 1.25rem;
-  margin-bottom: 1.25rem;
-  position: fixed;
-  left: 0;
-  top: 36px;
-  width: 100%;
-  padding: 0px 40px;
-  background-color: #27272ac9;
-  z-index: 30;
-  padding-bottom: 5px;
-  padding-top: 20px;
-  backdrop-filter: blur(6px);
-  opacity: 0.95;
+  @apply mt-5 mb-5 fixed left-0 top-[36px] w-full bg-[#27272ac9] bg-opacity-[0.95] z-[110] backdrop-blur-[6px] pt-3 md:pt-5 px-[20px] md:px-[40px];
 }
 
 .content-menu-one-filters {

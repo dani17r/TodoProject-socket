@@ -5,7 +5,7 @@ const { isGuest, isOwner } = shareComposable();
 </script>
 
 <template>
-  <div class="w-full flex items-center justify-center">
+  <div class="w-full md:flex items-center justify-center">
     <div v-if="$route.meta.error" class="text-center mt-[30vh]">
       <h1 class="text-4xl mb-6">Sorry the id is wrong</h1>
       <p class="font-bold mb-2">
@@ -22,7 +22,7 @@ const { isGuest, isOwner } = shareComposable();
       <p class="font-bold mb-2">Access to this board is not allowed</p>
     </div>
 
-    <div v-else class="bg-zinc-300 dark:bg-zinc-800 rounded p-6 w-3/5">
+    <div v-else class="pt-6 md:p-6 md:w-3/5 mx-auto max-w-[550px] md:min-w-[550px]">
       <slot />
     </div>
   </div>

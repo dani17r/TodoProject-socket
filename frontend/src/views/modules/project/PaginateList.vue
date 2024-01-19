@@ -31,7 +31,7 @@ const { projects, query } = storeToRefs(userStore);
   left: 0;
   padding: 0px 20px;
   bottom: 0px;
-  height: 60px;
+  height: 70px;
   display: flex;
   justify-items: center;
   background-color: #27272ac9;

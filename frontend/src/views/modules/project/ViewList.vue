@@ -154,6 +154,6 @@ getAll(true);
   @apply scale-110 transition-all;
 }
 .btn-options {
-  @apply absolute top-0 right-0;
+  @apply absolute top-[-2px] right-[-2px] z-[100];
 }
 </style>

@@ -55,11 +55,11 @@ const inputError = superErrors(errors);
         @keyup.enter="allowIfPermission('u', () => addNewTask())"
       />
       <button
-        class="btn-main !w-auto flex items-center uppercase"
+        class="btn-main !w-auto flex items-center md:uppercase !rounded-full md:!rounded-md"
         @click="allowIfPermission('c', () => addNewTask())"
       >
         <Icons.Plus class="inline" />
-        <span class="ml-1 mr-2"> Add </span>
+        <span class="ml-1 mr-2 hidden md:block"> Add </span>
       </button>
     </div>
   </Popper>

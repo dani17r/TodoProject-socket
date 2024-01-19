@@ -75,7 +75,7 @@ const isNext = computed(() => {
 
 <style>
 .content-paginate {
-  @apply flex items-center justify-between bg-white dark:bg-zinc-800 px-4 py-3 sm:px-6;
+  @apply flex items-center justify-center md:justify-between px-4 py-3 sm:px-6;
 }
 
 .box-paginate {

@@ -11,7 +11,7 @@ const { user } = userStore();
 
 <template>
   <div class="flex justify-center pt-20">
-    <span v-if="user" class="absolute top-16 right-5 text-sm"
+    <span v-if="user" class="absolute top-16 md:right-5 text-[12px] md:text-sm"
       >Created: {{ dayjs(user.createdAt).format(fmtUserCreateAt) }}</span
     >
     <div class="grid md:grid-cols-2 gap-10">
