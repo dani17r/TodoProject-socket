@@ -22,7 +22,10 @@ const { isGuest, isOwner } = shareComposable();
       <p class="font-bold mb-2">Access to this board is not allowed</p>
     </div>
 
-    <div v-else class="pt-6 md:p-6 md:w-3/5 mx-auto max-w-[550px] md:min-w-[550px]">
+    <div
+      v-else
+      class="pt-6 md:p-6 md:w-3/5 mx-auto max-w-[550px] md:min-w-[550px]"
+    >
       <slot />
     </div>
   </div>

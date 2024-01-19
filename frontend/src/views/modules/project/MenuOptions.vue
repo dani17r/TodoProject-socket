@@ -9,9 +9,12 @@ const { refresh, ascDesc, select, modals, search, query } = projectComposable();
 </script>
 
 <template>
-   <button class="btn-main btn-create-project-mobile" @click="modals.open.create()">
-      <Icons.Plus class="inline -mt-1" />
-    </button>
+  <button
+    class="btn-main btn-create-project-mobile"
+    @click="modals.open.create()"
+  >
+    <Icons.Plus class="inline -mt-1" />
+  </button>
 
   <div class="content-filter">
     <div class="content-menu-one-filters">
@@ -58,10 +61,10 @@ const { refresh, ascDesc, select, modals, search, query } = projectComposable();
 </template>
 
 <style>
-.btn-create-project{
+.btn-create-project {
   @apply !w-auto uppercase hidden md:block;
 }
-.btn-create-project-mobile{
+.btn-create-project-mobile {
   @apply !w-10 !h-10 !rounded-full fixed bottom-[50px] right-5 z-[200] md:relative block md:hidden;
 }
 

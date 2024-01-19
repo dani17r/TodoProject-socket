@@ -10,8 +10,8 @@ import { reactive } from "vue";
 //Datos que se repiten.
 const formLogin = {
   values: {
-    email: "dannymetal17@gmail.com",
-    password: "12345678",
+    email: "",
+    password: "",
   },
   validates: {
     email: ["empty", "min:6", "email"],

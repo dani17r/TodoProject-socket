@@ -42,7 +42,14 @@ onMounted(() => socket.open());
             "
           >
             <ViewImgProfile />
-            <h1 class="name">{{ truncate(startCase(user?.fullname),{length: 13, omission:''} ) }}</h1>
+            <h1 class="name">
+              {{
+                truncate(startCase(user?.fullname), {
+                  length: 13,
+                  omission: "",
+                })
+              }}
+            </h1>
           </div>
         </li>
       </ul>
