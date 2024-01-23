@@ -1,13 +1,8 @@
 <script setup lang="ts">
-// import ModalSharedWithMe from "@modules/user/ModalSharedWithMe.vue";
 import Confirm from "@components/modals/ModalConfirm.vue";
 import notifyComposable from "@composables/notify";
 
-import { defineAsyncComponent } from "vue";
-
-const ModalSharedWithMe = defineAsyncComponent(
-  () => import("@modules/user/ModalSharedWithMe.vue"),
-);
+import User from "@modules/user"
 
 import { superModals } from "@utils/inputs";
 import { userStore } from "@/stores/user";
@@ -82,7 +77,7 @@ const logOut = () => {
     @confirm="logOut()"
   />
 
-  <ModalSharedWithMe
+  <User.ModalSharedWithMe
     v-model="modals.sharedWithMe"
     @close="modals.toggle('sharedWithMe')"
   />

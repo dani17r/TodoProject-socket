@@ -1,23 +1,19 @@
+import type { FormsI, LoginI, StateI, UserI } from "@interfaces/interfaces.user";
 import type { CallbacksI, NotifyI } from "@interfaces/interfaces.generals";
 import userLocalStorageComposable from "@composables/userLocalStorage";
 import generalComposable from "@composables/general";
+import socketServices from "@services/boot/sockets";
 import shareComposable from "@composables/share";
 import { defineStore, storeToRefs } from "pinia";
 import { onceMountedTwo } from "@utils/actions";
 import { useSocketAction } from "@utils/main";
 import useProjectStore from "@stores/project";
-import { socketBase } from "@services/main";
-import eventBus from "@services/eventBus";
+import eventBus from "@services/boot/eventBus";
 import query from "@utils/querys";
 import { isEmpty } from "lodash";
-import type {
-  FormsI,
-  LoginI,
-  StateI,
-  UserI,
-} from "@interfaces/interfaces.user";
 
-const { removeUserId, setUserId, getUserId } = userLocalStorageComposable();
+const { removeUserId, setUserId } = userLocalStorageComposable();
+const { socketAuth, socketUser } = socketServices();
 const { loading } = generalComposable();
 
 const store = defineStore("user", {
@@ -51,22 +47,20 @@ const store = defineStore("user", {
     },
 
     refresh() {
-      const socket = socketBase("/auth", getUserId.value);
+      
       const token = localStorage.getItem("token") ?? null;
 
-      socket.emit("status", token);
-      socket.io.on("error", () => socket.close());
-      socket.on("status/response", ({ user }) => {
+      socketAuth.value.emit("status", token);
+      socketAuth.value.io.on("error", () => socketAuth.value.close());
+      socketAuth.value.on("status/response", ({ user }) => {
         if (!isEmpty(user)) this.addUser(user);
-        socket.close();
+        // socket.close();
       });
     },
 
     login(form: FormsI["login"], callbacks?: CallbacksI<NotifyI>) {
-      const socket = socketBase("/auth", getUserId.value);
-
       loading.enable();
-      const init = useSocketAction("login", socket);
+      const init = useSocketAction("login", socketAuth.value);
       const run = init<LoginI>({
         actions: (response) => {
           const { user, token, notify } = response as LoginI;
@@ -83,11 +77,10 @@ const store = defineStore("user", {
 
     logout(callbacks?: CallbacksI<NotifyI>) {
       const token = localStorage.getItem("token");
-      const socket = socketBase("/auth", getUserId.value);
       const project = useProjectStore();
 
       loading.enable();
-      const init = useSocketAction("logout", socket);
+      const init = useSocketAction("logout", socketAuth.value);
       const run = init<NotifyI, { notify: NotifyI }>(callbacks, {
         actions: (response) => {
           const { notify } = response as LoginI;
@@ -107,10 +100,8 @@ const store = defineStore("user", {
     },
 
     register(form: FormsI["register"], callbacks?: CallbacksI<NotifyI>) {
-      const socket = socketBase("/auth", getUserId.value);
-
       loading.enable();
-      const init = useSocketAction("register", socket);
+      const init = useSocketAction("register", socketAuth.value);
       const run = init<{ notify: NotifyI }>({
         actions: (response) => {
           const { notify } = response as LoginI;
@@ -124,9 +115,7 @@ const store = defineStore("user", {
 
     update(form: FormsI["update"], callbacks?: CallbacksI<NotifyI>) {
       eventBus.emit("user/update");
-      const socket = socketBase("/auth", getUserId.value);
-
-      const init = useSocketAction("update", socket);
+      const init = useSocketAction("update", socketAuth.value);
       const run = init<NotifyI, UserI>(callbacks, {
         actions: (user) => user && this.addUser(user),
       });
@@ -138,9 +127,7 @@ const store = defineStore("user", {
       form: FormsI["changePassword"],
       callbacks?: CallbacksI<NotifyI>,
     ) {
-      const socket = socketBase("/auth", getUserId.value);
-
-      const init = useSocketAction("change-password", socket);
+      const init = useSocketAction("change-password", socketAuth.value);
       const run = init<NotifyI>({
         actions: (notify) => callbacks?.actions && callbacks.actions(notify),
       });
@@ -160,9 +147,8 @@ const store = defineStore("user", {
         this,
         () => {
           const { droupPrivateIds } = shareComposable();
-          const socket = socketBase("/user", getUserId.value);
 
-          const init = useSocketAction("all", socket);
+          const init = useSocketAction("all", socketUser.value);
           const run = init<StateI["users"]>(callbacks, {
             actions: (data) => this.insert(data),
           });
@@ -180,8 +166,7 @@ const store = defineStore("user", {
       onceMountedTwo(
         this,
         () => {
-          const socket = socketBase("/auth", getUserId.value);
-          const init = useSocketAction("shared-with-user", socket);
+          const init = useSocketAction("shared-with-user", socketAuth.value);
           const run = init<StateI["shared"]>(callbacks, {
             actions: (shared) => (this.shared = shared as StateI["shared"]),
           });

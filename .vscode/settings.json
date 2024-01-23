@@ -1,3 +1,5 @@
 {
-  "vue.codeActions.enabled": false
+  "vue.codeActions.enabled": false,
+  "editor.scrollPredominantAxis": true,
+  "explorer.autoReveal": "focusNoScroll"
 }

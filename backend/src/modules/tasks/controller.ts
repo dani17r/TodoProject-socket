@@ -8,7 +8,6 @@ import { QueryI } from "@modules/interfaces";
 import { Types } from "mongoose";
 
 
-
 const getAll = async (query: QueryI, _project: string) => {
   const search = getSearchQuery(query);
   const fields = getFieldQuery(query);
@@ -27,9 +26,11 @@ const getAll = async (query: QueryI, _project: string) => {
 
 export default () => {
   io.of("/task").on("connection", (socket) => {
-    let projectId = socket.handshake.headers["project_id"];
-
+    console.log("connection: /task");
+    let projectId = socket.handshake.headers['project_id'];
+    
     socket.on("create", async ({ form, query }: CreateResI) => {
+      console.log("connection: /task/create");
       const isInsert = await Tasks.create({
         ...form,
         _author: new Types.ObjectId(form._author),
@@ -49,6 +50,8 @@ export default () => {
     });
 
     socket.on("update", async (form: TaskI) => {
+      console.log("connection: /task/update");
+      
       const newTask = await Tasks.findOneAndUpdate(
         { _id: form._id },
         { $set: form },
@@ -56,6 +59,8 @@ export default () => {
       );
 
       if (newTask) {
+        console.log(`connection: /task/broadcast:${projectId}/update`);
+        socket.broadcast.emit(`broadcast:test/update`);
         socket.broadcast.emit(`broadcast:${projectId}/update`);
         socket.emit("update/success", newTask);
       } else
@@ -66,6 +71,7 @@ export default () => {
     });
 
     socket.on("change-position", async (newPositions: TaskI[]) => {
+      console.log("connection: /task/change-position");
       let successTasks = [];
       for (let position of newPositions) {
         const update = await Tasks.updateOne(
@@ -86,6 +92,7 @@ export default () => {
     });
 
     socket.on("trash", async ({ _ids, _project, query }: TrashResI) => {
+      console.log("connection: /task/trash");
       const update = await Tasks.updateMany(
         { _id: { $in: _ids } },
         { $set: { trash: true } }
@@ -104,6 +111,7 @@ export default () => {
     });
 
     socket.on("delete", async ({ _id, _project, query }: DeleteResI) => {
+      console.log("connection: /task/delete");
       await Tasks.findByIdAndDelete(_id);
       const isDelete = Tasks.findById(_id).then((doc) => doc == null);
 
@@ -123,6 +131,7 @@ export default () => {
     });
 
     socket.on("delete-all", async ({ _project, query }: DeleteResI) => {
+      console.log("connection: /task/delete-all");
       const isDelete = await Tasks.deleteMany({ _project, trash: true });
 
       if (isDelete) {
@@ -137,6 +146,7 @@ export default () => {
     });
 
     socket.on("all", async ({ query, _project }: AllResI) => {
+      console.log("connection: /task/all");
       if (_project) {
         getAll(query, _project).then((tasks) => {
           socket.emit("all/success", tasks);

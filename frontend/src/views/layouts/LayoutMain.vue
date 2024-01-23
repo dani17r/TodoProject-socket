@@ -2,11 +2,10 @@
 import broadcastUser from "@services/user";
 import { userStore } from "@/stores/user";
 
-import ViewImgProfile from "@modules/user/ViewImgProfile.vue";
-import MenuOptions from "@modules/user/MenuOptions.vue";
+import User from "@modules/user";
 import Icons from "@components/icons";
 
-import { onUnmounted, onMounted } from "vue";
+// import { onUnmounted, onMounted } from "vue";
 
 import { startCase, truncate } from "lodash";
 import { ref } from "vue";
@@ -14,11 +13,11 @@ import { ref } from "vue";
 const menu = ref(false);
 
 const { user } = userStore();
-const socket = broadcastUser();
+broadcastUser();
 
 /** Ciclo de vida --------------------*/
-onUnmounted(() => socket.close());
-onMounted(() => socket.open());
+// onUnmounted(() => socket.close());
+// onMounted(() => socket.open());
 </script>
 
 <template>
@@ -41,7 +40,7 @@ onMounted(() => socket.open());
               $router.push({ name: 'profile', params: { id: user?._id } })
             "
           >
-            <ViewImgProfile />
+            <User.ViewImgProfile />
             <h1 class="name">
               {{
                 truncate(startCase(user?.fullname), {
@@ -56,7 +55,7 @@ onMounted(() => socket.open());
       <ul class="ul-right">
         <li class="cursor-pointer">
           <Icons.Menu @click="menu = true" />
-          <MenuOptions :status="menu" @close="menu = false" />
+          <User.MenuOptions :status="menu" @close="menu = false" />
         </li>
       </ul>
     </nav>

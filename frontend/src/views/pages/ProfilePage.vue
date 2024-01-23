@@ -2,8 +2,7 @@
 import { userStore } from "@stores/user";
 import dayjs from "dayjs";
 
-import FormProfilePass from "@modules/user/FormProfilePass.vue";
-import FormProfileUser from "@modules/user/FormProfileUser.vue";
+import User from "@modules/user"
 
 const fmtUserCreateAt = "dddd DD, MMMM MM, YYYY - h:m A";
 const { user } = userStore();
@@ -15,8 +14,8 @@ const { user } = userStore();
       >Created: {{ dayjs(user.createdAt).format(fmtUserCreateAt) }}</span
     >
     <div class="grid md:grid-cols-2 gap-10">
-      <FormProfileUser />
-      <FormProfilePass />
+      <User.FormProfile />
+      <User.FormProfilePass />
     </div>
   </div>
 </template>

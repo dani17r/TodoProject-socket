@@ -1,23 +1,19 @@
 <script setup lang="ts">
 // project libraries
 import shareComposable from "@composables/share";
-import { onUnmounted, onMounted } from "vue";
-import broadcastTask from "@services/share";
-import { useRoute } from "vue-router";
+import broadcastShared from "@services/share";
 import Task from "@modules/task";
+import { onMounted } from "vue";
 
 // internal libraries
 const { initPermissions, isOwner } = shareComposable();
-const route = useRoute();
 
 // Instancias
-const socket = broadcastTask(String(route.params.id));
+broadcastShared();
 
 /** Ciclo de vida --------------------*/
-onUnmounted(() => socket.close());
 onMounted(() => {
   initPermissions();
-  socket.open();
 });
 </script>
 

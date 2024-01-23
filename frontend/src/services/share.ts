@@ -1,10 +1,11 @@
+import userLocalStorageComposable from "@composables/userLocalStorage";
+import socketServices from "@services/boot/sockets";
 import shareComposable from "@composables/share";
 import useProjectStore from "@stores/project";
-import { socketTask } from "@services/main";
-import { computed, reactive } from "vue";
 import useTaskStore from "@stores/task";
 import { useRoute } from "vue-router";
-import eventBus from "./eventBus";
+import eventBus from "./boot/eventBus";
+import { reactive } from "vue";
 
 const status = reactive({
   changeShare: true,
@@ -16,8 +17,11 @@ const status = reactive({
   move: true,
 });
 
-export default (projectId: string) => {
-  const urlSocket = `broadcast:${projectId}`;
+export default () => {
+  const { socketTask, socketProject } = socketServices();
+  const { getProjectId } = userLocalStorageComposable();
+  const urlSocket = `broadcast:${getProjectId.value}`;
+  // console.log(`${urlSocket}/update`);
   const { initPermissions } = shareComposable();
   const projectStore = useProjectStore();
   const taskStore = useTaskStore();
@@ -31,41 +35,39 @@ export default (projectId: string) => {
   eventBus.on("task/trash", () => (status.trash = false));
   eventBus.on("task/move", () => (status.move = false));
 
-  const socket = computed(() => socketTask("/task", projectId));
-
-  socket.value.on(`${urlSocket}/create`, () => {
+  socketTask.value.on(`${urlSocket}/create`, () => {
     setTimeout(() => (status.create = true), 300);
     if (status.create) taskStore.getAll();
   });
 
-  socket.value.on(`${urlSocket}/update`, () => {
+  socketTask.value.on(`${urlSocket}/update`, () => {
+    console.log('uyuy');
+    
     setTimeout(() => (status.update = true), 300);
     if (status.update) taskStore.getAll();
   });
 
-  socket.value.on(`${urlSocket}/trash`, () => {
+  socketTask.value.on(`${urlSocket}/trash`, () => {
     setTimeout(() => (status.trash = true), 300);
     if (status.trash) taskStore.getAll();
   });
 
-  socket.value.on(`${urlSocket}/change-position`, () => {
+  socketTask.value.on(`${urlSocket}/change-position`, () => {
     setTimeout(() => (status.move = true), 300);
     if (status.move) taskStore.getAll();
   });
 
-  socket.value.on(`${urlSocket}/delete`, () => {
+  socketTask.value.on(`${urlSocket}/delete`, () => {
     setTimeout(() => (status.delete = true), 300);
     if (status.delete) taskStore.getAll();
   });
 
-  socket.value.on(`${urlSocket}/delete-all`, () => {
+  socketTask.value.on(`${urlSocket}/delete-all`, () => {
     setTimeout(() => (status.deleteAll = true), 300);
     if (status.deleteAll) taskStore.getAll();
   });
 
-  socketTask("/project", projectId).on(
-    `${urlSocket}/change-share`,
-    (updateProject) => {
+  socketProject.value.on(`${urlSocket}/change-share`, (updateProject) => {
       setTimeout(() => (status.changeShare = true), 300);
       if (status.changeShare) {
         projectStore.project = updateProject;
@@ -77,5 +79,5 @@ export default (projectId: string) => {
     },
   );
 
-  return socket.value;
+  return socketTask;
 };

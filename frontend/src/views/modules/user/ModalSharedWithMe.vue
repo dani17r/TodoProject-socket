@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ShareUrl from "@modules/task/share/ShareUrl.vue";
 import InputSearch from "@components/InputSearch.vue";
-import { computed, onMounted, ref, watchEffect } from "vue";
+import { computed, ref, watchEffect } from "vue";
 import { userStore } from "@stores/user";
 import { debounce, lowerCase } from "lodash";
 import { superForm } from "@utils/inputs";
@@ -21,7 +21,7 @@ const props = withDefaults(defineProps<PropsI>(), {
 
 const { getSharedUser, shared } = userStore();
 
-const status = computed(() => props.modelValue);
+const status = computed(() => props.modelValue)
 const cloneShared = computed(() => shared.value);
 const shareFilter = ref(shared.value);
 let memory = ref(true);
@@ -56,15 +56,17 @@ const search = superForm({
   },
 });
 
-watchEffect(() => (shareFilter.value = shared.value));
+watchEffect(() => shareFilter.value = shared.value);
 
-onMounted(() => {
-  getSharedUser({
-    actions: () => {
-      setTimeout(() => (shareFilter.value = shared.value), 200);
-    },
-  });
-});
+watchEffect(()=>{
+  if(props.modelValue) {
+    getSharedUser({
+      actions: () => {
+        setTimeout(() => (shareFilter.value = shared.value), 200);
+      },
+    }, true);
+  }
+})
 </script>
 
 <template>

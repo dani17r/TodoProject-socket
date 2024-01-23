@@ -16,14 +16,14 @@ export default {
 
   URL_FRONTEND: FRONTEND,
 
-  // CORS: {
-  //   origin: FRONTEND,
-  //   credential: false,
-  // },
-  // SOKET_IO: {
-  //   cors: {
-  //     origin: FRONTEND,
-  //     // credentials: true,
-  //   },
-  // },
+  CORS: {
+    origin: FRONTEND,
+    credential: false,
+  },
+  SOKET_IO: {
+    cors: {
+      origin: FRONTEND,
+      // credentials: true,
+    },
+  },
 };

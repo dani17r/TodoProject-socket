@@ -1,16 +1,15 @@
 import type { FormsI, StateI, ProjectI } from "@interfaces/interfaces.project";
-import userLocalStorageComposable from "@composables/userLocalStorage";
 import type { CallbacksI } from "@interfaces/interfaces.generals";
-import { socketBase, socketTask } from "@services/main";
+import socketServices from "@services/boot/sockets";
 import { defineStore, storeToRefs } from "pinia";
+import { onceMountedTwo } from "@utils/actions";
 import { useSocketAction } from "@utils/main";
 import { findIndex, isEmpty } from "lodash";
-import { onceMountedTwo } from "@utils/actions";
-import eventBus from "@services/eventBus";
+import eventBus from "@services/boot/eventBus";
 import { userStore } from "@stores/user";
 import query from "@utils/querys";
 
-const { getUserId } = userLocalStorageComposable();
+const { socketProject, socketAuth } = socketServices();
 
 const store = defineStore("project", {
   state: (): StateI => ({
@@ -48,9 +47,8 @@ const store = defineStore("project", {
         () => {
           this.loading.enable();
           const { user } = userStore();
-          const socket = socketBase("/project", getUserId.value);
 
-          const init = useSocketAction("all", socket);
+          const init = useSocketAction("all", socketProject.value);
           const run = init<StateI["projects"]>({
             actions: (projects) => this.insert(projects),
             finally: () => this.loading.disable(),
@@ -66,8 +64,7 @@ const store = defineStore("project", {
       eventBus.emit("project/create");
       this.loading.enable();
 
-      const socket = socketBase("/project", getUserId.value);
-      const init = useSocketAction("create", socket);
+      const init = useSocketAction("create", socketProject.value);
       const run = init<StateI["projects"]>(callbacks, {
         actions: (projects) => this.insert(projects),
         finally: () => this.loading.disable(),
@@ -79,9 +76,8 @@ const store = defineStore("project", {
     changeShare(newUpdate: ProjectI) {
       this.loading.enable();
       eventBus.emit("project/change-share");
-      const socket = socketTask("/project", String(this.project?._id));
 
-      const init = useSocketAction("change-share", socket);
+      const init = useSocketAction("change-share", socketProject.value);
       const run = init<StateI["projects"]>({
         finally: () => this.loading.disable(),
       });
@@ -91,10 +87,9 @@ const store = defineStore("project", {
 
     changeShareUsers(project: ProjectI) {
       eventBus.emit("user/change-share");
-      const socket = socketTask("/auth", getUserId.value);
+      
       const getUsersIds = project.share.private.group.map((item) => item._id);
-
-      const init = useSocketAction("change-share-user", socket);
+      const init = useSocketAction("change-share-user", socketAuth.value);
       const run = init({});
 
       run(getUsersIds);
@@ -103,9 +98,8 @@ const store = defineStore("project", {
     update(form: Partial<FormsI["full"]>, callbacks?: CallbacksI<ProjectI>) {
       this.loading.enable();
       eventBus.emit("project/update");
-      const socket = socketBase("/project", getUserId.value);
 
-      const init = useSocketAction("update", socket);
+      const init = useSocketAction("update", socketProject.value);
       const run = init<ProjectI>(callbacks, {
         actions: (updatedProject) => {
           const index = findIndex(this.projects.data, { _id: form._id });
@@ -124,8 +118,7 @@ const store = defineStore("project", {
       eventBus.emit("project/delete");
       const { user } = userStore();
 
-      const socket = socketBase("/project", getUserId.value);
-      const init = useSocketAction("delete", socket);
+      const init = useSocketAction("delete", socketProject.value);
       const run = init<StateI["projects"]>(callbacks, {
         actions: (projects) => this.removeAndPreviePaginate(projects),
       });

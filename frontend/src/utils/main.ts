@@ -112,8 +112,8 @@ export const useSocketAction = (name: string, socket: Socket) => {
         setTimeout(() => {
           callbackOne?.finally && callbackOne?.finally();
           callbackTwo?.finally && callbackTwo?.finally();
-          socket.close();
-        }, 600);
+          // socket.close();
+        }, 200);
       });
 
       socket.on(`${name}/error`, (err: NotifyErrorI) => {
@@ -123,7 +123,7 @@ export const useSocketAction = (name: string, socket: Socket) => {
         setTimeout(() => {
           callbackOne?.finally && callbackOne?.finally();
           callbackTwo?.finally && callbackTwo?.finally();
-          socket.close();
+          // socket.close();
         }, 200);
       });
     };

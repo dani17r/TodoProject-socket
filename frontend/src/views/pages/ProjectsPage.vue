@@ -3,15 +3,8 @@
 import broadcastProject from "@services/projects";
 import Project from "@modules/project";
 
-// internal libraries
-import { onUnmounted, onMounted } from "vue";
-
 // Instancias
-const socket = broadcastProject();
-
-/** Ciclo de vida --------------------*/
-onUnmounted(() => socket.close());
-onMounted(() => socket.open());
+broadcastProject();
 </script>
 
 <template>

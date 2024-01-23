@@ -22,7 +22,6 @@ import {
   getFieldQuery,
   getFieldSort,
 } from "@utils/querys";
-import { string } from "joi";
 
 const getAll = async (query: QueryI, _ids: string[]) => {
   const search = getSearchQuery(query);
@@ -50,6 +49,7 @@ const getAll = async (query: QueryI, _ids: string[]) => {
 
 export default () => {
   io.of("/user").on("connection", (socket) => {
+    console.log("connection: /user");
     
     socket.on("all", async ({ query, _ids }: AllDataI) => {
       getAll(query, _ids)
@@ -62,11 +62,13 @@ export default () => {
   });
 
   io.of("/auth").on("connection", (socket) => {
-    let userId = socket.handshake.headers["user"];
+    console.log("connection: /auth");
+    let userId = socket.handshake.headers["user_id"];
     const validation = validate(socket);
 
     //Login
     socket.on("login", async (form: LoginI) => {
+      console.log("connection: /auth/login");
       const action = async (values: LoginI) => {
         const credential = { email: values.email };
         const isUser = await User.findOne(credential).select("+password");
@@ -88,6 +90,7 @@ export default () => {
 
     //Register
     socket.on("register", async (form: RegisterI) => {
+      console.log("connection: /auth/register");
       const action = async (values: RegisterI) => {
         const msg = messages.register;
 
@@ -106,6 +109,7 @@ export default () => {
 
     //Status
     socket.on("status", async (token: string) => {
+      console.log("connection: /auth/status");
       const msg = messages.status;
       if (!isEmpty(token)) {
         const isUser = getEmailJwt(token);
@@ -119,6 +123,7 @@ export default () => {
 
     //Logout
     socket.on("logout", async (token: string) => {
+      console.log("connection: /auth/logout");
       const msg = messages.logout;
 
       const isUser = getEmailJwt(token);
@@ -134,6 +139,7 @@ export default () => {
 
     //Update
     socket.on("update", async (form: UpdateI) => {
+      console.log("connection: /auth/update");
       let userId = socket.handshake.headers["user"];
       const msg = messages.update;
 
@@ -157,6 +163,7 @@ export default () => {
 
     //ChangePassword
     socket.on("change-password", async (form: ChangePasswordI) => {
+      console.log("connection: /auth/change-password");
       const action = async (values: ChangePasswordI) => {
         const credential = { _id: values._id };
         const msgPass = messages.changePassword;
@@ -179,6 +186,7 @@ export default () => {
     });
 
     socket.on("shared-with-user", async () => {
+      console.log("connection: /auth/shared-with-user");
       await Projects.aggregate([
         {
           $match: {
@@ -223,6 +231,7 @@ export default () => {
     });
 
     socket.on("change-share-user", async (usersIds) => {
+      console.log("connection: /auth/change-share-user");
       usersIds.forEach((userId:string) => {
         socket.broadcast.emit(`broadcast:${userId}/change-share-user`);
       })

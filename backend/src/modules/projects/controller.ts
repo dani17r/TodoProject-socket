@@ -30,11 +30,13 @@ const getAll = async (query: QueryI, _author: string) => {
 
 export default () => {
   io.of("/project").on("connection", (socket) => {
-    let userId = socket.handshake.headers["user"];
+    console.log("connection: /project");
+    
+    let userId = socket.handshake.headers["user_id"];
     let projectId = socket.handshake.headers["project_id"];
 
     socket.on("create", async ({ form, query }: { form: ProjectI; query: QueryI }) => {
-        
+      console.log("connection: /project/create");
         const _author = new Types.ObjectId(form._author);
 
         const isInsert = await Projects.findOneAndUpdate(
@@ -59,6 +61,7 @@ export default () => {
     );
 
     socket.on("update", async (form: ProjectI) => {
+      console.log("connection: /project/update");
       const updateProject = await Projects.findOneAndUpdate(
         { _id: form._id },
         { $set: form },
@@ -76,6 +79,7 @@ export default () => {
     });
 
     socket.on("delete", async ({ _id, _author, query }: DeleteProject) => {
+      console.log("connection: /project/delete");
       await Projects.findByIdAndDelete(_id);
       const isDelete = Projects.findById(_id).then((doc) => doc == null);
 
@@ -94,6 +98,7 @@ export default () => {
     });
 
     socket.on("all", async ({ query, _author }: AllDataI) => {
+      console.log("connection: /project/all");
       getAll(query, _author)
         .then((projects) => {
           socket.emit("all/success", projects);
@@ -102,6 +107,7 @@ export default () => {
     });
 
     socket.on("one", async ({ _id }: OneDataI) => {
+      console.log("connection: /project/one");
       await Projects.findById(_id)
         .then((project) => {
           socket.emit("one/success", project);
@@ -110,6 +116,7 @@ export default () => {
     });
 
     socket.on("change-share", async (updateProject: ProjectI) => {
+      console.log("connection: /project/change-share");
       socket.broadcast.emit(
         `broadcast:${projectId}/change-share`,
         updateProject
@@ -118,6 +125,7 @@ export default () => {
 
     //Verify Id
     socket.on("verify-id", async (_id: string) => {
+      console.log("connection: /project/verify-id");
       const project = await Projects.findById(_id).catch(() => false);
 
       if (project) socket.emit("verify-id", { project, status: true });
