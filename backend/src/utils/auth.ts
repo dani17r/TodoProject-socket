@@ -5,7 +5,7 @@ import { Schema, models } from "mongoose";
 export const passwordOptions = function (SchemaBase: Schema) {
   SchemaBase.pre("save", async function () {
     const salt = await genSalt(10);
-    this.password = hashSync(this.password, salt);
+    this.password = hashSync(this.password as string, salt);
   });
 
   SchemaBase.methods.passwordCompare = async function (password: string) {
