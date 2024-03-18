@@ -87,7 +87,7 @@ const store = defineStore("project", {
 
     changeShareUsers(project: ProjectI) {
       eventBus.emit("user/change-share");
-      
+
       const getUsersIds = project.share.private.group.map((item) => item._id);
       const init = useSocketAction("change-share-user", socketAuth.value);
       const run = init({});

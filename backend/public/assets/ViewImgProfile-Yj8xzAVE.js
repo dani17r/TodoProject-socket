@@ -1,0 +1,1 @@
+import{d as t,h as a,K as r,f as c,i}from"./index-BZhkuRv_.js";const l=["src"],u=t({__name:"ViewImgProfile",setup(n){const{user:o}=a(),s=r(()=>{var e;return`http://localhost:8080/upload/profile/${(e=o.value)==null?void 0:e.image}`});return(e,p)=>(c(),i("img",{src:s.value,class:"image-mini-profile"},null,8,l))}});export{u as default};

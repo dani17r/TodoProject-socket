@@ -1,1 +1,0 @@
-import{r as t,v as c}from"./index-tSUvi4SZ.js";const a=s=>{const o=t(c.cloneDeep(s)),r=t({...s,clear:()=>{for(const e in r)e!="clear"&&(r[e]=o[e])}});return r},l=s=>{const o=t({...s,toggle:r=>o[r]=!o[r]});return o};export{l as a,a as s};

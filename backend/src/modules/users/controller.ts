@@ -1,241 +1,211 @@
-import { createSession, getEmailJwt, messages, removeSession } from "./options";
+import { LoginI, UpdateI, RegisterI, ChangePasswordI } from "@modules/users/interfaces";
+import { createSession, isTokenValid, messages, removeSession } from "./options";
+import { getAllUserByQuery } from "@modules/users/services";
 import { rules } from "@modules/users/validate";
 import { uploadImage } from "@utils/actions";
+import { msgError } from "@utils/handle";
 import { io } from "@main/server";
 import { isEmpty } from "lodash";
-import {
-  LoginI,
-  UpdateI,
-  AllDataI,
-  RegisterI,
-  ChangePasswordI,
-} from "@modules/users/interfaces";
 
 import Projects from "@modules/projects/model";
 import { QueryI } from "@modules/interfaces";
+import { validate } from "@utils/validate";
 import { newPassword } from "@utils/auth";
 import User from "@modules/users/model";
-import validate from "@utils/validate";
-import {
-  getPaginateQuery,
-  getSearchQuery,
-  getFieldQuery,
-  getFieldSort,
-} from "@utils/querys";
-
-const getAll = async (query: QueryI, _ids: string[]) => {
-  const search = getSearchQuery(query);
-  const pag = getPaginateQuery(query);
-  const fields = getFieldQuery(query);
-  const order = getFieldSort(query);
-
-  if (query.search.length) {
-    return await User.find({ _id: { $nin: _ids }, ...search }, fields)
-      .sort(order)
-      .paginate(pag);
-  } else {
-    return {
-      paginate: {
-        currentPag: pag.pag,
-        totalPaginate: 0,
-        limit: pag.limit,
-        totalPag: 0,
-        total: 0,
-      },
-      data: [],
-    };
-  }
-};
+import { Context } from "koa";
 
 export default () => {
-  io.of("/user").on("connection", (socket) => {
-    console.log("connection: /user");
-    
-    socket.on("all", async ({ query, _ids }: AllDataI) => {
-      getAll(query, _ids)
-        .then((users) => {
-          socket.emit("all/success", users);
-        })
-        .catch(() => socket.emit("all/error"));
-    });
-   
-  });
-
   io.of("/auth").on("connection", (socket) => {
-    console.log("connection: /auth");
-    let userId = socket.handshake.headers["user_id"];
-    const validation = validate(socket);
+    console.log('online');
 
-    //Login
-    socket.on("login", async (form: LoginI) => {
-      console.log("connection: /auth/login");
-      const action = async (values: LoginI) => {
-        const credential = { email: values.email };
-        const isUser = await User.findOne(credential).select("+password");
-        const msg = messages.login;
-
-        if (!isEmpty(isUser))
-          if (await isUser.passwordCompare(values.password)) {
-            const session = await createSession(credential, isUser._id);
-
-            socket.emit("login/success", msg.success(session));
-          } else socket.emit("login/error", msg.password);
-        else socket.emit("login/error", msg.userNotFount);
-
-        socket.disconnect(true);
-      };
-
-      await validation(form, rules.login, action);
-    });
-
-    //Register
-    socket.on("register", async (form: RegisterI) => {
-      console.log("connection: /auth/register");
-      const action = async (values: RegisterI) => {
-        const msg = messages.register;
-
-        if (!(await User.exists({ email: values.email }))) {
-          let user = await User.create(values);
-          if (!isEmpty(user)) {
-            socket.emit("register/success", msg.success);
-          } else socket.emit("register/error", msg.notCreated);
-        } else socket.emit("register/error", msg.email);
-
-        socket.disconnect(true);
-      };
-
-      await validation(form, rules.register, action);
-    });
-
-    //Status
-    socket.on("status", async (token: string) => {
-      console.log("connection: /auth/status");
-      const msg = messages.status;
-      if (!isEmpty(token)) {
-        const isUser = getEmailJwt(token);
-
-        if (!isEmpty(isUser)) {
-          const user = await User.findOne({ email: isUser.email });
-          socket.emit("status/response", msg.success(user));
-        } else socket.emit("status/response", msg.error);
-      } else socket.emit("status/response", msg.error);
-    });
-
-    //Logout
-    socket.on("logout", async (token: string) => {
-      console.log("connection: /auth/logout");
-      const msg = messages.logout;
-
-      const isUser = getEmailJwt(token);
-
-      if (!isEmpty(isUser)) {
-        let user = await User.findOne({ email: isUser.email });
-        let isUpdate = removeSession(user, token);
-
-        if (isUpdate) socket.emit("logout/success", msg.success);
-        else socket.emit("logout/error", msg.error);
-      } else socket.emit("logout/error", msg.error);
-    });
-
-    //Update
-    socket.on("update", async (form: UpdateI) => {
-      console.log("connection: /auth/update");
-      let userId = socket.handshake.headers["user"];
-      const msg = messages.update;
-
-      if (form.file.length) {
-        const oldImageName = form.image;
-        const name = await uploadImage(form.file, oldImageName);
-        form.image = name;
-      }
-
-      const user = await User.findOneAndUpdate(
-        { _id: form._id },
-        { $set: form },
-        { returnOriginal: false }
-      );
-
-      if (user) {
-        socket.broadcast.emit(`broadcast:${userId}/update`);
-        socket.emit("update/success", user);
-      } else socket.emit("logout/error", msg.error);
-    });
-
-    //ChangePassword
-    socket.on("change-password", async (form: ChangePasswordI) => {
-      console.log("connection: /auth/change-password");
-      const action = async (values: ChangePasswordI) => {
-        const credential = { _id: values._id };
-        const msgPass = messages.changePassword;
-        const msg = messages.login;
-
-        const isUser = await User.findOne(credential).select("+password");
-
-        if (!isEmpty(isUser)) {
-          if (await isUser.passwordCompare(values.currentPassword)) {
-            await User.findByIdAndUpdate(credential, {
-              password: await newPassword(values.newPassword),
-            }).select("+password");
-
-            socket.emit("change-password/success", msgPass.success);
-          } else socket.emit("change-password/error", msg.password);
-        } else socket.emit("change-password/error", msg.userNotFount);
-      };
-
-      await validation(form, rules.changePassword, action);
-    });
-
-    socket.on("shared-with-user", async () => {
-      console.log("connection: /auth/shared-with-user");
-      await Projects.aggregate([
-        {
-          $match: {
-            "share.private.group._id": userId,
-            "share.private.status": true,
-          },
-        },
-        { $unwind: "$share.private.group" },
-        { $match: { "share.private.group._id": userId } },
-        {
-          $lookup: {
-            from: "users",
-            localField: "_author",
-            foreignField: "_id",
-            as: "author",
-          },
-        },
-        {
-          $project: {
-            title: true,
-            description: true,
-            permissions: "$share.private.group.permissions",
-            author: { $arrayElemAt: ["$author", 0] },
-          },
-        },
-        {
-          $project: {
-            title: true,
-            description: true,
-            permissions: true,
-            author: {
-              fullname: true,
-              email: true,
-            },
-          },
-        },
-      ])
-        .then((projects) => {
-          socket.emit("shared-with-user/success", projects);
-        })
-        .catch(() => socket.emit("shared-with-user/error"));
+    socket.on("disconnect", () => {
+      console.log('offline');
     });
 
     socket.on("change-share-user", async (usersIds) => {
       console.log("connection: /auth/change-share-user");
-      usersIds.forEach((userId:string) => {
+      usersIds.forEach((userId: string) => {
         socket.broadcast.emit(`broadcast:${userId}/change-share-user`);
       })
     });
-
-  });
+  })
 };
+
+export const all = async (ctx: Context) => {
+  const query = ctx.request.query as unknown as QueryI & { not_equal_users: string[] };
+
+  getAllUserByQuery(query, query.not_equal_users)
+    .then((users) => {
+      return ctx.body = users;
+    })
+    .catch((error) => {
+      return msgError(ctx, 400, error.message);
+    });
+}
+
+export const login = async (ctx: Context) => {
+  const form = ctx.request.body as LoginI;
+  const validation = validate(ctx);
+
+  const action = async (values: LoginI) => {
+    const credential = { email: values.email };
+    const isUser = await User.findOne(credential).select("+password");
+    const msg = messages.login;
+
+    if (!isEmpty(isUser)){
+      if (await isUser.passwordCompare(values.password)) {
+        const session = await createSession(credential, isUser._id);
+        return ctx.body = msg.success(session);
+      } 
+      return msgError(ctx, 400, msg.password);
+    }
+    return msgError(ctx, 404, msg.userNotFount);
+  };
+
+  await validation(form, rules.login, action);
+}
+
+export const register = async (ctx: Context) => {
+  const form = ctx.request.body as RegisterI;
+  const validation = validate(ctx);
+
+  const action = async (values: RegisterI) => {
+    const msg = messages.register;
+    const isEmailExist = await User.exists({ email: values.email });
+
+    if (!isEmailExist) {
+      let user = await User.create(values);
+      if (!isEmpty(user)) return ctx.body = msg.success;
+      msgError(ctx, 401, msg.notCreated);
+    }
+    msgError(ctx, 400, msg.email);
+  };
+
+  await validation(form, rules.register, action);
+
+}
+
+export const status = async (ctx: Context) => {
+  return await isTokenValid(ctx, async (verify:boolean, token:string)=> {
+    const msg = messages.status;
+    if (verify) {
+      const user = await User.findOne({ "sessions.token": token }).then((data) => {
+        data.sessions = data.sessions.filter((session) => session.token == token);
+        return data;
+      });
+      if (user) return ctx.body = msg.success(user);
+      return msgError(ctx, 200, msg.error);
+    }
+    return msgError(ctx, 200, msg.error);
+  })
+}
+
+export const logout = async (ctx: Context) => {
+  const token = ctx.state['token'];
+  const msg = messages.logout;
+
+  let user = await User.findOne({ "sessions.token": token });
+  if (!user) return ctx.status = 404;
+
+  let isUpdate = await removeSession(user, token);
+  if (isUpdate) return ctx.body = msg.success;
+
+  return msgError(ctx, 404, msg.error);
+}
+
+export const update = async (ctx: Context) => {
+  const form = ctx.request.body as UpdateI;
+  const _id = ctx.params._id;
+  const msg = messages.update;
+
+  if (form?.file?.length) {
+    const oldImageName = form.image;
+    const name = await uploadImage(form.file, oldImageName).catch(()=> {
+      msgError(ctx, 400, msg.error);
+      return `--error-${oldImageName}`;
+    });
+    form.image = name;
+  }
+  
+  const user = await User.findOneAndUpdate(
+    { _id },
+    { $set: form },
+    { returnOriginal: false }
+  );
+
+  if (user) {
+    io.of('/auth').emit(`broadcast:${_id}/update`);
+    return ctx.body = user;
+  } 
+  return msgError(ctx, 400, 'User not found');
+}
+
+export const changePassword = async (ctx: Context) => {
+  const form = ctx.request.body as ChangePasswordI;
+  const validation = validate(ctx);
+
+  const action = async (values: ChangePasswordI) => {
+    const credential = { _id: values.user_id };
+    const msgPass = messages.changePassword;
+    const msg = messages.login;
+
+    const isUser = await User.findOne(credential).select("+password");
+
+    if (isUser) {
+      if (await isUser.passwordCompare(values.currentPassword)) {
+        await User.findByIdAndUpdate(credential, {
+          password: await newPassword(values.newPassword),
+        }).select("+password");
+
+        return ctx.body = msgPass.success;
+      } 
+      else return msgError(ctx, 400, msg.password);
+    }
+    else return  msgError(ctx, 404, msg.userNotFount);
+  };
+
+  await validation(form, rules.changePassword, action);
+}
+
+export const sharedWithUsers = async (ctx: Context) => {
+  const _id = ctx.params._id;
+  await Projects.aggregate([
+    {
+      $match: {
+        "share.private.group._id": _id,
+        "share.private.status": true,
+      },
+    },
+    { $unwind: "$share.private.group" },
+    { $match: { "share.private.group._id": _id } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "_author",
+        foreignField: "_id",
+        as: "author",
+      },
+    },
+    {
+      $project: {
+        title: true,
+        description: true,
+        permissions: "$share.private.group.permissions",
+        author: { $arrayElemAt: ["$author", 0] },
+      },
+    },
+    {
+      $project: {
+        title: true,
+        description: true,
+        permissions: true,
+        author: {
+          fullname: true,
+          email: true,
+        },
+      },
+    },
+  ])
+    .then((projects) => ctx.body = projects)
+    .catch((error) => msgError(ctx, 404, error));
+}

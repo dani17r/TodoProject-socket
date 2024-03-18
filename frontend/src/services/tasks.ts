@@ -13,7 +13,6 @@ const status = reactive({
   move: true,
 });
 
-
 export default () => {
   const { getProjectId } = userLocalStorageComposable();
   const urlSocket = `broadcast:${getProjectId.value}`;

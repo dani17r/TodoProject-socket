@@ -2,7 +2,7 @@
 import Confirm from "@components/modals/ModalConfirm.vue";
 import notifyComposable from "@composables/notify";
 
-import User from "@modules/user"
+import User from "@modules/user";
 
 import { superModals } from "@utils/inputs";
 import { userStore } from "@/stores/user";

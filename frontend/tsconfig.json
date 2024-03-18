@@ -21,7 +21,7 @@
       "@router/*": ["src/router/*"],
       "@utils/*": ["src/utils/*"],
       "@views/*": ["src/views/*"],
-      "@/*": ["src/*"]
-    }
+      "@/*": ["src/*"],
+    },
   },
 }

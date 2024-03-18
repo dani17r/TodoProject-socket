@@ -1,1 +1,0 @@
-import{d as r,h as a,K as t,f as c,i}from"./index-tSUvi4SZ.js";const n=["src"],u=r({__name:"ViewImgProfile",setup(l){const{user:o}=a(),s=t(()=>{var e;return`/upload/profile/${(e=o.value)==null?void 0:e.image}`});return(e,m)=>(c(),i("img",{src:s.value,class:"image-mini-profile"},null,8,n))}});export{u as default};

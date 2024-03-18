@@ -41,8 +41,8 @@ export default () => {
   });
 
   socketTask.value.on(`${urlSocket}/update`, () => {
-    console.log('uyuy');
-    
+    console.log("uyuy");
+
     setTimeout(() => (status.update = true), 300);
     if (status.update) taskStore.getAll();
   });
@@ -68,16 +68,15 @@ export default () => {
   });
 
   socketProject.value.on(`${urlSocket}/change-share`, (updateProject) => {
-      setTimeout(() => (status.changeShare = true), 300);
-      if (status.changeShare) {
-        projectStore.project = updateProject;
-        initPermissions();
-        route.meta.type = updateProject.share.public.status
-          ? "public"
-          : "private";
-      }
-    },
-  );
+    setTimeout(() => (status.changeShare = true), 300);
+    if (status.changeShare) {
+      projectStore.project = updateProject;
+      initPermissions();
+      route.meta.type = updateProject.share.public.status
+        ? "public"
+        : "private";
+    }
+  });
 
   return socketTask;
 };

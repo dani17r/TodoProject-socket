@@ -21,7 +21,7 @@ interface ActionsAuthI extends Document {
   passwordUpdate: (password: string) => Promise<boolean>;
 }
 
-interface SessionsI {
+interface SessionsI{
   status: boolean;
   token: string;
 }
@@ -65,7 +65,6 @@ export interface UpdateI {
   fullname: string;
   email: string;
   image: string;
-  _id: string;
 }
 
 export interface AllDataI {
@@ -76,5 +75,5 @@ export interface AllDataI {
 export interface ChangePasswordI {
   currentPassword: string;
   newPassword: string;
-  _id: string;
+  user_id: string;
 }

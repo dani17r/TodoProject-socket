@@ -21,7 +21,7 @@ const props = withDefaults(defineProps<PropsI>(), {
 
 const { getSharedUser, shared } = userStore();
 
-const status = computed(() => props.modelValue)
+const status = computed(() => props.modelValue);
 const cloneShared = computed(() => shared.value);
 const shareFilter = ref(shared.value);
 let memory = ref(true);
@@ -56,17 +56,20 @@ const search = superForm({
   },
 });
 
-watchEffect(() => shareFilter.value = shared.value);
+watchEffect(() => (shareFilter.value = shared.value));
 
-watchEffect(()=>{
-  if(props.modelValue) {
-    getSharedUser({
-      actions: () => {
-        setTimeout(() => (shareFilter.value = shared.value), 200);
+watchEffect(() => {
+  if (props.modelValue) {
+    getSharedUser(
+      {
+        actions: () => {
+          setTimeout(() => (shareFilter.value = shared.value), 200);
+        },
       },
-    }, true);
+      true,
+    );
   }
-})
+});
 </script>
 
 <template>

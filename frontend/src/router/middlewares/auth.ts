@@ -15,12 +15,11 @@ loading.enable();
 export const auth = (
   next: MiddlewareI["next"],
   { actions, error, final }: CallbacksMiddlI,
-  ) => {
-    
+) => {
   if (dontCallback.value) {
     const token = localStorage.getItem("token") ?? null;
     dontCallback.value = false;
-    
+
     socketAuth.value.emit("status", token);
     socketAuth.value.on("status/response", ({ user, isSession }) => {
       final && setTimeout(() => final(), 200);

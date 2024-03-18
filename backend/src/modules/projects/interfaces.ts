@@ -38,6 +38,14 @@ export interface ProjectI extends Document {
   } | null;
 }
 
+export interface CreatedI {
+  _author: string;
+  title: string;
+  description: string;
+}
+export interface UpdatedI {
+  _id: string;
+}
 export interface AllDataI {
   query: QueryI;
   _author: string;

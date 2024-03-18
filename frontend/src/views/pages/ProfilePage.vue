@@ -2,7 +2,7 @@
 import { userStore } from "@stores/user";
 import dayjs from "dayjs";
 
-import User from "@modules/user"
+import User from "@modules/user";
 
 const fmtUserCreateAt = "dddd DD, MMMM MM, YYYY - h:m A";
 const { user } = userStore();

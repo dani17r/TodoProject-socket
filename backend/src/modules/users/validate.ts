@@ -17,6 +17,6 @@ export const rules = {
   changePassword: Joi.object().keys({
     currentPassword: str_length(4, 16, str()).required(),
     newPassword: str_length(8, 16, str()).required(),
-    _id: str().required(),
+    user_id: str().required(),
   }),
 };

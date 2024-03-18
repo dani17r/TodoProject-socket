@@ -1,15 +1,28 @@
-import { CredentialI, CredentialT, ResultLoginI, UserI } from "./interfaces";
+import { CredentialI, ResultLoginI, UserI } from "./interfaces";
 import User from "@modules/users/model";
 import config from "@main/config";
 import { Types } from "mongoose";
 import jwt from "jsonwebtoken";
-import { remove } from "lodash";
 
-export const getEmailJwt = (token: string) => {
-  return jwt.verify(token, config.SECRET, (val, data) =>
-    val ? {} : data
-  ) as unknown as CredentialI;
-};
+export const isTokenValid = async (ctx, func: Function) => {
+  let getAuthoritation = ctx.headers.authorization?.split(' ');
+  if (!ctx.headers.authorization) getAuthoritation = [null, null];
+
+  const bearer = getAuthoritation[0];
+  const token = getAuthoritation[1];
+
+  if (bearer === 'Bearer' && token) {
+    try {
+      jwt.verify(token, config.SECRET);    
+      return await func(true, token);
+    } catch (err) {
+      return await func(false, token);
+    }
+  }
+  else {
+    return await func(false, null);
+  }
+}
 
 export const createSession = async (
   credential: CredentialI,
@@ -34,13 +47,16 @@ export const createSession = async (
 };
 
 export const removeSession = async (user: UserI, token: string) => {
-  remove(user.sessions, (session) => session.token == token);
+  const getSession = user.sessions.find((session) => session.token == token);
+  if (!getSession) return false;
+
+  const newSession = user.sessions.filter(session => session.token != token);
 
   const isUpdate = await User.findOneAndUpdate(
     { email: user.email },
-    { $set: { sessions: user.sessions } },
+    { $set: { sessions: newSession } },
     { returnOriginal: false }
-  );
+  ).then(() => true).catch(() => false)
 
   return isUpdate;
 };

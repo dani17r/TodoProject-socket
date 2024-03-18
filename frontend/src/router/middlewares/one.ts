@@ -36,7 +36,7 @@ export const isShareProject: MiddlewareI["function"] = (to, from, next) => {
   loading.enable();
 
   setProjectId(String(to.params.id));
-  
+
   auth(next, {
     actions: ({ user, isSession }) => {
       const { addUser } = userStore();

@@ -6,13 +6,15 @@ const str_length = (min: Number, max: Number, joi: any) =>
 
 export const rules = {
   created: Joi.object().keys({
-    name: str_length(3, 30, str()),
+    _author: Joi.string(),
+    title: str_length(3, 30, str()),
     description: Joi.allow(null),
-    type: str().required(),
   }),
   updated: Joi.object().keys({
-    name: str_length(3, 30, str()),
+    title: str_length(3, 30, str()),
     description: Joi.allow(null),
-    type: str().required(),
+  }),
+  removed: Joi.object().keys({
+    _id: Joi.string().required(),
   }),
 };

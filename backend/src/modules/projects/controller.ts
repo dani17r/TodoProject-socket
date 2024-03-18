@@ -1,110 +1,30 @@
-import {
-  DeleteProject,
-  AllDataI,
-  OneDataI,
-  ProjectI,
-} from "@modules/projects/interfaces";
-// import { rules } from "@modules/projects/validate";
+
+import { 
+  createOneProject, 
+  deleteOneProject, 
+  emitCreateProject, 
+  emitDeleteProject, 
+  emitUpdateProject, 
+  getAllProjects, 
+  updateOneProject
+} from "@modules/projects/services";
+
+import { OneDataI, ProjectI, CreatedI, UpdatedI } from "@modules/projects/interfaces";
+import { messages } from "@modules/projects/options";
+import { rules } from "@modules/projects/validate";
 import Projects from "@modules/projects/model";
 import { QueryI } from "@modules/interfaces";
-import querystring from "querystring";
+import { validate } from "@utils/validate";
+import { msgError } from "@utils/handle";
 import { io } from "@main/server";
-import { Types } from "mongoose";
-import {
-  getPaginateQuery,
-  getSearchQuery,
-  getFieldQuery,
-  getFieldSort,
-} from "@utils/querys";
-
-const getAll = async (query: QueryI, _author: string) => {
-  const search = getSearchQuery(query);
-  const pag = getPaginateQuery(query);
-  const fields = getFieldQuery(query);
-  const order = getFieldSort(query);
-
-  return await Projects.find({ ...search, _author }, fields)
-    .sort(order)
-    .paginate(pag);
-};
+import { Context } from "koa";
 
 export default () => {
   io.of("/project").on("connection", (socket) => {
     console.log("connection: /project");
-    
+
     let userId = socket.handshake.headers["user_id"];
     let projectId = socket.handshake.headers["project_id"];
-
-    socket.on("create", async ({ form, query }: { form: ProjectI; query: QueryI }) => {
-      console.log("connection: /project/create");
-        const _author = new Types.ObjectId(form._author);
-
-        const isInsert = await Projects.findOneAndUpdate(
-          { title: form.title },
-          {
-            $setOnInsert: { ...form, _author },
-          },
-          { upsert: true }
-        ).then((doc) => doc == null);
-
-        if (isInsert) {
-          getAll(query, form._author).then((projects) => {
-            socket.broadcast.emit(`broadcast:${userId}/create`);
-            socket.emit("create/success", projects);
-          });
-        } else
-          socket.emit("create/error", {
-            message: `A project with this name already exists`,
-            field: "title",
-          });
-      }
-    );
-
-    socket.on("update", async (form: ProjectI) => {
-      console.log("connection: /project/update");
-      const updateProject = await Projects.findOneAndUpdate(
-        { _id: form._id },
-        { $set: form },
-        { returnOriginal: false }
-      );
-
-      if (updateProject) {
-        socket.broadcast.emit(`broadcast:${userId}/update`);
-        socket.emit("update/success", updateProject);
-      } else
-        socket.emit("update/error", {
-          message: `Could not update project`,
-          field: "title",
-        });
-    });
-
-    socket.on("delete", async ({ _id, _author, query }: DeleteProject) => {
-      console.log("connection: /project/delete");
-      await Projects.findByIdAndDelete(_id);
-      const isDelete = Projects.findById(_id).then((doc) => doc == null);
-
-      if (isDelete) {
-        getAll(query, _author).then((projects) => {
-          socket.emit("delete/success", projects);
-          socket.broadcast.emit(`broadcast:${userId}/delete`, {
-            _id,
-            projects,
-          });
-        });
-      } else
-        socket.emit("delete/error", {
-          message: `Could not delete`,
-        });
-    });
-
-    socket.on("all", async ({ query, _author }: AllDataI) => {
-      console.log("connection: /project/all");
-      getAll(query, _author)
-        .then((projects) => {
-          socket.emit("all/success", projects);
-        })
-        .catch(() => socket.emit("all/error"));
-    });
 
     socket.on("one", async ({ _id }: OneDataI) => {
       console.log("connection: /project/one");
@@ -135,18 +55,84 @@ export default () => {
 };
 
 export const all = async (ctx) => {
-  const { query, _author } = ctx.request.query;
-  const queryParams = querystring.parse(query) as unknown as AllDataI["query"]; ;
-  const data = await getAll(queryParams, _author);
-  return ctx.body = data;
+  const query = ctx.request.query;
+  const _author = ctx.state.user_id;
+
+  await getAllProjects(query, _author)
+    .then((projects) => ctx.body = projects)
+    .catch((error) => msgError(ctx, 404, error));
 };
 
+export const create = async (ctx: Context) => {
+  const query = ctx.request.query as unknown as QueryI;
+  const form = ctx.request.body as CreatedI;
+  const msg = messages.created;
 
-// db.getCollection("projects").find(
-//   { "share.private.group._id": "6476635ea145d4a789aaba4e" },
-//   {
-//     _id: true,
-//     _author: true,
-//     title: true,
-//   }
-// );
+  const validation = validate(ctx);
+
+  const action = async (values: any) => {
+    const newProject = await createOneProject(values);
+
+    if (newProject) {
+      await getAllProjects(query, form._author)
+        .then((projects) => {
+          emitCreateProject(values);
+          return ctx.body = projects;
+        })
+        .catch((error) => msgError(ctx, 404, error));
+
+    } else return msgError(ctx, 400, msg.existingProject)
+  };
+
+  await validation(form, rules.created, action);
+};
+
+export const update = async (ctx: Context) => {
+  const query = ctx.request.query as any;
+  const form = ctx.request.body as ProjectI;
+  const msg = messages.update;
+
+  const validation = validate(ctx);
+
+  const action = async (values: ProjectI) => {
+ 
+    const updateProject = await updateOneProject(values);
+
+    if (updateProject) {
+      await getAllProjects(query, values._author)
+        .then((projects) => {
+          emitUpdateProject({ user_id: values._author });
+          return ctx.body = projects;
+        })
+        .catch((error) => msgError(ctx, 404, error));
+
+    } else return msgError(ctx, 400, msg.noProjectUpdate)
+  };
+
+  await validation(form, rules.updated, action);
+};
+
+export const remove = async (ctx) => {
+  const query = ctx.request.query;
+  const params = ctx.request.params;
+  const _author = ctx.state.user_id;
+  const msg = messages.remove;
+
+  const validation = validate(ctx);
+
+  const action = async (values: any) => {
+    const isDelete = await deleteOneProject(values);
+
+    if (!isDelete) {
+      await getAllProjects(query, _author)
+        .then((projects) => {
+          emitDeleteProject(values, projects);
+          return ctx.body = projects;
+        })
+        .catch((error) => msgError(ctx, 404, error))
+    }
+    else return msgError(ctx, 400, msg.noDelete);
+  }
+
+  await validation(params, rules.removed, action);
+}

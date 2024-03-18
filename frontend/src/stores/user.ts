@@ -1,4 +1,9 @@
-import type { FormsI, LoginI, StateI, UserI } from "@interfaces/interfaces.user";
+import type {
+  FormsI,
+  LoginI,
+  StateI,
+  UserI,
+} from "@interfaces/interfaces.user";
 import type { CallbacksI, NotifyI } from "@interfaces/interfaces.generals";
 import userLocalStorageComposable from "@composables/userLocalStorage";
 import generalComposable from "@composables/general";
@@ -47,7 +52,6 @@ const store = defineStore("user", {
     },
 
     refresh() {
-      
       const token = localStorage.getItem("token") ?? null;
 
       socketAuth.value.emit("status", token);

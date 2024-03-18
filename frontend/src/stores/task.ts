@@ -52,7 +52,7 @@ const store = defineStore("task", {
         this,
         () => {
           this.loading.enable();
-          
+
           const init = useSocketAction("all", socketTask.value);
           const run = init<StateI["tasks"]>({
             actions: (tasks) => this.insert(tasks),
